@@ -1,0 +1,84 @@
+/* Responsive Hero Banner Styles */
+
+/* Push hero content down from navbar */
+.hero-banner .hero-content {
+    top: clamp(120px, 18vh, 240px);
+    bottom: auto;
+}
+
+/* Override button padding and sizing */
+.hero-action .btn {
+    padding: clamp(8px, 1vw, 12px) clamp(15px, 3vw, 25px);
+    font-size: clamp(14px, 1.5vw, 18px);
+}
+
+/* Mobile responsiveness for buttons */
+@media (max-width: 768px) {
+    .hero-action {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .hero-action .btn {
+        display: block;
+        width: 100%;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+}
+
+/* Extra large screens (26+ inch monitors) */
+@media (min-width: 1920px) {
+    .hero-banner .hero-content {
+        width: 70%;
+        bottom: 20%;
+    }
+}
+
+/* Tablet and smaller desktop screens */
+@media (max-width: 1200px) {
+    .hero-banner .hero-content {
+        width: 85%;
+    }
+
+    .hero-banner .hero-content .hero-title {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Tablets */
+@media (max-width: 991px) {
+    .hero-banner {
+        height: 80vh;
+        min-height: 600px;
+    }
+
+    .hero-banner .hero-content {
+        width: 90%;
+        top: 140px;
+        bottom: auto;
+    }
+}
+
+/* Small devices */
+@media (max-width: 576px) {
+    .hero-banner {
+        height: 70vh;
+        min-height: 500px;
+    }
+
+    .hero-banner .hero-content {
+        width: 95%;
+        top: 120px;
+        bottom: auto;
+    }
+
+    .hero-stats {
+        margin-top: 2rem !important;
+    }
+
+    .stat-card {
+        padding: 1rem !important;
+    }
+}
