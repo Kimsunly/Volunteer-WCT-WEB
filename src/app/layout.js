@@ -11,8 +11,7 @@ import 'swiper/css/autoplay';
 import BootstrapClient from '@/components/common/BootstrapClient';
 import AOSInit from '@/components/common/AOSInit';
 import { AuthProvider } from '@/context/AuthContext';
-import MainNavbar from '@/components/nav/MainNavbar';
-import SiteFooter from '@/components/layout/SiteFooter';
+import ConditionalLayout from '@/components/layout/ConditionalLayout';
 
 const kantumruy = localFont({
   src: [
@@ -41,11 +40,9 @@ export default function RootLayout({ children }) {
     <html lang="km" data-theme="light" className={kantumruy.variable}>
       <body style={{ fontFamily: 'var(--font-kantumruy), sans-serif' }}>
         <AuthProvider>
-          <MainNavbar />
           <BootstrapClient />
           <AOSInit />
-          {children}
-          <SiteFooter />
+          <ConditionalLayout>{children}</ConditionalLayout>
         </AuthProvider>
       </body>
     </html>
