@@ -1261,7 +1261,7 @@ footer p.text-center {
 
 /* ---- opportunities-area ----- */
 /* .opportunities-area {
-    background-image: url('../image/homepage/dot-bg.webp');
+    background-image: url('/images/homepage/dot-bg.webp');
     padding: 60px 0;
     background-color: var(--gray-bg);
 } */
@@ -1328,7 +1328,7 @@ footer p.text-center {
 /* ------ Upcoming Event ----- */
 /* .upcomming-area {
   padding: 60px 0;
-  background: url('../image/homepage/shape-thirteen.png');
+  background: url('/images/homepage/shape-thirteen.png');
 }
 
 .upcomming-area .card:hover .overlay {
@@ -1707,11 +1707,11 @@ footer p.text-center {
 }
 
 .benefit-area .pattern-1 {
-  background: url('../image/homepage/pattern-9.png') no-repeat right bottom;
+  background: url('/images/homepage/pattern-9.png') no-repeat right bottom;
 }
 
 .benefit-area .pattern-2 {
-  background: url('../image/homepage/pattern-9.png') no-repeat right bottom;
+  background: url('/images/homepage/pattern-9.png') no-repeat right bottom;
   transform: rotate(180deg);
 } */
 .benefits-modern {
@@ -2510,14 +2510,14 @@ footer p.text-center {
 /* .cta-area {
     padding: 60px 0;
     margin-top: 40px;
-    background: url('../image/homepage/dot-bg.webp');
+    background: url('/images/homepage/dot-bg.webp');
 }
 
 .cta-area .cta-content {
     padding: 60px;
     background-color: var(--gray-bg);
     border-radius: 10px;
-    background: url('../image/homepage/cta-bg.avif') no-repeat center;
+    background: url('/images/homepage/cta-bg.avif') no-repeat center;
     background-size: cover;
     color: var(--text-white-fixed);
 }
@@ -2813,7 +2813,7 @@ footer p.text-center {
   width: 100%;
   height: 100%;
   top: 0;
-  background: url('../image/homepage/shape-two.png') no-repeat;
+  background: url('/images/homepage/shape-two.png') no-repeat;
   z-index: 1;
   animation: quiz 3s linear infinite alternate;
 }
@@ -3547,7 +3547,7 @@ footer p.text-center {
 /* .testimonial-area {
   padding: 60px 0;
   position: relative;
-  background: url('../image/homepage/shape-nine.png') no-repeat -10%;
+  background: url('/images/homepage/shape-nine.png') no-repeat -10%;
   overflow-x: hidden;
 }
 
@@ -3558,7 +3558,7 @@ footer p.text-center {
   top: 0;
   width: 100%;
   height: 100%;
-  background: url('../image/homepage/shape-nine.png') no-repeat;
+  background: url('/images/homepage/shape-nine.png') no-repeat;
   transform: rotate(180deg);
 }
 
@@ -4114,8 +4114,11 @@ footer p.text-center {
 }
 
 .Org-brand {
-  margin-top: 150px;
   background-color: var(--bg-card) !important;
+}
+
+.org-dashboard {
+  padding-top: 170px !important;
 }
 
 .org-dashboard .tab-content {
@@ -5832,8 +5835,9 @@ footer p.text-center {
   padding: 5px 12px;
   transition: 0.3s;
   font-size: 15px;
-  
+
 }
+
 .opportunity .category-icons .tablinks {
   background: transparent;
   border: none;
@@ -5842,7 +5846,8 @@ footer p.text-center {
 }
 
 .opportunity .category-icons .tablinks.active {
-  border-bottom-color: #007bff; /* your primary color */
+  border-bottom-color: #007bff;
+  /* your primary color */
 }
 
 .opportunity .category-icons .tab button:hover>.category-icons_item img {

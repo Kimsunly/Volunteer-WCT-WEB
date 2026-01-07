@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+import HomepageContent from "../homepage/HomepageContent";
 import HeroBanner from "./components/HeroBanner";
 import AboutUs from "./components/AboutUs";
 import StatsStripModern from "@/components/base/StatsStripModern";
@@ -101,7 +103,13 @@ const mockEvents = [
     },
 ];
 
-export default function LandingPage() {
+export default async function LandingPage() {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("authToken")?.value;
+    if (token) {
+        return <HomepageContent />;
+    }
+
     return (
         <main>
             <HeroBanner />

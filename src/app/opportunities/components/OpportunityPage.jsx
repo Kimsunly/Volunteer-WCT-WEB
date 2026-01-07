@@ -34,7 +34,7 @@ const OPPORTUNITIES = [
     location: { slug: "koh-kong", label: "កោះកុង" },
     images: [
       "/images/opportunities/Environment/card-2/img-1.png",
-      "/images/opportunities/Environment/card-2/img-2.png",
+      "/images/opportunities/Environment/card-2/img-4.png",
       "/images/opportunities/Environment/card-2/img-3.png",
     ],
     description: "រួមគ្នាដើម្បីធ្វើឲ្យឆ្នេររបស់យើងស្អាត និងគ្មានសំរាម",
@@ -57,8 +57,8 @@ const OPPORTUNITIES = [
     location: { slug: "steung-treng", label: "ស្ទឹងត្រែង" },
     images: [
       "/images/opportunities/Wildlife/card-3/img-1.png",
-      "/images/opportunities/Wildlife/card-3/img-2.png",
       "/images/opportunities/Wildlife/card-3/img-3.png",
+      "/images/opportunities/Wildlife/card-3/volunteer.png",
     ],
     description:
       "ជួយថែរក្សាសត្វព្រៃដែលរងរបួស និងចូលរួមសកម្មភាពអភិរក្សនៅមជ្ឈមណ្ឌលសង្គ្រោះ",
@@ -130,7 +130,7 @@ const OPPORTUNITIES = [
     images: [
       "/images/opportunities/Health/card-6/img-1.png",
       "/images/opportunities/Health/card-6/img-2.png",
-      "/images/opportunities/Health/card-6/img-3.png",
+      "/images/opportunities/Health/card-6/img-4.png",
     ],
     description:
       "ចូលរួមផ្តល់ក្តីសង្ឃឹម និងជួយសង្គ្រោះជីវិតអ្នកជំងឺដែលត្រូវការឈាមជាបន្ទាន់",
@@ -226,7 +226,7 @@ const OPPORTUNITIES = [
     images: [
       "/images/opportunities/Childcare/card-10/img-1.png",
       "/images/opportunities/Childcare/card-10/img-2.png",
-      "/images/opportunities/Childcare/card-10/img-3.png",
+      "/images/opportunities/Childcare/card-10/img-2.png",
     ],
     description:
       "ជួយរៀបចំសកម្មភាពកម្សាន្ត និងមើលថែទាំកុមារពិការក្នុងអំឡុងពេលជំរុំរដូវក្តៅ",
@@ -296,9 +296,9 @@ const OPPORTUNITIES = [
     category: { slug: "event", label: "ព្រឹត្តិការណ៏" },
     location: { slug: "siem-reap", label: "សៀមរាប" },
     images: [
-      "/images/opportunities/Event/card-13/img-1.png",
-      "/images/opportunities/Event/card-13/img-2.png",
-      "/images/opportunities/Event/card-13/img-3.png",
+      "/images/opportunities/Event/card-13/img-4.png",
+      "/images/opportunities/Event/card-13/img-5.png",
+      "/images/opportunities/Event/card-13/img-6.png",
     ],
     description: "ជួយរៀបចំកន្លែងចុះឈ្មោះ និងផ្តល់ទឹកដល់អ្នកចូលរួមរត់ប្រណាំង",
     organization: "គណៈកម្មាធិការជាតិអូឡាំពិកកម្ពុជា",
@@ -344,7 +344,7 @@ const OPPORTUNITIES = [
     location: { slug: "siem-reap", label: "សៀមរាប" },
     images: [
       "/images/opportunities/Childcare/card-15/img-1.png",
-      "/images/opportunities/Childcare/card-15/img-2.png",
+      "/images/opportunities/Childcare/card-15/img-3.png",
       "/images/opportunities/Childcare/card-15/img-3.png",
     ],
     description:
@@ -415,8 +415,8 @@ const OPPORTUNITIES = [
     location: { slug: "phnom-penh", label: "ភ្នំពេញ" },
     images: [
       "/images/opportunities/Health/card-18/img-1.png",
-      "/images/opportunities/Health/card-18/img-2.png",
-      "/images/opportunities/Health/card-18/img-3.png",
+      "/images/opportunities/Health/card-18/img-1.png",
+      "/images/opportunities/Health/card-18/img-1.png",
     ],
     description:
       "យល់ដឹងពីសារៈសំខាន់នៃសុខភាពផ្លូវចិត្ត និងវិធីសាស្ត្រថែរក្សាសុខភាពផ្លូវចិត្តប្រចាំថ្ងៃ",
@@ -462,8 +462,8 @@ const OPPORTUNITIES = [
     category: { slug: "event", label: "ព្រឹត្តិការណ៏" },
     location: { slug: "phnom-penh", label: "ភ្នំពេញ" },
     images: [
-      "/images/opportunities/Event/card-20/img-1.png",
-      "/images/opportunities/Event/card-20/img-2.png",
+      "/images/opportunities/Event/card-20/img-3.png",
+      "/images/opportunities/Event/card-20/img-3.png",
       "/images/opportunities/Event/card-20/img-3.png",
     ],
     description: "ជួយរៀបចំសម្ភារៈ និងណែនាំអ្នកចូលរួមក្នុងសិក្ខាសាលា",
@@ -485,9 +485,9 @@ const OPPORTUNITIES = [
     category: { slug: "event", label: "ព្រឹត្តិការណ៏" },
     location: { slug: "phnom-penh", label: "ភ្នំពេញ" },
     images: [
-      "/images/opportunities/Event/card-21/img-1.png",
-      "/images/opportunities/Event/card-21/img-2.png",
-      "/images/opportunities/Event/card-21/img-3.png",
+      "/images/opportunities/Event/card-13/img-4.png",
+      "/images/opportunities/Event/card-13/img-5.png",
+      "/images/opportunities/Event/card-13/img-6.png",
     ],
     description: "ជួយណែនាំភ្ញៀវជាតិ និងអន្តរជាតិអំពីរោងទស្សនីយភាពនានា",
     organization: "ក្រសួងវប្បធម៌ និងវិចិត្រសិល្បៈ",
@@ -539,7 +539,7 @@ const CATEGORY_TABS = [
   {
     slug: "health",
     label: "សុខភាព",
-    icon: "/images/opportunities/Categories/medical.png",
+    icon: "/images/opportunities/Categories/img-1.png",
   },
 ];
 

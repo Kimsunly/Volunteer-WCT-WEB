@@ -8,17 +8,15 @@ export default function ProfileDropdown() {
 
   if (!user) return null;
 
-  // Get dashboard URL based on role
   const getDashboardUrl = () => {
-    switch (user.role) {
-      case "user":
-        return "/user";
+    switch (user?.role) {
       case "organizer":
-        return "/organizer";
+        return "/organizer/profile";
       case "admin":
         return "/admin";
+      case "user":
       default:
-        return "/";
+        return "/user-profile";
     }
   };
 
@@ -31,6 +29,9 @@ export default function ProfileDropdown() {
     } finally {
       // Clear state
       localStorage.removeItem("authToken");
+      localStorage.removeItem("role");
+      document.cookie = "authToken=; path=/; max-age=0";
+      document.cookie = "role=; path=/; max-age=0";
       setUser(null);
       router.push("/");
     }
@@ -45,7 +46,7 @@ export default function ProfileDropdown() {
         aria-expanded="false"
       >
         <img
-          src={user.profileImage || "/images/profile-placeholder.png"}
+          src={user.profileImage || "/images/profile.png"}
           alt={user.name}
           style={{
             width: "32px",
