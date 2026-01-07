@@ -92,3 +92,4 @@ EventCard.propTypes = {
   className: PropTypes.string,
   onClick: PropTypes.func,
 };
+

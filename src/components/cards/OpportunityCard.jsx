@@ -51,12 +51,40 @@ export default function OpportunityCard({
   const locationLabel =
     typeof data?.location === "string" ? data.location : data?.location?.label;
 
-  // Image handling
-  const images = data?.images || [];
-  const imageUrl = data?.imageUrl || images[0] || "/placeholder.png";
-  const currentImage = images.length > 0 ? images[currentImageIndex] : imageUrl;
+  // Image handling (be defensive: support array, JSON string, or single imageUrl)
+  let images = [];
+  if (Array.isArray(data?.images)) {
+    images = data.images;
+  } else if (typeof data?.images === "string" && data.images.trim() !== "") {
+    try {
+      const parsed = JSON.parse(data.images);
+      images = Array.isArray(parsed) ? parsed : [parsed];
+    } catch (e) {
+      // if parsing fails, treat it as a single URL string
+      images = [data.images];
+    }
+  } else if (data?.imageUrl) {
+    images = [data.imageUrl];
+  }
+
+  // Normalize each image entry to a simple string URL
+  const normalizeImage = (it) => {
+    if (!it) return null;
+    if (typeof it === "string") return it;
+    if (typeof it === "object") {
+      return it.url || it.path || it.name || null;
+    }
+    return null;
+  };
+
+  const normalizedImages = images.map(normalizeImage).filter(Boolean);
+  const imageUrl = data?.imageUrl || (normalizedImages.length ? normalizedImages[0] : "/placeholder.svg");
+  const currentImage = normalizedImages.length > 0 ? normalizedImages[currentImageIndex] : imageUrl;
 
   // Date, Time, Capacity
+
+  // Ensure we have a usable detail link: prefer explicit field, otherwise derive from id
+  const detailHref = data?.detailHref || (id ? `/opportunities/${id}` : null);
   const date = data?.date;
   const time = data?.time;
   const capacityLabel =
@@ -72,9 +100,6 @@ export default function OpportunityCard({
     if (data.benefits.housing) benefitsArray.push("housing");
     if (data.benefits.meals) benefitsArray.push("meals");
   }
-
-  // Links
-  const detailHref = data?.detailHref;
 
   // Handle carousel
   const prevImage = () => {
