@@ -24,7 +24,7 @@ const OPPORTUNITIES = [
       housing: "មានកន្លែងស្នាក់នៅ",
       meals: "មានអាហារ",
     },
-    detailHref: "detailpage-card-education.html",
+    detailHref: "/opportunities/1",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -47,7 +47,7 @@ const OPPORTUNITIES = [
       housing: "គ្មានកន្លែងស្នាក់នៅ",
       meals: "អាហារ (ថ្ងៃត្រង់)",
     },
-    detailHref: "detailpage-card-environment.html",
+    detailHref: "/opportunities/2",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -71,7 +71,7 @@ const OPPORTUNITIES = [
       housing: "មានកន្លែងស្នាក់នៅ",
       meals: "មានអាហារ",
     },
-    detailHref: "detailpage-card-wildlife.html",
+    detailHref: "/opportunities/3",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -95,7 +95,7 @@ const OPPORTUNITIES = [
       housing: "មានកន្លែងស្នាក់នៅ",
       meals: "មានអាហារ",
     },
-    detailHref: "detailpage-card-childcare.html",
+    detailHref: "/opportunities/4",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -119,7 +119,7 @@ const OPPORTUNITIES = [
       housing: "គ្មានកន្លែងស្នាក់នៅ",
       meals: "មានអាហារ",
     },
-    detailHref: "detailpage-card-agriculture.html",
+    detailHref: "/opportunities/1",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -143,7 +143,7 @@ const OPPORTUNITIES = [
       housing: "គ្មានកន្លែងស្នាក់នៅ",
       meals: "គ្មានអាហារ",
     },
-    detailHref: "detailpage-card-health.html",
+    detailHref: "/opportunities/1",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -167,7 +167,7 @@ const OPPORTUNITIES = [
       housing: "គ្មានកន្លែងស្នាក់នៅ",
       meals: "គ្មានអាហារ",
     },
-    detailHref: "detailpage-card-education.html",
+    detailHref: "/opportunities/2",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -191,7 +191,7 @@ const OPPORTUNITIES = [
       housing: "កន្លែងស្នាក់នៅ",
       meals: "អាហារ",
     },
-    detailHref: "detailpage-card-education.html",
+    detailHref: "/opportunities/3",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -215,7 +215,7 @@ const OPPORTUNITIES = [
       housing: "កន្លែងស្នាក់នៅ",
       meals: "អាហារ",
     },
-    detailHref: "detailpage-card-wildlife.html",
+    detailHref: "/opportunities/3",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -239,7 +239,7 @@ const OPPORTUNITIES = [
       housing: "មានកន្លែងស្នាក់នៅ",
       meals: "មានអាហារ",
     },
-    detailHref: "detailpage-card-childcare.html",
+    detailHref: "/opportunities/4",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -263,7 +263,7 @@ const OPPORTUNITIES = [
       housing: "គ្មានកន្លែងស្នាក់នៅ",
       meals: "មានអាហារ",
     },
-    detailHref: "detailpage-card-environment.html",
+    detailHref: "/opportunities/2",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -287,7 +287,7 @@ const OPPORTUNITIES = [
       housing: "កន្លែងស្នាក់នៅ",
       meals: "អាហារ",
     },
-    detailHref: "detailpage-card-wildlife.html",
+    detailHref: "/opportunities/3",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -310,7 +310,7 @@ const OPPORTUNITIES = [
       housing: "កន្លែងស្នាក់នៅ",
       meals: "អាហារ",
     },
-    detailHref: "detailpage-card-event.html",
+    detailHref: "/opportunities/1",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -334,7 +334,7 @@ const OPPORTUNITIES = [
       housing: "កន្លែងស្នាក់នៅ",
       meals: "មានអាហារ",
     },
-    detailHref: "detailpage-card-health.html",
+    detailHref: "/opportunities/2",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -358,7 +358,7 @@ const OPPORTUNITIES = [
       housing: "មានកន្លែងស្នាក់នៅ",
       meals: "មានអាហារ",
     },
-    detailHref: "detailpage-card-childcare.html",
+    detailHref: "/opportunities/4",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -381,7 +381,7 @@ const OPPORTUNITIES = [
       housing: "គ្មានកន្លែងស្នាក់នៅ",
       meals: "មានអាហារ",
     },
-    detailHref: "detailpage-card-environment.html",
+    detailHref: "/opportunities/2",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -405,7 +405,7 @@ const OPPORTUNITIES = [
       housing: "មានកន្លែងស្នាក់នៅ",
       meals: "មានអាហារ",
     },
-    detailHref: "detailpage-card-agriculture.html",
+    detailHref: "/opportunities/1",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -429,7 +429,7 @@ const OPPORTUNITIES = [
       housing: "កន្លែងស្នាក់នៅ",
       meals: "មានអាហារ",
     },
-    detailHref: "detailpage-card-health.html",
+    detailHref: "/opportunities/2",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -453,7 +453,7 @@ const OPPORTUNITIES = [
       housing: "មានកន្លែងស្នាក់នៅ",
       meals: "មានអាហារ",
     },
-    detailHref: "detailpage-card-agriculture.html",
+    detailHref: "/opportunities/1",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -476,7 +476,7 @@ const OPPORTUNITIES = [
       housing: "កន្លែងស្នាក់នៅ",
       meals: "អាហារ",
     },
-    detailHref: "detailpage-card-event.html",
+    detailHref: "/opportunities/1",
     applyHref: "volunteer-apply.html",
   },
   {
@@ -499,7 +499,7 @@ const OPPORTUNITIES = [
       housing: "កន្លែងស្នាក់នៅ",
       meals: "អាហារ",
     },
-    detailHref: "detailpage-card-event.html",
+    detailHref: "/opportunities/1",
     applyHref: "volunteer-apply.html",
   },
 ];
