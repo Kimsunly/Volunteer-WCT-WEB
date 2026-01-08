@@ -19,7 +19,7 @@ const mockOpportunities = [
     time: "ម៉ោង ៧:០០ - ១១:००",
     capacityLabel: "ចំនួន ២០ នាក់",
     benefits: ["transport", "housing", "food"],
-    detailHref: "/opportunity/opp-1",
+    detailHref: "/opportunities/1",
     isFavorite: false,
   },
   {
@@ -36,7 +36,7 @@ const mockOpportunities = [
     time: "ម៉ោង ៧:៣០ - ១១:៣០",
     capacityLabel: "ចំនួន ៥០ នាក់",
     benefits: ["transport", "housing"],
-    detailHref: "/opportunity/opp-2",
+    detailHref: "/opportunities/2",
     isFavorite: false,
   },
   {
@@ -49,7 +49,7 @@ const mockOpportunities = [
     time: "ម៉ោង ៧:००ー១១:००",
     capacityLabel: "ចំនួន ២០ នាក់",
     benefits: ["food"],
-    detailHref: "/opportunity/opp-3",
+    detailHref: "/opportunities/3",
     isFavorite: false,
   },
   {
@@ -62,7 +62,7 @@ const mockOpportunities = [
     time: "ម៉ោង ២:០០ - ៥:០០",
     capacityLabel: "ចំនួន ១៥ នាក់",
     benefits: ["transport", "food"],
-    detailHref: "/opportunity/opp-4",
+    detailHref: "/opportunities/4",
     isFavorite: true,
   },
   {
@@ -79,7 +79,7 @@ const mockOpportunities = [
     time: "ម៉ោង ៨:០០ - ១២:០០",
     capacityLabel: "ចំនួន ៣០ នាក់",
     benefits: ["housing", "food"],
-    detailHref: "/opportunity/opp-5",
+    detailHref: "/opportunities/1",
     isFavorite: false,
   },
   {
@@ -96,7 +96,7 @@ const mockOpportunities = [
     time: "ម៉ោង ៦:០០ - ១០:០០",
     capacityLabel: "ចំនួន ១០០ នាក់",
     benefits: ["transport", "food"],
-    detailHref: "/opportunity/opp-6",
+    detailHref: "/opportunities/2",
     isFavorite: false,
   },
 ];

@@ -7,12 +7,14 @@ import SiteFooter from "@/components/layout/SiteFooter";
 export default function ConditionalLayout({ children }) {
   const pathname = usePathname();
   const isAuthPage = pathname?.startsWith("/auth");
+  const isAdminPage = pathname?.startsWith("/admin");
+  const isApplyPage = /^\/opportunities\/[^/]+\/apply/.test(pathname || "");
 
   return (
     <>
-      {!isAuthPage && <MainNavbar />}
+      {!isAuthPage && !isAdminPage && !isApplyPage && <MainNavbar />}
       {children}
-      {!isAuthPage && <SiteFooter />}
+      {!isAuthPage && !isAdminPage && !isApplyPage && <SiteFooter />}
     </>
   );
 }

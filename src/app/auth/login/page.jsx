@@ -19,29 +19,33 @@ export default function LoginPage() {
       e.currentTarget.querySelector("#email")?.value ||
       "VolunteerCambo@gmail.com";
 
+    // Check for admin credentials
+    const isAdmin = email === "admin@volunteer.org" && password === "admin123";
+    const userRole = isAdmin ? "admin" : "user";
+
     // Simulate successful login
     const mockUser = {
-      id: "mock-user-id",
-      name: "ស្ម័គ្រចិត្ត", // Khmer label for demo
+      id: isAdmin ? "admin-id" : "mock-user-id",
+      name: isAdmin ? "Admin" : "ស្ម័គ្រចិត្ត", // Khmer label for demo
       email,
-      role: "user",
+      role: userRole,
       profileImage: "/images/profile.png",
-      tierLabel: "Member",
+      tierLabel: isAdmin ? "Administrator" : "Member",
       rating: 5,
     };
 
     // Persist mock token for middleware / future checks
     localStorage.setItem("authToken", "mock-auth-token");
-    localStorage.setItem("role", "user");
+    localStorage.setItem("role", userRole);
     // Also set a cookie so middleware sees it (Next middleware reads cookies)
     document.cookie = "authToken=mock-auth-token; path=/; max-age=86400";
-    document.cookie = "role=user; path=/; max-age=86400";
+    document.cookie = `role=${userRole}; path=/; max-age=86400`;
 
     // Update global auth state
     setUser(mockUser);
 
-    // Go to root. Root shows homepage content when authToken cookie exists.
-    router.push("/");
+    // Redirect based on role
+    router.push(isAdmin ? "/admin/dashboard" : "/");
   };
 
   return (
