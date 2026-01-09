@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import { getOpportunityById } from "@/data/mockOpportunities";
@@ -9,9 +10,11 @@ import { getOpportunityById } from "@/data/mockOpportunities";
 export default function VolunteerApplyPage() {
   const params = useParams();
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [opportunity, setOpportunity] = useState(null);
   const [mounted, setMounted] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [accessDenied, setAccessDenied] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -32,12 +35,17 @@ export default function VolunteerApplyPage() {
     if (params?.id) {
       const oppData = getOpportunityById(params.id);
       if (oppData) {
-        setOpportunity(oppData);
+        // Check if opportunity is private and user is not authenticated
+        if (oppData.visibility === "private" && status !== "authenticated") {
+          setAccessDenied(true);
+        } else {
+          setOpportunity(oppData);
+        }
       } else {
         router.push("/opportunities");
       }
     }
-  }, [params?.id, router]);
+  }, [params?.id, router, status]);
 
   const handleInputChange = (e) => {
     const { id, value, type, checked } = e.target;
@@ -120,7 +128,65 @@ export default function VolunteerApplyPage() {
     }, 5000);
   };
 
-  if (!mounted || !opportunity) {
+  if (!mounted) {
+    return (
+      <div className="container py-5 text-center">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Access denied for private opportunities
+  if (accessDenied) {
+    return (
+      <main className="py-5 bg-light">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-md-8">
+              <div className="card shadow-lg border-0">
+                <div className="card-body text-center py-5">
+                  <i className="bi bi-lock fs-1 text-warning mb-3"></i>
+                  <h3 className="mb-3">ឱកាសឯកជន / Private Opportunity</h3>
+                  <p className="text-muted mb-4">
+                    ឱកាសនេះត្រូវការការអនុញ្ញាតពិសេស។ សូមចុះឈ្មោះ
+                    ឬចូលគណនីដើម្បីដាក់ពាក្យ។
+                  </p>
+                  <p className="text-muted small mb-4">
+                    This opportunity requires special permission. Please log in
+                    or register to apply.
+                  </p>
+                  <div className="d-flex gap-2 justify-content-center">
+                    <Link href="/auth/login" className="btn btn-primary">
+                      <i className="bi bi-box-arrow-in-right me-2"></i>
+                      ចូលគណនី
+                    </Link>
+                    <Link
+                      href="/auth/register"
+                      className="btn btn-outline-primary"
+                    >
+                      <i className="bi bi-person-plus me-2"></i>
+                      ចុះឈ្មោះ
+                    </Link>
+                    <Link
+                      href="/opportunities"
+                      className="btn btn-outline-secondary"
+                    >
+                      <i className="bi bi-arrow-left me-2"></i>
+                      ត្រឡប់ក្រោយ
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!opportunity) {
     return (
       <div className="container py-5 text-center">
         <div className="spinner-border text-primary" role="status">

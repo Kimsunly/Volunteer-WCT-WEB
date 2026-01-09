@@ -11,6 +11,8 @@ export const mockOpportunities = [
         type: "ការងារកសិកម្ម / ប្រមូលផល",
         benefits: ["អាហារ", "មធ្យោបាយធ្វើដំណើរ"],
         volunteersNeeded: 30,
+        visibility: "public", // public | private
+        requiresApproval: false,
         images: [
             "/images/opportunities/Agriculture/card-5/img-1.png",
             "/images/opportunities/Agriculture/card-5/img-2.png",

@@ -44,6 +44,7 @@ export default function AdminSidebar({ active }) {
           )}
           {link("/admin/categories", "bi bi-tags", "ប្រភេទ", "categories")}
           {link("/admin/blogs", "bi bi-lightbulb", "គន្លឹះ / ប្លុក", "blogs")}
+          {link("/admin/community", "bi bi-people-fill", "សហគមន៍", "community")}
           {link("/admin/comments", "bi bi-chat-dots", "មតិយោបល់", "comments")}
           {link("/admin/users", "bi bi-people", "អ្នកប្រើប្រាស់", "users")}
           {link("/admin/donations", "bi bi-heart", "បរិច្ចាគ", "donations")}
