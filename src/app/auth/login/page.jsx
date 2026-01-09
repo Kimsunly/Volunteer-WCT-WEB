@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { useAuth } from "@/context/AuthContext";
 import { AuthShell, PasswordField } from "../components";
 import Image from "next/image";
@@ -122,38 +123,80 @@ export default function LoginPage() {
                       </div>
                     </div>
 
-                    {/* Social login (static) */}
+                    {/* Social login with NextAuth */}
                     <div className="col-12">
                       <ul className="login-list">
                         <li>
-                          <a href="#">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              signIn("facebook", {
+                                callbackUrl: "/",
+                                redirect: true,
+                              })
+                            }
+                            style={{
+                              border: "none",
+                              background: "none",
+                              padding: 0,
+                              cursor: "pointer",
+                            }}
+                          >
                             <Image
                               src="/images/Icon/facebook.png"
                               alt="Facebook"
                               width={40}
                               height={40}
                             />
-                          </a>
+                          </button>
                         </li>
                         <li>
-                          <a href="#">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              signIn("google", {
+                                callbackUrl: "/",
+                                redirect: true,
+                              })
+                            }
+                            style={{
+                              border: "none",
+                              background: "none",
+                              padding: 0,
+                              cursor: "pointer",
+                            }}
+                          >
                             <Image
                               src="/images/Icon/search.png"
                               alt="Google"
                               width={40}
                               height={40}
                             />
-                          </a>
+                          </button>
                         </li>
                         <li>
-                          <a href="#">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              signIn("github", {
+                                callbackUrl: "/",
+                                redirect: true,
+                              })
+                            }
+                            style={{
+                              border: "none",
+                              background: "none",
+                              padding: 0,
+                              cursor: "pointer",
+                            }}
+                          >
                             <Image
                               src="/images/Icon/github.png"
                               alt="GitHub"
                               width={40}
                               height={40}
                             />
-                          </a>
+                          </button>
                         </li>
                       </ul>
                     </div>

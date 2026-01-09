@@ -98,7 +98,7 @@ export default function OrgDashboardPage() {
   );
 
   // Tabs (React-controlled)
-  const [activeTab, setActiveTab] = useState("overview"); // overview | opportunities | applications | analytics | settings
+  const [activeTab, setActiveTab] = useState("overview"); // overview | opportunities | applications | analytics | community | settings
 
   // Modal state
   const [createOpen, setCreateOpen] = useState(false);
@@ -195,6 +195,7 @@ export default function OrgDashboardPage() {
             { id: "opportunities", label: "ឱកាស" },
             { id: "applications", label: "ការដាក់ពាក្យ" },
             { id: "analytics", label: "វិភាគទិន្នន័យ" },
+            { id: "community", label: "សហគមន៍" },
             { id: "settings", label: "ការកំណត់" },
           ]}
         />
@@ -248,6 +249,26 @@ export default function OrgDashboardPage() {
           )}
 
           {activeTab === "analytics" && <AnalyticsPane />}
+
+          {activeTab === "community" && (
+            <div className="card shadow-sm mb-4" data-aos="fade-up">
+              <div className="card-body">
+                <h5 className="card-title mb-3">គ្រប់គ្រងសហគមន៍</h5>
+                <p className="text-muted mb-3">
+                  បង្កើត និងគ្រប់គ្រងប្រកាសសហគមន៍របស់អង្គការ
+                </p>
+                <a
+                  href="/organizer/community"
+                  className="btn btn-primary"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <i className="bi bi-box-arrow-up-right me-2"></i>
+                  បើកទំព័រគ្រប់គ្រងសហគមន៍
+                </a>
+              </div>
+            </div>
+          )}
 
           {activeTab === "settings" && (
             <div className="card shadow-sm mb-4" data-aos="fade-up">

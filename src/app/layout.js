@@ -12,6 +12,7 @@ import BootstrapClient from '@/components/common/BootstrapClient';
 import AOSInit from '@/components/common/AOSInit';
 import { AuthProvider } from '@/context/AuthContext';
 import ConditionalLayout from '@/components/layout/ConditionalLayout';
+import SessionProviderWrapper from '@/components/common/SessionProviderWrapper';
 
 const kantumruy = localFont({
   src: [
@@ -39,11 +40,13 @@ export default function RootLayout({ children }) {
   return (
     <html lang="km" data-theme="light" className={kantumruy.variable}>
       <body style={{ fontFamily: 'var(--font-kantumruy), sans-serif' }}>
-        <AuthProvider>
-          <BootstrapClient />
-          <AOSInit />
-          <ConditionalLayout>{children}</ConditionalLayout>
-        </AuthProvider>
+        <SessionProviderWrapper>
+          <AuthProvider>
+            <BootstrapClient />
+            <AOSInit />
+            <ConditionalLayout>{children}</ConditionalLayout>
+          </AuthProvider>
+        </SessionProviderWrapper>
       </body>
     </html>
   );
