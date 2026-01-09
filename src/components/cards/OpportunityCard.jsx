@@ -40,16 +40,28 @@ export default function OpportunityCard({
   // Extract fields (works for both shapes)
   const id = data?.id;
   const title = data?.title;
+  const description = data?.description;
 
-  // Category handling
+  // Category handling - support both nested object and flat database fields
   const categoryLabel =
-    typeof data?.category === "string" ? data.category : data?.category?.label;
-  const categorySlug = data?.category?.slug || data?.category;
+    typeof data?.category === "string" 
+      ? data.category 
+      : data?.category?.label || data?.category_label;
+  const categorySlug = 
+    data?.category?.slug || 
+    data?.category_slug || 
+    (typeof data?.category === "string" ? data.category : null);
   const categoryColorClass = categoryColorMap[categorySlug] || "bg-primary";
 
-  // Location handling
+  // Location handling - support both nested object and flat database fields
   const locationLabel =
-    typeof data?.location === "string" ? data.location : data?.location?.label;
+    typeof data?.location === "string" 
+      ? data.location 
+      : data?.location?.label || data?.location_label;
+  const locationSlug = 
+    data?.location?.slug || 
+    data?.location_slug || 
+    (typeof data?.location === "string" ? data.location : null);
 
   // Image handling (be defensive: support array, JSON string, or single imageUrl)
   let images = [];
@@ -81,15 +93,15 @@ export default function OpportunityCard({
   const imageUrl = data?.imageUrl || (normalizedImages.length ? normalizedImages[0] : "/placeholder.svg");
   const currentImage = normalizedImages.length > 0 ? normalizedImages[currentImageIndex] : imageUrl;
 
-  // Date, Time, Capacity
-
+  // Date, Time, Capacity - support multiple field name variations
   // Ensure we have a usable detail link: prefer explicit field, otherwise derive from id
   const detailHref = data?.detailHref || (id ? `/opportunities/${id}` : null);
-  const date = data?.date;
-  const time = data?.time;
+  const date = data?.date || data?.date_range || data?.start_date;
+  const time = data?.time || data?.start_time;
+  const capacity = data?.capacity || data?.volunteer_capacity;
   const capacityLabel =
     data?.capacityLabel ||
-    (data?.capacity ? `ចំនួន ${data.capacity} នាក់` : "");
+    (capacity ? `ចំនួន ${capacity} នាក់` : "");
 
   // Benefits handling (convert object to array if needed)
   let benefitsArray = [];
@@ -103,11 +115,15 @@ export default function OpportunityCard({
 
   // Handle carousel
   const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+    if (normalizedImages.length > 1) {
+      setCurrentImageIndex((prev) => (prev - 1 + normalizedImages.length) % normalizedImages.length);
+    }
   };
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+    if (normalizedImages.length > 1) {
+      setCurrentImageIndex((prev) => (prev + 1) % normalizedImages.length);
+    }
   };
 
   // Handle favorite toggle
@@ -153,9 +169,9 @@ export default function OpportunityCard({
           />
 
           {/* Carousel indicators (for new shape with multiple images) */}
-          {images.length > 1 && (
+          {normalizedImages.length > 1 && (
             <div className="carousel-indicators page position-absolute bottom-0 start-50 translate-middle-x mb-2">
-              {images.map((_, idx) => (
+              {normalizedImages.map((_, idx) => (
                 <button
                   key={idx}
                   type="button"
@@ -192,7 +208,7 @@ export default function OpportunityCard({
           </button>
 
           {/* Carousel controls (for new shape with multiple images) */}
-          {images.length > 1 && (
+          {normalizedImages.length > 1 && (
             <>
               <button
                 type="button"
@@ -222,6 +238,19 @@ export default function OpportunityCard({
 
         <div className="card-body d-flex flex-column">
           <h3 className="card-title mb-3 fw-bold">{title}</h3>
+
+          {/* Description */}
+          {description && (
+            <p className="card-text text-muted mb-3" style={{ 
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              {description}
+            </p>
+          )}
 
           {/* Info list */}
           <div className="info-list mb-3">

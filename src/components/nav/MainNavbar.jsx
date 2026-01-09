@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import TopHeader from "./TopHeader";
 import ProfileDropdown from "./ProfileDropdown";
+import NotificationDropdown from "./NotificationDropdown";
 
 export default function MainNavbar() {
   const { user, setUser, loading } = useAuth();
@@ -63,40 +64,32 @@ export default function MainNavbar() {
           <div className="d-none d-lg-flex mx-auto">
             <ul className="navbar-nav landing-nav">
               <li className="nav-item">
-                <Link 
-                  className={`nav-link ${isActive("/") ? "active" : ""}`} 
+                <Link
+                  className={`nav-link ${isActive("/") ? "active" : ""}`}
                   href="/"
                 >
                   ទំព័រដើម
                 </Link>
               </li>
               <li className="nav-item">
-                <Link 
-                  className={`nav-link ${isActive("/opportunities") ? "active" : ""}`} 
+                <Link
+                  className={`nav-link ${isActive("/opportunities") ? "active" : ""}`}
                   href="/opportunities"
                 >
                   ការងារស្ម័គ្រចិត្ត
                 </Link>
               </li>
               <li className="nav-item">
-                <Link 
-                  className={`nav-link ${isActive("/event") ? "active" : ""}`} 
-                  href="/event"
-                >
-                  ព្រឹត្តិការណ៏
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link 
-                  className={`nav-link ${isActive("/blog") ? "active" : ""}`} 
-                  href="/blog"
+                <Link
+                  className={`nav-link ${isActive("/blogs") ? "active" : ""}`}
+                  href="/blogs"
                 >
                   អត្ថបទ
                 </Link>
               </li>
               <li className="nav-item">
-                <Link 
-                  className={`nav-link ${isActive("/donation") ? "active" : ""}`} 
+                <Link
+                  className={`nav-link ${isActive("/donation") ? "active" : ""}`}
                   href="/donation"
                 >
                   បរិច្ចាក
@@ -117,9 +110,12 @@ export default function MainNavbar() {
               <i className="bi bi-search"></i>
             </button>
 
-            {/* Profile Dropdown (Only if logged in) */}
+            {/* Notification & Profile (Only if logged in) */}
             {!loading && user && (
-              <ProfileDropdown />
+              <>
+                <NotificationDropdown />
+                <ProfileDropdown />
+              </>
             )}
 
             {/* Authentication Buttons - Desktop Only */}
@@ -186,9 +182,9 @@ export default function MainNavbar() {
         <div className="offcanvas-body">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
-              <Link 
-                className={`nav-link ${isActive("/") ? "active" : ""}`} 
-                href="/" 
+              <Link
+                className={`nav-link ${isActive("/") ? "active" : ""}`}
+                href="/"
                 data-bs-dismiss="offcanvas"
               >
                 ទំព័រដើម
@@ -204,18 +200,18 @@ export default function MainNavbar() {
               </Link>
             </li>
             <li className="nav-item">
-              <Link 
-                className={`nav-link ${isActive("/event") ? "active" : ""}`} 
-                href="/event" 
+              <Link
+                className={`nav-link ${isActive("/event") ? "active" : ""}`}
+                href="/event"
                 data-bs-dismiss="offcanvas"
               >
                 ព្រឹត្តិការណ៏
               </Link>
             </li>
             <li className="nav-item">
-              <Link 
-                className={`nav-link ${isActive("/blog") ? "active" : ""}`} 
-                href="/blog" 
+              <Link
+                className={`nav-link ${isActive("/blogs") ? "active" : ""}`}
+                href="/blogs"
                 data-bs-dismiss="offcanvas"
               >
                 អត្ថបទ
@@ -259,10 +255,17 @@ export default function MainNavbar() {
                 <li className="nav-item">
                   <button
                     className="nav-link text-danger"
-                    onClick={() => {
-                      localStorage.removeItem("authToken");
-                      setUser(null);
-                      router.push("/");
+                    onClick={async () => {
+                      try {
+                        await fetch("/api/auth/logout", { method: "POST" });
+                      } finally {
+                        localStorage.removeItem("authToken");
+                        localStorage.removeItem("role");
+                        document.cookie = "authToken=; path=/; max-age=0";
+                        document.cookie = "role=; path=/; max-age=0";
+                        setUser(null);
+                        router.push("/");
+                      }
                     }}
                     style={{
                       border: "none",

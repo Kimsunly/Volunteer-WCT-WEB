@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 
 export default async function DetailPage({ params }) {
-  const { id } = params;
+  const { id } = await params;
   
   // ទាញទិន្នន័យតាម ID
   const { data: opp } = await supabase
