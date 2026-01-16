@@ -5,7 +5,7 @@ import { api } from './api';
  * List all approved community posts.
  */
 export async function listCommunityPosts(params = { limit: 50, offset: 0 }) {
-    const { data } = await api.get('/api/community/', { params });
+    const { data } = await api.get('/api/community', { params });
     return data;
 }
 
@@ -32,7 +32,7 @@ export async function getMyPosts(params = { limit: 50, offset: 0 }) {
 export async function createPost(postData) {
     // Note: If sending JSON, don't use FormData. 
     // If backend expects JSON:
-    const { data } = await api.post('/api/community/', postData);
+    const { data } = await api.post('/api/community', postData);
     return data;
 }
 

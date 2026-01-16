@@ -30,7 +30,7 @@ export async function getMyOpportunities(params = { limit: 50, offset: 0 }) {
 
 export async function createOpportunity(formData) {
     // formData should be an instance of FormData for multipart/form-data
-    const { data } = await api.post('/api/opportunities/', formData, {
+    const { data } = await api.post('/api/opportunities', formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
         },

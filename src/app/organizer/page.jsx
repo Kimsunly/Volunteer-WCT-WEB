@@ -68,12 +68,13 @@ export default function OrgDashboardPage() {
         titleKh: op.title,
         titleEn: op.title, // Fallback
         dateKh: op.date_range || "—",
-        locationKh: op.location || "—",
+        locationKh: op.location_label || op.location || "—",
         current: 0, // Need to fetch dynamicly if needed
         capacity: op.capacity || 0,
         registrations: 0, // Need stats
         status: op.status,
         image: Array.isArray(op.images) ? op.images[0] : (typeof op.images === 'string' ? op.images.split(',')[0] : "/images/ORG/Tree-conservation.png"),
+        category: op.category_label || op.category,
         raw: op,
       }));
 
