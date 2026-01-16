@@ -9,7 +9,7 @@ export async function getComments(entityType, entityId, { limit = 20, offset = 0
 }
 
 export async function createComment(content, entityType, entityId) {
-    const { data } = await api.post('/comments/', {
+    const { data } = await api.post('/comments', {
         content,
         entity_type: entityType,
         entity_id: entityId
