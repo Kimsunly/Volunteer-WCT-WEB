@@ -400,8 +400,14 @@ export default function AdminTipsPage() {
                       type="button"
                       className="btn btn-primary pill"
                       onClick={commit}
+                      disabled={loading}
                     >
-                      រក្សាទុក
+                      {loading ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                          កំពុងរក្សាទុក...
+                        </>
+                      ) : "រក្សាទុក"}
                     </button>
                   </div>
                 </div>

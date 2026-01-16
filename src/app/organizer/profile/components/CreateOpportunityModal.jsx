@@ -35,6 +35,7 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
 
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const errRef = useRef(null);
   const objectUrlRef = useRef(null);
 
@@ -103,7 +104,7 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
     if (errRef.current) errRef.current.textContent = "";
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Basic validity
     const missing = [];
@@ -119,13 +120,18 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
       alert(`សូមបំពេញ៖ ${missing.join(", ")}`);
       return;
     }
-    onSubmit({
-      ...form,
-      imageFile,
-      imagePreview,
-      dateKh: new Date(form.dateISO).toLocaleDateString("km-KH"), // simple conversion
-      status: form.status,
-    });
+    try {
+      setSubmitting(true);
+      await onSubmit({
+        ...form,
+        imageFile,
+        imagePreview,
+        dateKh: new Date(form.dateISO).toLocaleDateString("km-KH"), // simple conversion
+        status: form.status,
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (!open) return null;
@@ -682,9 +688,19 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
               </button>
               <button
                 type="submit"
-                className="btn btn-primary btn-lg rounded-pill"
+                className="btn btn-primary btn-lg rounded-pill px-4"
+                disabled={submitting}
               >
-                <i className="bi bi-plus-lg me-1"></i> Post Opportunity
+                {submitting ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    កំពុងបញ្ជូន...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-plus-lg me-1"></i> Post Opportunity
+                  </>
+                )}
               </button>
             </div>
           </form>

@@ -9,6 +9,7 @@ import { organizerRegister } from "@/lib/services/organizerAuth";
 export default function OrgRegisterPage() {
   const router = useRouter();
   const [orgType, setOrgType] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const onFile = (file) => {
     // You can upload to backend or store in state
@@ -30,12 +31,15 @@ export default function OrgRegisterPage() {
       orgType,
     };
     try {
+      setSubmitting(true);
       await organizerRegister(payload);
       alert("បានចុះឈ្មោះអង្គការ! សូមបន្តការផ្ទៀងផ្ទាត់");
       router.push("/auth/org/confirm");
     } catch (err) {
       console.error("Organizer register error", err);
       alert("ការចុះឈ្មោះអង្គការបរាជ័យ");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -166,8 +170,14 @@ export default function OrgRegisterPage() {
                       <button
                         type="submit"
                         className="text-white btn btn-primary w-100"
+                        disabled={submitting}
                       >
-                        បង្កើតគណនី
+                        {submitting ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            កំពុងបង្កើត...
+                          </>
+                        ) : "បង្កើតគណនី"}
                       </button>
                     </div>
 

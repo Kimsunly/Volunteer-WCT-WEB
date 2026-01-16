@@ -16,6 +16,7 @@ import toast from "react-hot-toast";
 export default function OrgLoginPage() {
   const router = useRouter();
   const { setUser } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -25,6 +26,7 @@ export default function OrgLoginPage() {
       "Volunteer@gmail.com";
     const password = e.currentTarget.querySelector("#password")?.value || "SokryPes@123";
     try {
+      setSubmitting(true);
       const { token } = await organizerLogin({ email, password });
       if (!token) {
         toast.error("ការចូលគណនីបានបរាជ័យ៖ មិនមានថូខឹន");
@@ -46,6 +48,8 @@ export default function OrgLoginPage() {
       console.error("Organizer login error", err);
       const errorMsg = parseApiError(err);
       toast.error(errorMsg || "ការចូលគណនីបានបរាជ័យ។");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -109,8 +113,13 @@ export default function OrgLoginPage() {
                     </div>
 
                     <div className="col-12">
-                      <button type="submit" className="btn btn-primary">
-                        ចូលគណនី
+                      <button type="submit" className="btn btn-primary w-100" disabled={submitting}>
+                        {submitting ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            កំពុងចូល...
+                          </>
+                        ) : "ចូលគណនី"}
                       </button>
                     </div>
 
