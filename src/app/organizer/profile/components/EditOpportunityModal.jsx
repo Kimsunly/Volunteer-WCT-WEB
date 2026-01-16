@@ -31,6 +31,7 @@ export default function EditOpportunityModal({ open, onClose, onSubmit, opportun
 
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState("");
+    const [submitting, setSubmitting] = useState(false);
     const errRef = useRef(null);
     const objectUrlRef = useRef(null);
 
@@ -114,7 +115,7 @@ export default function EditOpportunityModal({ open, onClose, onSubmit, opportun
         if (errRef.current) errRef.current.textContent = "";
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const missing = [];
         if (!form.titleKh) missing.push("ចំណងជើង (KH)");
@@ -130,11 +131,16 @@ export default function EditOpportunityModal({ open, onClose, onSubmit, opportun
             return;
         }
 
-        onSubmit({
-            ...form,
-            id: opportunity.id,
-            imageFile,
-        });
+        try {
+            setSubmitting(true);
+            await onSubmit({
+                ...form,
+                id: opportunity.id,
+                imageFile,
+            });
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     if (!open || !opportunity) return null;
@@ -539,8 +545,18 @@ export default function EditOpportunityModal({ open, onClose, onSubmit, opportun
                             <button
                                 type="submit"
                                 className="btn btn-primary btn-lg rounded-pill px-4"
+                                disabled={submitting}
                             >
-                                <i className="bi bi-check-lg me-1"></i> រក្សាទុក
+                                {submitting ? (
+                                    <>
+                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        កំពុងរក្សាទុក...
+                                    </>
+                                ) : (
+                                    <>
+                                        <i className="bi bi-check-lg me-1"></i> រក្សាទុក
+                                    </>
+                                )}
                             </button>
                         </div>
                     </form>

@@ -376,8 +376,14 @@ export default function AdminCategoriesPage() {
                       type="button"
                       className="btn btn-primary pill"
                       onClick={commit}
+                      disabled={actionLoading === "commit"}
                     >
-                      រក្សាទុក
+                      {actionLoading === "commit" ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                          កំពុងរក្សាទុក...
+                        </>
+                      ) : "រក្សាទុក"}
                     </button>
                   </div>
                 </div>
