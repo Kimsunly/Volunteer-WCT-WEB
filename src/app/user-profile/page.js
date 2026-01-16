@@ -28,9 +28,11 @@ export default function UserProfilePage() {
     // User for header: prefer authenticated user, fallback to mock
     const profileUser = authUser
         ? {
-            name: authUser.name ?? "អ្នកប្រើប្រាស់",
-            avatar: authUser.profileImage ?? "/images/profile.png",
-            tierLabel: authUser.tierLabel ?? "Volunteer",
+            name: (authUser.first_name && authUser.last_name)
+                ? `${authUser.first_name} ${authUser.last_name}`
+                : (authUser.name ?? "អ្នកប្រើប្រាស់"),
+            avatar: authUser.avatar_url ?? authUser.profileImage ?? "/images/profile.png",
+            tierLabel: authUser.volunteer_level ?? authUser.tierLabel ?? "Volunteer",
             rating: authUser.rating ?? 4.5,
             ratingText: String(authUser.rating ?? 4.8),
             notifCount: Array.isArray(authUser.notifications) ? authUser.notifications.length : 0,

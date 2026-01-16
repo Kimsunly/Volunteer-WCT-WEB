@@ -1,6 +1,9 @@
 "use client";
 import { useAuth } from "@/context/AuthContext";
+import { logout as apiLogout } from "@/lib/services/auth";
+import { clearAuth } from "@/lib/utils/authState";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function ProfileDropdown() {
   const { user, setUser } = useAuth();
@@ -22,16 +25,11 @@ export default function ProfileDropdown() {
 
   const handleLogout = async () => {
     try {
-      // Call logout API
-      await fetch("/api/auth/logout", { method: "POST" });
+      await apiLogout();
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
-      // Clear state
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("role");
-      document.cookie = "authToken=; path=/; max-age=0";
-      document.cookie = "role=; path=/; max-age=0";
+      clearAuth();
       setUser(null);
       router.push("/");
     }
@@ -46,7 +44,7 @@ export default function ProfileDropdown() {
         aria-expanded="false"
       >
         <img
-          src={user.profileImage || "/images/profile.png"}
+          src={user.avatar_url || user.profileImage || "/images/profile.png"}
           alt={user.name}
           style={{
             width: "32px",
@@ -59,16 +57,16 @@ export default function ProfileDropdown() {
 
       <ul className="dropdown-menu dropdown-menu-end">
         <li>
-          <a className="dropdown-item" href={getDashboardUrl()}>
+          <Link className="dropdown-item" href={getDashboardUrl()}>
             <i className="bi bi-person-circle"></i>
             <span className="ps-2">មើលគណនី</span>
-          </a>
+          </Link>
         </li>
         <li>
-          <a className="dropdown-item" href="/settings">
+          <Link className="dropdown-item" href="/settings">
             <i className="bi bi-gear"></i>
             <span className="ps-2">ការកំណត់</span>
-          </a>
+          </Link>
         </li>
         <li>
           <hr className="dropdown-divider" />

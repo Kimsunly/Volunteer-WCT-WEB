@@ -58,22 +58,22 @@ export default function TopHeader() {
           {/* Quick Links */}
           <ul className="nav-list list-unstyled d-flex m-0">
             <li className="nav-item me-3">
-              <a
+              <Link
                 href="/about"
                 className="nav-link p-0 text-white small pe-2"
                 style={{ opacity: 0.8 }}
               >
                 អំពីយើង
-              </a>
+              </Link>
             </li>
             <li className="nav-item">
-              <a
+              <Link
                 href="/contact"
                 className="nav-link p-0 text-white small pe-2"
                 style={{ opacity: 0.8 }}
               >
                 ទំនាក់ទំនង
-              </a>
+              </Link>
             </li>
           </ul>
         </div>

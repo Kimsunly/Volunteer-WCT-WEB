@@ -1,52 +1,64 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { login as apiLogin, me as apiMe } from "@/lib/services/auth";
+import { setAuth } from "@/lib/utils/authState";
+import { parseApiError } from "@/lib/utils/apiError";
 import { useAuth } from "@/context/AuthContext";
 import { AuthShell, PasswordField } from "../components";
 import Image from "next/image";
+import toast from "react-hot-toast";
+import LoadingButton from "@/components/common/LoadingButton";
 
 export default function LoginPage() {
   const router = useRouter();
   const { setUser } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
 
     // Read values (ids are set in fields)
     const email =
       e.currentTarget.querySelector("#email")?.value ||
       "VolunteerCambo@gmail.com";
+    const password =
+      e.currentTarget.querySelector("#password")?.value || "VolunteerCambo";
 
-    // Check for admin credentials
-    const isAdmin = email === "admin@volunteer.org" && password === "admin123";
-    const userRole = isAdmin ? "admin" : "user";
+    try {
+      setSubmitting(true);
+      const { token } = await apiLogin({ email, password });
+      if (!token) {
+        toast.error("ការចូលគណនីបានបរាជ័យ៖ មិនមានថូខឹន");
+        return;
+      }
+      const remember = e.target?.querySelector("#rememberMe")?.checked || false;
+      setAuth({ token, remember });
 
-    // Simulate successful login
-    const mockUser = {
-      id: isAdmin ? "admin-id" : "mock-user-id",
-      name: isAdmin ? "Admin" : "ស្ម័គ្រចិត្ត", // Khmer label for demo
-      email,
-      role: userRole,
-      profileImage: "/images/profile.png",
-      tierLabel: isAdmin ? "Administrator" : "Member",
-      rating: 5,
-    };
-
-    // Persist mock token for middleware / future checks
-    localStorage.setItem("authToken", "mock-auth-token");
-    localStorage.setItem("role", userRole);
-    // Also set a cookie so middleware sees it (Next middleware reads cookies)
-    document.cookie = "authToken=mock-auth-token; path=/; max-age=86400";
-    document.cookie = `role=${userRole}; path=/; max-age=86400`;
-
-    // Update global auth state
-    setUser(mockUser);
-
-    // Redirect based on role
-    router.push(isAdmin ? "/admin/dashboard" : "/");
+      // Fetch current user info to get role
+      const userInfo = await apiMe();
+      const role = userInfo?.role || "user";
+      setAuth({ token, role, remember });
+      setUser({
+        id: userInfo?.id,
+        name: userInfo?.name,
+        email: userInfo?.email || email,
+        role,
+        profileImage: userInfo?.image || "/images/profile.png",
+      });
+      toast.success("ចូលគណនីបានជោគជ័យ!");
+      router.push(role === "admin" ? "/admin/dashboard" : "/");
+    } catch (err) {
+      console.error("Login error", err);
+      const msg =
+        parseApiError(err) || "ការចូលគណនីបានបរាជ័យ។ សូមពិនិត្យមើលព័ត៌មានសម្ងាត់របស់អ្នក។";
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -110,9 +122,14 @@ export default function LoginPage() {
                     </div>
 
                     <div className="col-12">
-                      <button type="submit" className="btn btn-primary">
+                      <LoadingButton
+                        type="submit"
+                        className="btn btn-primary w-100"
+                        loading={submitting}
+                        loadingText="កំពុងចូល..."
+                      >
                         ចូលគណនី
-                      </button>
+                      </LoadingButton>
                     </div>
 
                     <div className="col-12">

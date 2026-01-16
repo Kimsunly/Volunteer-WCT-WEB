@@ -4,35 +4,49 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import {
+  organizerLogin,
+  getOrganizerProfile,
+} from "@/lib/services/organizerAuth";
+import { setAuth } from "@/lib/utils/authState";
+import { parseApiError } from "@/lib/utils/apiError";
 import { AuthShell, PasswordField } from "../../components";
+import toast from "react-hot-toast";
 
 export default function OrgLoginPage() {
   const router = useRouter();
   const { setUser } = useAuth();
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
 
     const email =
       e.currentTarget.querySelector("#email")?.value ||
-      "OrganizerCambo@gmail.com";
+      "Volunteer@gmail.com";
+    const password = e.currentTarget.querySelector("#password")?.value || "SokryPes@123";
+    try {
+      const { token } = await organizerLogin({ email, password });
+      if (!token) {
+        toast.error("ការចូលគណនីបានបរាជ័យ៖ មិនមានថូខឹន");
+        return;
+      }
+      setAuth({ token, role: "organizer" });
 
-    const mockOrganizer = {
-      id: "mock-org-id",
-      name: "អង្គការ",
-      email,
-      role: "organizer",
-      profileImage: "/images/profile.png",
-    };
-
-    // Persist mock token for middleware / future checks
-    localStorage.setItem("authToken", "mock-auth-token");
-    document.cookie = "authToken=mock-auth-token; path=/; max-age=86400";
-    localStorage.setItem("role", "organizer");
-    document.cookie = "role=organizer; path=/; max-age=86400";
-
-    setUser(mockOrganizer);
-    router.push("/");
+      const profile = await getOrganizerProfile().catch(() => null);
+      setUser({
+        id: profile?.id,
+        name: profile?.name || "អង្គការ",
+        email,
+        role: "organizer",
+        profileImage: profile?.image || "/images/profile.png",
+      });
+      toast.success("ចូលគណនីបានជោគជ័យ!");
+      router.push("/");
+    } catch (err) {
+      console.error("Organizer login error", err);
+      const errorMsg = parseApiError(err);
+      toast.error(errorMsg || "ការចូលគណនីបានបរាជ័យ។");
+    }
   };
 
   return (
@@ -62,7 +76,7 @@ export default function OrgLoginPage() {
                         className="form-control"
                         id="email"
                         placeholder="បញ្ចូលអ៊ីមែល"
-                        defaultValue="VolunteerCambo@gmail.com"
+                        defaultValue="Volunteer@gmail.com"
                         required
                       />
                       <div className="invalid-feedback">
@@ -72,7 +86,7 @@ export default function OrgLoginPage() {
 
                     <PasswordField
                       id="password"
-                      defaultValue="VolunteerCambo"
+                      defaultValue="SokryPes@123"
                     />
 
                     <div className="col-12 d-flex justify-content-between align-items-center">

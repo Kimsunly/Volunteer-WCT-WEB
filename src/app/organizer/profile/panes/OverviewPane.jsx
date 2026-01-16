@@ -1,7 +1,11 @@
 import React from "react";
 import Image from "next/image";
 
-export default function OverviewPane() {
+export default function OverviewPane({ stats, recentApps }) {
+  // Default values if props are missing
+  const { activeOpps = 0, totalVolunteers = 0, eventsThisMonth = 0, rating = 0 } = stats || {};
+  const apps = recentApps || [];
+
   return (
     <div className="tab-pane fade show active" id="overview">
       <div className="container">
@@ -12,11 +16,11 @@ export default function OverviewPane() {
               <div className="d-flex justify-content-between">
                 <div>
                   <h6>ការងារសកម្ម</h6>
-                  <h3>12</h3>
-                  <small className="text-success">+3 ថ្មីៗ</small>
+                  <h3>{activeOpps}</h3>
+                  <small className="text-success">បច្ចុប្បន្ន</small>
                 </div>
-                <div className="icon-box bg-primary">
-                  <i className="fa-regular fa-calendar-days"></i>
+                <div className="icon-box bg-primary text-white d-flex align-items-center justify-content-center">
+                  <i className="bi bi-briefcase fs-4"></i>
                 </div>
               </div>
             </div>
@@ -26,11 +30,11 @@ export default function OverviewPane() {
               <div className="d-flex justify-content-between">
                 <div>
                   <h6>អ្នកស្ម័គ្រចិត្តសរុប</h6>
-                  <h3>156</h3>
-                  <small className="text-success">+24 ថ្មីៗ</small>
+                  <h3>{totalVolunteers}</h3>
+                  <small className="text-success">សរុប</small>
                 </div>
-                <div className="icon-box bg-success">
-                  <i className="fa-solid fa-user-group"></i>
+                <div className="icon-box bg-success text-white d-flex align-items-center justify-content-center">
+                  <i className="bi bi-people-fill fs-4"></i>
                 </div>
               </div>
             </div>
@@ -40,14 +44,14 @@ export default function OverviewPane() {
               <div className="d-flex justify-content-between">
                 <div>
                   <h6>ព្រឹត្តិការណ៍ខែនេះ</h6>
-                  <h3>8</h3>
-                  <small className="text-success">+2 ថ្មីៗ</small>
+                  <h3>{eventsThisMonth}</h3>
+                  <small className="text-success">ខែនេះ</small>
                 </div>
                 <div
-                  className="icon-box bg-purple"
+                  className="icon-box bg-purple text-white d-flex align-items-center justify-content-center"
                   style={{ background: "#a569bd" }}
                 >
-                  <i className="fa-regular fa-calendar"></i>
+                  <i className="bi bi-calendar-event fs-4"></i>
                 </div>
               </div>
             </div>
@@ -57,11 +61,13 @@ export default function OverviewPane() {
               <div className="d-flex justify-content-between">
                 <div>
                   <h6>ការវាយតម្លៃ</h6>
-                  <h3>4.8</h3>
-                  <small className="text-success">+0.2 ថ្មីៗ</small>
+                  <h3>{rating}</h3>
+                  <small className="text-warning">
+                    <i className="bi bi-star-fill me-1"></i>
+                  </small>
                 </div>
-                <div className="icon-box bg-warning">
-                  <i className="fa-solid fa-star"></i>
+                <div className="icon-box bg-warning text-white d-flex align-items-center justify-content-center">
+                  <i className="bi bi-star-fill fs-4"></i>
                 </div>
               </div>
             </div>
@@ -74,55 +80,34 @@ export default function OverviewPane() {
             <div className="card card-custom p-3">
               <h6 className="fw-bold mb-3">ពាក្យសុំថ្មីៗ</h6>
 
-              <div className="d-flex align-items-center mb-3">
-                <Image
-                  src="/images/ORG/computer-icons-user-profile-circle-abstract.jpg"
-                  className="rounded-circle me-2"
-                  width={44}
-                  height={44}
-                  alt=""
-                />
-                <div>
-                  <strong>សុភា ចាន់</strong>
-                  <br />
-                  <small>24 មករា 2025</small>
-                </div>
-                <span className="badge bg-warning text-dark ms-auto">
-                  កំពុងរង់ចាំ
-                </span>
-              </div>
-
-              <div className="d-flex align-items-center mb-3">
-                <Image
-                  src="/images/ORG/computer-icons-user-profile-circle-abstract.jpg"
-                  className="rounded-circle me-2"
-                  width={44}
-                  height={44}
-                  alt=""
-                />
-                <div>
-                  <strong>ដារា លី</strong>
-                  <br />
-                  <small>24 មករា 2025</small>
-                </div>
-                <span className="badge bg-success ms-auto">អនុម័ត</span>
-              </div>
-
-              <div className="d-flex align-items-center">
-                <Image
-                  src="/images/ORG/computer-icons-user-profile-circle-abstract.jpg"
-                  className="rounded-circle me-2"
-                  width={44}
-                  height={44}
-                  alt=""
-                />
-                <div>
-                  <strong>ពិសាក់ ស៊ុន</strong>
-                  <br />
-                  <small>23 មករា 2025</small>
-                </div>
-                <span className="badge bg-danger ms-auto">បានបដិសេធ</span>
-              </div>
+              {apps.length === 0 ? (
+                <div className="text-muted text-center py-4">គ្មានពាក្យសុំថ្មីៗទេ</div>
+              ) : (
+                apps.map((app) => (
+                  <div key={app.id} className="d-flex align-items-center mb-3">
+                    <Image
+                      src={app.avatar}
+                      className="rounded-circle me-2 object-fit-cover"
+                      width={44}
+                      height={44}
+                      alt=""
+                    />
+                    <div>
+                      <strong>{app.nameKh}</strong>
+                      <br />
+                      <small>{app.dateKh}</small>
+                    </div>
+                    <span
+                      className={`badge ms-auto ${app.status === 'approved' ? 'bg-success' :
+                        app.status === 'rejected' ? 'bg-danger' : 'bg-warning text-dark'
+                        }`}
+                    >
+                      {app.status === 'pending' ? 'កំពុងរង់ចាំ' :
+                        app.status === 'approved' ? 'អនុម័ត' : 'បានបដិសេធ'}
+                    </span>
+                  </div>
+                ))
+              )}
 
               <a href="#" className="d-block mt-2 text-primary small">
                 មើលទាំងអស់
@@ -137,13 +122,13 @@ export default function OverviewPane() {
                 Create New Opportunity
               </a>
               <a href="#" className="quick-action bg-light-green">
-                <i className="fa-solid fa-user-group"></i> Manage Volunteers
+                <i className="bi bi-people-fill me-2"></i> Manage Volunteers
               </a>
               <a href="#" className="quick-action bg-light-purple">
-                <i className="fa-solid fa-chart-line"></i> View Reports
+                <i className="bi bi-graph-up me-2"></i> View Reports
               </a>
               <a href="#" className="quick-action bg-light-orange">
-                <i className="fa-solid fa-envelope"></i> Send Messages
+                <i className="bi bi-envelope-fill me-2"></i> Send Messages
               </a>
             </div>
           </div>

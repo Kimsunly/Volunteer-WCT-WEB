@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 
 export default function ContactCTA() {
   return (
@@ -19,13 +20,13 @@ export default function ContactCTA() {
           <h4 className="fw-bold mb-1">មានសំណួរផ្សេងទៀត?</h4>
           <p className="mb-0">ទាក់ទងមកយើង ហើយយើងនឹងជួយឆ្លើយសំណួររបស់អ្នក</p>
         </div>
-        <a
+        <Link
           href="/contact"
           className="btn btn-light px-4 py-2 fw-bold"
           style={{ borderRadius: 50, boxShadow: "0 4px 15px rgba(0,0,0,0.2)" }}
         >
           ទាក់ទង
-        </a>
+        </Link>
       </div>
     </div>
   );

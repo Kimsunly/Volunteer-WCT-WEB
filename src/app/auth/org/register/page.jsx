@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AuthShell, UploadArea, PasswordField } from "../../components";
+import { organizerRegister } from "@/lib/services/organizerAuth";
 
 export default function OrgRegisterPage() {
   const router = useRouter();
@@ -14,15 +15,28 @@ export default function OrgRegisterPage() {
     console.log("Selected file:", file);
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     const form = document.getElementById("orgRegisterForm");
     if (!form?.checkValidity()) {
       form?.classList.add("was-validated");
       return;
     }
-    alert("បង្កើតគណនីអង្គការ (Mock)");
-    router.push("/auth/org/confirm");
+    const payload = {
+      orgname: form.querySelector("#orgname")?.value,
+      email: form.querySelector("#email")?.value,
+      phone: form.querySelector("#phone")?.value,
+      password: form.querySelector("#password")?.value,
+      orgType,
+    };
+    try {
+      await organizerRegister(payload);
+      alert("បានចុះឈ្មោះអង្គការ! សូមបន្តការផ្ទៀងផ្ទាត់");
+      router.push("/auth/org/confirm");
+    } catch (err) {
+      console.error("Organizer register error", err);
+      alert("ការចុះឈ្មោះអង្គការបរាជ័យ");
+    }
   };
 
   return (
@@ -110,11 +124,15 @@ export default function OrgRegisterPage() {
                         onChange={(e) => setOrgType(e.target.value)}
                         required
                       >
-                        <option value="">ជ្រើសរើសអង្គការ</option>
-                        <option value="environment">អង្គការបរិស្ថាន</option>
-                        <option value="health">អង្គការសុខាភិបាល</option>
-                        <option value="community">អង្គការសហគមន៏</option>
-                        <option value="charity">អង្គការមនុស្សធម៏</option>
+                        <option value="">ជ្រើសរើសប្រភេទអង្គការ</option>
+                        <option value="ngo">អង្គការមិនមែនរដ្ឋាភិបាល (NGO)</option>
+                        <option value="nonprofit">សមាគមមិនរកប្រាក់ចំណេញ (Non-profit)</option>
+                        <option value="community">សហគមន៍ (Community)</option>
+                        <option value="educational">គ្រឹះស្ថានអប់រំ (Educational)</option>
+                        <option value="religious">ស្ថាប័នសាសនា (Religious)</option>
+                        <option value="government">ស្ថាប័នរដ្ឋ (Government)</option>
+                        <option value="corporate">ក្រុមហ៊ុន/សហគ្រាស (Corporate)</option>
+                        <option value="other">ផ្សេងៗ (Other)</option>
                       </select>
                       <div className="invalid-feedback">
                         សូមជ្រើសរើសប្រភេទអង្គការ។

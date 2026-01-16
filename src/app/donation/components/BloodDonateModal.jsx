@@ -1,7 +1,10 @@
+
 // src/app/donation/components/BloodDonateModal.jsx
 "use client";
 
 import React, { useState } from "react";
+import { createBloodDonation } from "@/services/donations";
+import toast from "react-hot-toast";
 
 function isValidAge(dobStr) {
   if (!dobStr) return false;
@@ -22,6 +25,7 @@ export default function BloodDonateModal({ open, onClose }) {
   });
   const [validated, setValidated] = useState(false);
   const [ageInvalid, setAgeInvalid] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   if (!open) return null;
 
@@ -33,37 +37,63 @@ export default function BloodDonateModal({ open, onClose }) {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const okAge = isValidAge(form.dob);
     setAgeInvalid(!okAge);
     setValidated(true);
     if (!okAge) return;
 
-    // Mock success
-    alert("✅ Registration submitted!");
-    setForm({
-      fullName: "",
-      email: "",
-      phone: "",
-      dob: "",
-      bloodType: "",
-      agree: true,
-    });
-    setValidated(false);
-    onClose();
+    if (!form.fullName || !form.email || !form.bloodType || !form.agree) {
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      // Map to API payload (snake_case)
+      const payload = {
+        full_name: form.fullName,
+        email: form.email,
+        phone: form.phone || null,
+        dob: form.dob,
+        blood_type: form.bloodType,
+        agree: form.agree
+      };
+
+      await createBloodDonation(payload);
+
+      toast.success("✅ បានចុះឈ្មោះដោយជោគជ័យ! យើងនឹងទាក់ទងទៅអ្នកឆាប់ៗនេះ។");
+      setForm({
+        fullName: "",
+        email: "",
+        phone: "",
+        dob: "",
+        bloodType: "",
+        agree: true,
+      });
+      setValidated(false);
+      onClose();
+    } catch (err) {
+      console.error("Failed to register blood donation:", err);
+      toast.error("បរាជ័យក្នុងការចុះឈ្មោះ សូមព្យាយាមម្តងទៀត");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <div
       className="modal fade show"
-      style={{ display: "block" }}
+      style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
       aria-modal="true"
       role="dialog"
+      onClick={onClose}
     >
-      <div className="modal-backdrop fade show" onClick={onClose}></div>
-      <div className="modal-dialog modal-lg modal-dialog-centered">
-        <div className="modal-content rounded-4">
+      <div
+        className="modal-dialog modal-lg modal-dialog-centered"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="modal-content rounded-4 shadow-lg">
           <div className="modal-header">
             <h5 className="modal-title">
               <i className="bi bi-droplet-fill me-2 text-danger"></i>{" "}
@@ -197,11 +227,21 @@ export default function BloodDonateModal({ open, onClose }) {
                 type="button"
                 className="btn btn-secondary"
                 onClick={onClose}
+                disabled={submitting}
               >
                 បិទ
               </button>
-              <button type="submit" className="btn btn-danger">
-                <i className="bi bi-droplet-fill me-1"></i> បញ្ជូនការចុះឈ្មោះ
+              <button type="submit" className="btn btn-danger" disabled={submitting}>
+                {submitting ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    កំពុងបញ្ជូន...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-droplet-fill me-1"></i> បញ្ជូនការចុះឈ្មោះ
+                  </>
+                )}
               </button>
             </div>
           </form>

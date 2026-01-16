@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { AdminSidebar, PageHeader, RoleGuard, storage } from "../components";
-import AdminNavbar from "../components/AdminNavbar";
+import { PageHeader, RoleGuard, storage } from "../components";
 
 export default function AdminCommentsPage() {
   const [mounted, setMounted] = useState(false);
@@ -160,220 +159,209 @@ export default function AdminCommentsPage() {
 
   return (
     <>
-      <AdminNavbar
+      <RoleGuard enabled={roleAllowed} />
+
+      <PageHeader
         title="គ្រប់គ្រងមតិយោបល់"
-        subtitle="Review and moderate user comments"
+        subtitle="Review and moderate user comments on opportunities"
+        actions={
+          <div className="d-flex gap-2">
+            <button
+              className="btn btn-outline-danger pill"
+              onClick={() => setShowFlaggedOnly(true)}
+            >
+              <i className="bi bi-flag-fill me-1"></i> Flagged (
+              <span>{stats.flagged}</span>)
+            </button>
+            <button
+              className="btn btn-outline-secondary pill"
+              onClick={() => setShowFlaggedOnly(false)}
+            >
+              <i className="bi bi-list me-1"></i> All Comments
+            </button>
+          </div>
+        }
       />
-      <div className="container-fluid py-4">
+
+      <div className={!roleAllowed ? "opacity-50 pe-none" : ""}>
         <div className="row g-3">
-          <AdminSidebar active="comments" />
-          <main className="col-lg-9 col-xl-10">
-            <RoleGuard />
-
-            <PageHeader
-              title="គ្រប់គ្រងមតិយោបល់"
-              subtitle="Review and moderate user comments on opportunities"
-              actions={
-                <div className="d-flex gap-2">
-                  <button
-                    className="btn btn-outline-danger pill"
-                    onClick={() => setShowFlaggedOnly(true)}
-                  >
-                    <i className="bi bi-flag-fill me-1"></i> Flagged (
-                    <span>{stats.flagged}</span>)
-                  </button>
-                  <button
-                    className="btn btn-outline-secondary pill"
-                    onClick={() => setShowFlaggedOnly(false)}
-                  >
-                    <i className="bi bi-list me-1"></i> All Comments
-                  </button>
+          {/* Comments list */}
+          <div className="col-lg-9">
+            <div id="commentsContainer">
+              {!filtered.length ? (
+                <div className="text-center text-muted py-5">
+                  គ្មានមតិយោបល់
                 </div>
-              }
-            />
+              ) : (
+                filtered.map((c, idx) => {
+                  const initial =
+                    c.userName?.charAt(0)?.toUpperCase() || "?";
+                  const statusClass =
+                    c.status === "approved"
+                      ? "success"
+                      : c.status === "flagged"
+                        ? "danger"
+                        : c.status === "hidden"
+                          ? "warning"
+                          : "secondary";
 
-            <div className={!roleAllowed ? "opacity-50 pe-none" : ""}>
-              <div className="row g-3">
-                {/* Comments list */}
-                <div className="col-lg-9">
-                  <div id="commentsContainer">
-                    {!filtered.length ? (
-                      <div className="text-center text-muted py-5">
-                        គ្មានមតិយោបល់
-                      </div>
-                    ) : (
-                      filtered.map((c, idx) => {
-                        const initial =
-                          c.userName?.charAt(0)?.toUpperCase() || "?";
-                        const statusClass =
-                          c.status === "approved"
-                            ? "success"
-                            : c.status === "flagged"
-                              ? "danger"
-                              : c.status === "hidden"
-                                ? "warning"
-                                : "secondary";
-
-                        return (
-                          <div
-                            className={`comment-item ${c.flagged ? "flagged" : ""}`}
-                            key={c.id}
-                          >
-                            <div className="d-flex gap-3">
-                              <div className="avatar">{initial}</div>
-                              <div className="flex-fill">
-                                <div className="d-flex align-items-start justify-content-between mb-2">
-                                  <div>
-                                    <div className="fw-bold">{c.userName}</div>
-                                    <small className="text-muted">
-                                      {c.userEmail} • {c.createdAt}
-                                    </small>
-                                  </div>
-                                  <span
-                                    className={`status-badge bg-${statusClass} text-white`}
-                                  >
-                                    {c.status}
-                                  </span>
-                                </div>
-
-                                <div className="mb-2">
-                                  <small className="text-muted">
-                                    នៅលើ:{" "}
-                                    <a
-                                      href="#"
-                                      className="text-decoration-none"
-                                    >
-                                      {c.opportunityTitle}
-                                    </a>
-                                  </small>
-                                </div>
-
-                                <p className="mb-2">{c.comment}</p>
-
-                                {c.flagged && (
-                                  <div className="alert alert-danger mb-2 py-2">
-                                    <i className="bi bi-flag-fill"></i> Flagged:{" "}
-                                    {c.flagReason}
-                                  </div>
-                                )}
-
-                                <div className="d-flex gap-2">
-                                  {c.status !== "approved" && (
-                                    <button
-                                      className="btn btn-sm btn-success pill"
-                                      onClick={() => approve(idx)}
-                                    >
-                                      <i className="bi bi-check-circle"></i>{" "}
-                                      Approve
-                                    </button>
-                                  )}
-                                  {c.status !== "hidden" ? (
-                                    <button
-                                      className="btn btn-sm btn-warning pill"
-                                      onClick={() => hide(idx)}
-                                    >
-                                      <i className="bi bi-eye-slash"></i> Hide
-                                    </button>
-                                  ) : (
-                                    <button
-                                      className="btn btn-sm btn-info pill"
-                                      onClick={() => unhide(idx)}
-                                    >
-                                      <i className="bi bi-eye"></i> Unhide
-                                    </button>
-                                  )}
-                                  <button
-                                    className="btn btn-sm btn-danger pill"
-                                    onClick={() => remove(idx)}
-                                  >
-                                    <i className="bi bi-trash"></i> Delete
-                                  </button>
-                                </div>
-                              </div>
+                  return (
+                    <div
+                      className={`comment-item ${c.flagged ? "flagged" : ""}`}
+                      key={c.id}
+                    >
+                      <div className="d-flex gap-3">
+                        <div className="avatar">{initial}</div>
+                        <div className="flex-fill">
+                          <div className="d-flex align-items-start justify-content-between mb-2">
+                            <div>
+                              <div className="fw-bold">{c.userName}</div>
+                              <small className="text-muted">
+                                {c.userEmail} • {c.createdAt}
+                              </small>
                             </div>
+                            <span
+                              className={`status-badge bg-${statusClass} text-white`}
+                            >
+                              {c.status}
+                            </span>
                           </div>
-                        );
-                      })
-                    )}
-                  </div>
 
-                  {/* Pagination placeholder */}
-                  <nav className="mt-3">
-                    <ul className="pagination justify-content-center mb-0">
-                      <li className="page-item disabled">
-                        <a className="page-link">Previous</a>
-                      </li>
-                      <li className="page-item active">
-                        <a className="page-link">1</a>
-                      </li>
-                      <li className="page-item">
-                        <a className="page-link">2</a>
-                      </li>
-                      <li className="page-item">
-                        <a className="page-link">Next</a>
-                      </li>
-                    </ul>
-                  </nav>
-                </div>
+                          <div className="mb-2">
+                            <small className="text-muted">
+                              នៅលើ:{" "}
+                              <a
+                                href="#"
+                                className="text-decoration-none"
+                              >
+                                {c.opportunityTitle}
+                              </a>
+                            </small>
+                          </div>
 
-                {/* Sidebar stats & filters */}
-                <div className="col-lg-3">
-                  <div className="admin-card p-3">
-                    <h6 className="mb-3">ស្ថិតិ</h6>
-                    <div className="d-flex justify-content-between mb-2">
-                      <span className="text-muted">សរុប:</span>
-                      <strong>{stats.total}</strong>
-                    </div>
-                    <div className="d-flex justify-content-between mb-2">
-                      <span className="text-muted">Flagged:</span>
-                      <strong className="text-danger">{stats.flagged}</strong>
-                    </div>
-                    <div className="d-flex justify-content-between mb-2">
-                      <span className="text-muted">Approved:</span>
-                      <strong className="text-success">{stats.approved}</strong>
-                    </div>
-                    <div className="d-flex justify-content-between">
-                      <span className="text-muted">Hidden:</span>
-                      <strong className="text-warning">{stats.hidden}</strong>
-                    </div>
-                  </div>
+                          <p className="mb-2">{c.comment}</p>
 
-                  <div className="admin-card p-3 mt-3">
-                    <h6 className="mb-3">តម្រង</h6>
-                    <select
-                      className="form-select mb-2"
-                      value={oppFilter}
-                      onChange={(e) => setOppFilter(e.target.value)}
-                    >
-                      <option value="all">All Opportunities</option>
-                      <option value="1">Teach English to Rural Students</option>
-                      <option value="2">Community Clean-up Drive</option>
-                      <option value="3">Medical Camp Support</option>
-                    </select>
-                    <select
-                      className="form-select mb-2"
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                    >
-                      <option value="all">All Status</option>
-                      <option value="approved">Approved</option>
-                      <option value="pending">Pending</option>
-                      <option value="flagged">Flagged</option>
-                      <option value="hidden">Hidden</option>
-                    </select>
-                    <button
-                      className="btn btn-sm btn-outline-secondary w-100 pill"
-                      onClick={() => {
-                        /* no-op: filters already reactive */
-                      }}
-                    >
-                      អនុវត្តតម្រង
-                    </button>
-                  </div>
-                </div>
+                          {c.flagged && (
+                            <div className="alert alert-danger mb-2 py-2">
+                              <i className="bi bi-flag-fill"></i> Flagged:{" "}
+                              {c.flagReason}
+                            </div>
+                          )}
+
+                          <div className="d-flex gap-2">
+                            {c.status !== "approved" && (
+                              <button
+                                className="btn btn-sm btn-success pill"
+                                onClick={() => approve(idx)}
+                              >
+                                <i className="bi bi-check-circle"></i>{" "}
+                                Approve
+                              </button>
+                            )}
+                            {c.status !== "hidden" ? (
+                              <button
+                                className="btn btn-sm btn-warning pill"
+                                onClick={() => hide(idx)}
+                              >
+                                <i className="bi bi-eye-slash"></i> Hide
+                              </button>
+                            ) : (
+                              <button
+                                className="btn btn-sm btn-info pill"
+                                onClick={() => unhide(idx)}
+                              >
+                                <i className="bi bi-eye"></i> Unhide
+                              </button>
+                            )}
+                            <button
+                              className="btn btn-sm btn-danger pill"
+                              onClick={() => remove(idx)}
+                            >
+                              <i className="bi bi-trash"></i> Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Pagination placeholder */}
+            <nav className="mt-3">
+              <ul className="pagination justify-content-center mb-0">
+                <li className="page-item disabled">
+                  <a className="page-link">Previous</a>
+                </li>
+                <li className="page-item active">
+                  <a className="page-link">1</a>
+                </li>
+                <li className="page-item">
+                  <a className="page-link">2</a>
+                </li>
+                <li className="page-item">
+                  <a className="page-link">Next</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+
+          {/* Sidebar stats & filters */}
+          <div className="col-lg-3">
+            <div className="admin-card p-3">
+              <h6 className="mb-3">ស្ថិតិ</h6>
+              <div className="d-flex justify-content-between mb-2">
+                <span className="text-muted">សរុប:</span>
+                <strong>{stats.total}</strong>
+              </div>
+              <div className="d-flex justify-content-between mb-2">
+                <span className="text-muted">Flagged:</span>
+                <strong className="text-danger">{stats.flagged}</strong>
+              </div>
+              <div className="d-flex justify-content-between mb-2">
+                <span className="text-muted">Approved:</span>
+                <strong className="text-success">{stats.approved}</strong>
+              </div>
+              <div className="d-flex justify-content-between">
+                <span className="text-muted">Hidden:</span>
+                <strong className="text-warning">{stats.hidden}</strong>
               </div>
             </div>
-          </main>
+
+            <div className="admin-card p-3 mt-3">
+              <h6 className="mb-3">តម្រង</h6>
+              <select
+                className="form-select mb-2"
+                value={oppFilter}
+                onChange={(e) => setOppFilter(e.target.value)}
+              >
+                <option value="all">All Opportunities</option>
+                <option value="1">Teach English to Rural Students</option>
+                <option value="2">Community Clean-up Drive</option>
+                <option value="3">Medical Camp Support</option>
+              </select>
+              <select
+                className="form-select mb-2"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="all">All Status</option>
+                <option value="approved">Approved</option>
+                <option value="pending">Pending</option>
+                <option value="flagged">Flagged</option>
+                <option value="hidden">Hidden</option>
+              </select>
+              <button
+                className="btn btn-sm btn-outline-secondary w-100 pill"
+                onClick={() => {
+                  /* no-op: filters already reactive */
+                }}
+              >
+                អនុវត្តតម្រង
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </>

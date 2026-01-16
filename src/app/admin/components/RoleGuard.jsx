@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 // ========================================
 // TESTING MODE: Set to true to auto-login as admin
 // ========================================
-const TESTING_MODE = true;
+const TESTING_MODE = false;
 
 /**
  * RoleGuard
@@ -21,19 +21,7 @@ export default function RoleGuard() {
 
     // Auto-set admin credentials in testing mode
     if (TESTING_MODE) {
-      localStorage.setItem("role", "admin");
-      localStorage.setItem("authToken", "test-admin-token");
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          id: "test-admin-id",
-          name: "Test Admin",
-          email: "admin@volunteer.org",
-          role: "admin",
-        })
-      );
-      document.cookie = "authToken=test-admin-token; path=/; max-age=86400";
-      document.cookie = "role=admin; path=/; max-age=86400";
+      // Testing mode disabled in production; left for local tests
       setAllowed(true);
       return;
     }

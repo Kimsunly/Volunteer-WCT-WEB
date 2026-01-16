@@ -63,15 +63,11 @@ export default function OpportunityCard({
     data?.capacityLabel ||
     (data?.capacity ? `ចំនួន ${data.capacity} នាក់` : "");
 
-  // Benefits handling (convert object to array if needed)
-  let benefitsArray = [];
-  if (Array.isArray(data?.benefits)) {
-    benefitsArray = data.benefits;
-  } else if (typeof data?.benefits === "object" && data.benefits) {
-    if (data.benefits.transport) benefitsArray.push("transport");
-    if (data.benefits.housing) benefitsArray.push("housing");
-    if (data.benefits.meals) benefitsArray.push("meals");
-  }
+  // Benefits handling
+  const benefitsArray = [];
+  if (data?.transport && data.transport.toLowerCase() !== "not provided" && data.transport.toLowerCase() !== "none") benefitsArray.push("transport");
+  if (data?.housing && data.housing.toLowerCase() !== "not provided" && data.housing.toLowerCase() !== "none") benefitsArray.push("housing");
+  if (data?.meals && data.meals.toLowerCase() !== "not provided" && data.meals.toLowerCase() !== "none") benefitsArray.push("meals");
 
   // Links
   const detailHref = data?.detailHref;
@@ -112,151 +108,137 @@ export default function OpportunityCard({
 
   return (
     <div
-      className={`col-12 col-md-6 col-xl-4 opportunity-card ${className}`}
+      className={`col-12 col-md-6 col-xl-4 mb-4 ${className}`}
       data-category={categorySlug || ""}
       data-aos="fade-up"
-      data-aos-delay="0"
     >
-      <div className="card h-100 border-0 shadow-sm hover-lift">
-        {/* Image + Carousel (if multiple images) */}
-        <div className="position-relative overflow-hidden">
+      <div className="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+        {/* Image Section */}
+        <div className="position-relative overflow-hidden" style={{ height: "220px" }}>
           <img
             src={currentImage}
             alt={title}
-            className="card-img-top"
-            style={{ height: 240, objectFit: "cover" }}
+            className="w-100 h-100 object-fit-cover transition-scale"
+            onError={(e) => {
+              e.target.src = "/images/placeholder.png";
+            }}
           />
 
-          {/* Carousel indicators (for new shape with multiple images) */}
-          {images.length > 1 && (
-            <div className="carousel-indicators page position-absolute bottom-0 start-50 translate-middle-x mb-2">
-              {images.map((_, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  className={idx === currentImageIndex ? "active" : ""}
-                  aria-current={idx === currentImageIndex}
-                  onClick={() => setCurrentImageIndex(idx)}
-                  style={{ width: 8, height: 8, margin: "0 3px" }}
-                />
-              ))}
+          {/* Category badge - Top Left */}
+          {categoryLabel && (
+            <div className="position-absolute top-0 start-0 m-3">
+              <span className="badge rounded-pill bg-primary px-3 py-2 shadow-sm fw-normal">
+                {categoryLabel}
+              </span>
             </div>
           )}
 
-          {/* Category badge */}
-          {categoryLabel && (
-            <span
-              className={`position-absolute top-0 start-0 m-3 badge ${categoryColorClass}`}
+          {/* Favorite button - Top Right */}
+          <div className="position-absolute top-0 end-0 m-3">
+            <button
+              type="button"
+              className="btn btn-white rounded-circle shadow-sm d-flex align-items-center justify-content-center p-0"
+              style={{ width: "38px", height: "38px", backgroundColor: "white" }}
+              onClick={handleToggleFav}
             >
-              {categoryLabel}
-            </span>
-          )}
-
-          {/* Favorite button */}
-          <button
-            type="button"
-            className="btn btn-light btn-sm position-absolute top-0 end-0 m-3 rounded-circle d-flex align-items-center justify-content-center"
-            style={{ width: 40, height: 40 }}
-            aria-label={isFav ? "Remove from favorites" : "Add to favorites"}
-            onClick={handleToggleFav}
-          >
-            <i
-              className={`bi ${isFav ? "bi-heart-fill text-danger" : "bi-heart"}`}
-              aria-hidden="true"
-            />
-          </button>
-
-          {/* Carousel controls (for new shape with multiple images) */}
-          {images.length > 1 && (
-            <>
-              <button
-                type="button"
-                className="carousel-control-prev position-absolute start-0 top-50 translate-middle-y"
-                onClick={prevImage}
-                style={{ zIndex: 10 }}
-              >
-                <span
-                  className="carousel-control-prev-icon"
-                  aria-hidden="true"
-                ></span>
-              </button>
-              <button
-                type="button"
-                className="carousel-control-next position-absolute end-0 top-50 translate-middle-y"
-                onClick={nextImage}
-                style={{ zIndex: 10 }}
-              >
-                <span
-                  className="carousel-control-next-icon"
-                  aria-hidden="true"
-                ></span>
-              </button>
-            </>
-          )}
+              <i
+                className={`bi ${isFav ? "bi-heart-fill text-danger text-shadow" : "bi-heart text-dark"}`}
+                style={{ fontSize: "1.1rem" }}
+              />
+            </button>
+          </div>
         </div>
 
-        <div className="card-body d-flex flex-column">
-          <h3 className="card-title mb-3 fw-bold">{title}</h3>
+        <div className="card-body p-4 d-flex flex-column font-kantumruy">
+          <h5 className="card-title fw-bold mb-3 text-dark fs-5">{title}</h5>
 
-          {/* Info list */}
-          <div className="info-list mb-3">
+          {/* Icons Grid */}
+          <div className="opportunity-info mb-3">
             {locationLabel && (
-              <div className="d-flex align-items-center mb-2 text-muted">
-                <i
-                  className="bi bi-geo-alt-fill text-danger me-2"
-                  aria-hidden="true"
-                />
+              <div className="d-flex align-items-center mb-2 gap-2 text-secondary small">
+                <i className="bi bi-geo-alt-fill text-danger fs-6" />
                 <span>{locationLabel}</span>
               </div>
             )}
             {date && (
-              <div className="d-flex align-items-center mb-2 text-muted">
-                <i
-                  className="bi bi-calendar-check text-primary me-2"
-                  aria-hidden="true"
-                />
+              <div className="d-flex align-items-center mb-2 gap-2 text-secondary small">
+                <i className="bi bi-calendar-check-fill text-primary fs-6" />
                 <span>{date}</span>
               </div>
             )}
             {time && (
-              <div className="d-flex align-items-center mb-2 text-muted">
-                <i
-                  className="bi bi-clock text-warning me-2"
-                  aria-hidden="true"
-                />
+              <div className="d-flex align-items-center mb-2 gap-2 text-secondary small">
+                <i className="bi bi-clock-fill text-warning fs-6" />
                 <span>{time}</span>
               </div>
             )}
             {capacityLabel && (
-              <div className="d-flex align-items-center text-muted">
-                <i
-                  className="bi bi-people text-success me-2"
-                  aria-hidden="true"
-                />
+              <div className="d-flex align-items-center gap-2 text-secondary small">
+                <i className="bi bi-people-fill text-success fs-6" />
                 <span>{capacityLabel}</span>
               </div>
             )}
           </div>
 
-          {/* Benefits badges */}
-          {renderBenefits()}
-
-          {/* Action button */}
+          {/* Bottom Row: Benefits and Action Button */}
           <div className="mt-auto">
+            {/* Benefit Icons */}
+            <div className="d-flex gap-2 mb-3 text-secondary">
+              {benefitsArray.includes("transport") && (
+                <div className="bg-light rounded-3 d-flex align-items-center justify-content-center" style={{ width: "36px", height: "36px" }}>
+                  <i className="bi bi-car-front-fill fs-6" title="Transport" />
+                </div>
+              )}
+              {benefitsArray.includes("meals") && (
+                <div className="bg-light rounded-3 d-flex align-items-center justify-content-center" style={{ width: "36px", height: "36px" }}>
+                  <i className="bi bi-utensils fs-6" title="Meals" />
+                </div>
+              )}
+              {benefitsArray.includes("housing") && (
+                <div className="bg-light rounded-3 d-flex align-items-center justify-content-center" style={{ width: "36px", height: "36px" }}>
+                  <i className="bi bi-house-door-fill fs-6" title="Housing" />
+                </div>
+              )}
+            </div>
+
+            {/* Action button */}
             {detailHref ? (
-              <Link href={detailHref} className="btn btn-primary w-100">
-                <i className="bi bi-info-circle me-2" aria-hidden="true" />
-                ព័ត៌មានលម្អិត
+              <Link
+                href={detailHref}
+                className="btn btn-primary w-100 rounded-3 py-2 d-flex align-items-center justify-content-center gap-2"
+                style={{ backgroundColor: "#007bff", borderColor: "#007bff" }}
+              >
+                <i className="bi bi-info-circle fs-5" />
+                <span>ព័ត៌មានលម្អិត</span>
               </Link>
             ) : (
-              <button className="btn btn-primary w-100" disabled>
-                <i className="bi bi-info-circle me-2" aria-hidden="true" />
-                ព័ត៌មានលម្អិត
+              <button
+                className="btn btn-primary w-100 rounded-3 py-2 d-flex align-items-center justify-content-center gap-2"
+                disabled
+              >
+                <i className="bi bi-info-circle fs-5" />
+                <span>ព័ត៌មានលម្អិត</span>
               </button>
             )}
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .transition-scale {
+          transition: transform 0.5s ease;
+        }
+        .opportunity-card:hover .transition-scale {
+          transform: scale(1.05);
+        }
+        .card {
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+        }
+      `}</style>
     </div>
   );
 }

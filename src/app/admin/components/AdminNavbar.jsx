@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { logout as apiLogout } from "@/lib/services/auth";
+import { clearAuth } from "@/lib/utils/authState";
 
 export default function AdminNavbar({
   title = "Admin",
@@ -13,6 +15,18 @@ export default function AdminNavbar({
     const next = current === "light" ? "dark" : "light";
     html.setAttribute("data-theme", next);
     localStorage.setItem("theme", next);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await apiLogout();
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      clearAuth();
+      // Redirect to login page
+      window.location.href = "/auth/login";
+    }
   };
 
   return (
@@ -50,6 +64,13 @@ export default function AdminNavbar({
             aria-label="Toggle theme"
           >
             <i className="bi bi-moon-fill"></i>
+          </button>
+          <button
+            className="btn btn-sm btn-danger pill"
+            onClick={handleLogout}
+            aria-label="Logout"
+          >
+            <i className="bi bi-box-arrow-right"></i> Logout
           </button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
+import { me as apiMe } from "@/lib/services/auth";
 
 const AuthContext = createContext();
 
@@ -11,16 +12,16 @@ export function AuthProvider({ children }) {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                // Call your API to get current user
-                const response = await fetch("/api/auth/me", {
-                    credentials: "include", // Include cookies
-                });
-                if (response.ok) {
-                    const userData = await response.json();
-                    setUser(userData); // { id, name, role, profileImage, ... }
+                // Use backend /api/auth/me to get full profile (role, status, etc.)
+                const userData = await apiMe();
+                if (userData) {
+                    setUser(userData);
+                } else {
+                    setUser(null);
                 }
             } catch (error) {
                 console.error("Auth check failed:", error);
+                setUser(null);
             } finally {
                 setLoading(false);
             }

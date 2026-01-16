@@ -2,7 +2,9 @@
 // src/app/donation/components/DonationForm.jsx
 "use client";
 
+
 import React, { useState } from "react";
+import { createDonation } from "@/services/donations";
 
 const AMOUNTS = [10, 25, 50, 100, 250, 500];
 
@@ -80,29 +82,22 @@ export default function DonationForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = {
-      donationType: form.donationType,
+      donor_name: `${form.firstName} ${form.lastName}`,
+      email: form.email,
+      phone: form.phone,
       amount: Number(form.amount) || 0,
       cause: form.cause,
-      donor: {
-        firstName: form.firstName,
-        lastName: form.lastName,
-        email: form.email,
-        phone: form.phone,
-      },
-      pay: form.pay,
-      news: form.news,
+      donation_type: form.donationType,
     };
 
-    console.log("Donation payload:", payload);
-
-    // TODO: replace with real API (e.g., /api/donate)
-    // const res = await fetch("/api/donate", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify(payload),
-    // });
-
-    alert("បរិច្ចាគបានបញ្ជូន (Mock)");
+    try {
+      await createDonation(payload);
+      alert("សូមអរគុណសម្រាប់ការបរិច្ចាគរបស់លោកអ្នក! យើងបានទទួលព័ត៌មានរួចហើយ។");
+      // Could reset form here if desired
+    } catch (err) {
+      console.error("Donation error:", err);
+      alert("បរាជ័យក្នុងការបញ្ជូនការបរិច្ចាគ។ សូមព្យាយាមម្តងទៀត។");
+    }
   };
 
   return (

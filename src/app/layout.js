@@ -13,6 +13,7 @@ import AOSInit from '@/components/common/AOSInit';
 import { AuthProvider } from '@/context/AuthContext';
 import ConditionalLayout from '@/components/layout/ConditionalLayout';
 import SessionProviderWrapper from '@/components/common/SessionProviderWrapper';
+import { Toaster } from 'react-hot-toast';
 
 const kantumruy = localFont({
   src: [
@@ -38,10 +39,11 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="km" data-theme="light" className={kantumruy.variable}>
+    <html lang="km" data-theme="light" className={kantumruy.variable} suppressHydrationWarning>
       <body style={{ fontFamily: 'var(--font-kantumruy), sans-serif' }}>
         <SessionProviderWrapper>
           <AuthProvider>
+            <Toaster position="top-center" reverseOrder={false} />
             <BootstrapClient />
             <AOSInit />
             <ConditionalLayout>{children}</ConditionalLayout>

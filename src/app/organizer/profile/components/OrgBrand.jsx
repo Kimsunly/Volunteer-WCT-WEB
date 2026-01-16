@@ -15,7 +15,16 @@ export default function OrgBrand({ org, onCreate }) {
         alt="Profile"
       />
       <div>
-        <h5 className="mb-0">{org.nameKh}</h5>
+        <h5 className="mb-0 d-flex align-items-center gap-2">
+          {org.nameKh}
+          {org.isVerified && (
+            <i
+              className="bi bi-patch-check-fill text-primary"
+              title="Verified Organizer"
+              style={{ fontSize: "1rem" }}
+            ></i>
+          )}
+        </h5>
         <small>{org.nameEn}</small>
       </div>
       <div className="ms-auto" data-aos="fade-left" data-aos-delay="200">
