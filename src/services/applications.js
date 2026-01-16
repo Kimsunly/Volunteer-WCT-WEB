@@ -14,7 +14,7 @@ export async function applyToOpportunity(payload, isMultipart = false) {
         });
         return data;
     } else {
-        const { data } = await api.post('/api/applications/', payload);
+        const { data } = await api.post('/api/applications', payload);
         return data;
     }
 }

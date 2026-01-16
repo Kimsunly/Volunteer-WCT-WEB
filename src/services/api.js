@@ -21,15 +21,29 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Fallback: if backend doesn't use '/api' prefix, retry once without it on 404
+// Fallback: if backend doesn't use '/api' prefix or has trailing slash issues, retry
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const status = error?.response?.status;
     const cfg = error?.config;
-    const url = cfg?.url;
+    let url = cfg?.url;
+    if (!url || cfg._retry) throw error;
+
+    // Fix 1: Trailing slash issue (Common in FastAPI)
+    if ((status === 404 || status === 405) && url.endsWith('/')) {
+      cfg._retry = true;
+      cfg.url = url.slice(0, -1);
+      try {
+        return await api.request(cfg);
+      } catch (e) {
+        throw e;
+      }
+    }
+
+    // Fix 2: /api prefix issue
     const isApiPrefixed = typeof url === 'string' && url.startsWith('/api/');
-    if (status === 404 && isApiPrefixed && !cfg._retry) {
+    if (status === 404 && isApiPrefixed) {
       cfg._retry = true;
       cfg.url = url.replace(/^\/api\//, '/');
       try {

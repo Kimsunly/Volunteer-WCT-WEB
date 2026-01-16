@@ -60,7 +60,7 @@ export default function EditOpportunityModal({ open, onClose, onSubmit, opportun
                 titleEn: opportunity.titleEn || "",
                 description: opportunity.raw?.description || "",
                 locationKh: opportunity.locationKh || "ភ្នំពេញ",
-                category: opportunity.raw?.category_label || "environment",
+                category: opportunity.category || "environment",
                 dateISO: opportunity.raw?.date_range || "",
                 visibility: opportunity.raw?.is_private ? "private" : "public",
                 accessCode: "", // We don't show the hashed key, or maybe leave it empty for no change
