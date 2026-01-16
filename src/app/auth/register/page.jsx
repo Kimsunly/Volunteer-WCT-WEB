@@ -1,13 +1,68 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { AuthShell, PasswordField } from "../components";
+import { register as apiRegister, me as apiMe } from "@/lib/services/auth";
+import { useRouter } from "next/navigation";
+import { setAuth } from "@/lib/utils/authState";
+import { useAuth } from "@/context/AuthContext";
+import toast from "react-hot-toast";
+import LoadingButton from "@/components/common/LoadingButton";
 
 export default function RegisterPage() {
-  const onSubmit = (e) => {
+  const router = useRouter();
+  const { setUser } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
+  const onSubmit = async (e) => {
     e.preventDefault();
-    alert("បង្កើតគណនី (Mock)");
+    const form = e.currentTarget;
+    const payload = {
+      firstname: form.querySelector("#firstname")?.value,
+      lastname: form.querySelector("#lastname")?.value,
+      email: form.querySelector("#email")?.value,
+      password: form.querySelector("#password")?.value,
+      passwordConfirm: form.querySelector("#passwordConfirm")?.value,
+      phone: form.querySelector("#phone")?.value,
+    };
+    // quick client-side check
+    if (
+      payload.password &&
+      payload.passwordConfirm &&
+      payload.password !== payload.passwordConfirm
+    ) {
+      toast.error("ពាក្យសម្ងាត់ និងបញ្ជាក់មិនត្រូវគ្នា");
+      return;
+    }
+    try {
+      setSubmitting(true);
+      const { token, data } = await apiRegister(payload);
+      if (token) {
+        setAuth({ token });
+        // Fetch user info to populate context and role
+        const userInfo = await apiMe();
+        const role = userInfo?.role || data?.user?.role || "user";
+        setAuth({ token, role });
+        setUser({
+          id: userInfo?.id || data?.user?.id,
+          name:
+            userInfo?.name ||
+            `${payload.firstname || ""} ${payload.lastname || ""}`.trim(),
+          email: userInfo?.email || data?.user?.email || payload.email,
+          role,
+          profileImage: userInfo?.image || "/images/profile.png",
+        });
+        toast.success("ចុះឈ្មោះបានជោគជ័យ!");
+      }
+      // Direct to home screen after successful register
+      router.push("/");
+    } catch (err) {
+      console.error("Register error", err);
+      const msg = err?.message || "ការចុះឈ្មោះបរាជ័យ";
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -85,6 +140,30 @@ export default function RegisterPage() {
                       minLength={6}
                     />
 
+                    <PasswordField
+                      id="passwordConfirm"
+                      label="បញ្ជាក់ពាក្យសម្ងាត់"
+                      defaultValue="1234567"
+                      minLength={6}
+                    />
+
+                    <div className="col-12">
+                      <label htmlFor="phone" className="form-label">
+                        លេខទូរស័ព្ទ
+                      </label>
+                      <input
+                        type="tel"
+                        className="form-control"
+                        id="phone"
+                        placeholder="បញ្ចូលលេខទូរស័ព្ទ"
+                        defaultValue="+855 12 345 678"
+                        required
+                      />
+                      <div className="invalid-feedback">
+                        សូមបញ្ចូលលេខទូរស័ព្ទត្រឹមត្រូវ!
+                      </div>
+                    </div>
+
                     <div className="col-12">
                       <div className="form-check">
                         <input
@@ -104,9 +183,14 @@ export default function RegisterPage() {
                     </div>
 
                     <div className="col-12">
-                      <button type="submit" className="btn btn-primary">
+                      <LoadingButton
+                        type="submit"
+                        className="btn btn-primary w-100"
+                        loading={submitting}
+                        loadingText="កំពុងបង្កើត..."
+                      >
                         បង្កើតគណនី
-                      </button>
+                      </LoadingButton>
                     </div>
 
                     <div className="col-12">

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import Link from "next/link";
 
 export default function NotificationDropdown() {
   const { user } = useAuth();
@@ -91,9 +92,8 @@ export default function NotificationDropdown() {
             notifications.map((notification) => (
               <li key={notification.id}>
                 <a
-                  className={`dropdown-item d-flex align-items-start py-3 ${
-                    !notification.read ? "bg-light" : ""
-                  }`}
+                  className={`dropdown-item d-flex align-items-start py-3 ${!notification.read ? "bg-light" : ""
+                    }`}
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
@@ -130,9 +130,9 @@ export default function NotificationDropdown() {
           )}
         </div>
         <li className="my-3 d-flex justify-content-center border-top pt-3">
-          <a href="/notifications" className="text-primary">
+          <Link href="/notifications" className="text-primary">
             មើលការជូនដំណឹងទាំងអស់
-          </a>
+          </Link>
         </li>
       </ul>
     </div>

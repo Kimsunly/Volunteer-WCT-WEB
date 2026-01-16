@@ -81,6 +81,14 @@ export default function MainNavbar() {
               </li>
               <li className="nav-item">
                 <Link
+                  className={`nav-link ${isActive("/community") ? "active" : ""}`}
+                  href="/community"
+                >
+                  សហគមន៍
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link
                   className={`nav-link ${isActive("/blogs") ? "active" : ""}`}
                   href="/blogs"
                 >
@@ -122,14 +130,14 @@ export default function MainNavbar() {
             {!loading && !user && (
               <ul className="nav-authentication d-none d-lg-flex m-0 list-unstyled align-items-center">
                 <li>
-                  <a href="/auth/login" className="login">
+                  <Link href="/auth/login" className="login">
                     ចូលគណនី
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="/auth/register" className="sign-up">
+                  <Link href="/auth/register" className="sign-up">
                     បង្កើតគណនី
-                  </a>
+                  </Link>
                 </li>
               </ul>
             )}
@@ -233,24 +241,24 @@ export default function MainNavbar() {
             {!loading && user && (
               <>
                 <li className="nav-item">
-                  <a
+                  <Link
                     className="nav-link"
                     href={getDashboardUrl()}
                     data-bs-dismiss="offcanvas"
                   >
                     <i className="bi bi-person-circle me-2"></i>
                     គណនីរបស់ខ្ញុំ
-                  </a>
+                  </Link>
                 </li>
                 <li className="nav-item">
-                  <a
+                  <Link
                     className="nav-link"
                     href="/settings"
                     data-bs-dismiss="offcanvas"
                   >
                     <i className="bi bi-gear me-2"></i>
                     ការកំណត់
-                  </a>
+                  </Link>
                 </li>
                 <li className="nav-item">
                   <button
@@ -284,26 +292,86 @@ export default function MainNavbar() {
             {!loading && !user && (
               <>
                 <li className="nav-item">
-                  <a
+                  <Link
                     className="nav-link"
                     href="/auth/login"
                     data-bs-dismiss="offcanvas"
                   >
                     ចូលគណនី
-                  </a>
+                  </Link>
                 </li>
                 <li className="nav-item">
-                  <a
+                  <Link
                     className="nav-link"
                     href="/auth/register"
                     data-bs-dismiss="offcanvas"
                   >
                     បង្កើតគណនី
-                  </a>
+                  </Link>
                 </li>
               </>
             )}
           </ul>
+        </div>
+      </div>
+      {/* Search Modal */}
+      <div
+        className="modal fade"
+        id="searchModal"
+        tabIndex="-1"
+        aria-labelledby="searchModalLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content border-0 shadow-lg rounded-4">
+            <div className="modal-header border-bottom-0">
+              <h5 className="modal-title fw-bold" id="searchModalLabel">
+                ស្វែងរក
+              </h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body p-4">
+              <form action="/opportunities" method="GET">
+                <div className="input-group input-group-lg bg-light rounded-4 overflow-hidden border">
+                  <span className="input-group-text border-0 bg-transparent ps-4">
+                    <i className="bi bi-search text-muted"></i>
+                  </span>
+                  <input
+                    type="search"
+                    name="q"
+                    className="form-control border-0 bg-transparent shadow-none"
+                    placeholder="ស្វែងរកឱកាស..."
+                    autoFocus
+                  />
+                  <button className="btn btn-primary px-4 fw-bold" type="submit">
+                    ស្វែងរក
+                  </button>
+                </div>
+              </form>
+              <div className="mt-4">
+                <p className="small text-muted mb-2 fw-medium">ការស្វែងរកពេញនិយម</p>
+                <div className="d-flex flex-wrap gap-2">
+                  <Link href="/opportunities?q=Teaching" className="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">
+                    បង្រៀន
+                  </Link>
+                  <Link href="/opportunities?q=Environment" className="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">
+                    បរិស្ថាន
+                  </Link>
+                  <Link href="/opportunities?q=Health" className="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">
+                    សុខភាព
+                  </Link>
+                  <Link href="/opportunities?q=Technology" className="btn btn-sm btn-light rounded-pill px-3" data-bs-dismiss="modal">
+                    បច្ចេកវិទ្យា
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </header>

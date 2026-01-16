@@ -10,6 +10,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'cdni.iconscout.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'hyidxiytjwxknerdrpua.supabase.co',
+      },
     ],
   },
 };

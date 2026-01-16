@@ -1,7 +1,8 @@
 "use client";
 
+
 import Image from "next/image";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
 import {
   OrgBrand,
   CreateOpportunityModal,
@@ -10,103 +11,117 @@ import {
   OpportunitiesPane,
   ApplicationsPane,
   AnalyticsPane,
+  OpportunityDetailModal,
+  EditOpportunityModal,
+  SettingsPane,
 } from "./profile";
-
-/** Mock data — replace with API later */
-const INITIAL_OPPORTUNITIES = [
-  {
-    id: "op-1",
-    titleKh: "សម្អាតសហគមន៍",
-    titleEn: "Community Cleanup",
-    dateKh: "២៤ មករា ២០២៥",
-    locationKh: "ភ្នំពេញ",
-    current: 15,
-    capacity: 20,
-    registrations: 8,
-    status: "active", // active | pending | closed
-    image: "/images/ORG/Tree-conservation.png",
-  },
-  {
-    id: "op-2",
-    titleKh: "ដាំដើមឈើ",
-    titleEn: "Tree Planting",
-    dateKh: "៥ កុម្ភៈ ២០២៥",
-    locationKh: "តាកែវ",
-    current: 25,
-    capacity: 30,
-    registrations: 12,
-    status: "active",
-    image: "/images/ORG/Tree-conservation.png",
-  },
-  {
-    id: "op-3",
-    titleKh: "អភិរក្សព្រៃឈើ",
-    titleEn: "Forest Conservation",
-    dateKh: "១២ កុម្ភៈ ២០២៥",
-    locationKh: "កំពង់ចាម",
-    current: 8,
-    capacity: 15,
-    registrations: 3,
-    status: "pending",
-    image: "/images/ORG/Tree-conservation.png",
-  },
-];
-
-const INITIAL_APPLICATIONS = [
-  {
-    id: "app-1",
-    avatar: "/images/ORG/computer-icons-user-profile-circle-abstract.jpg",
-    nameKh: "សុភា ចាន់",
-    nameEn: "Sophea Chan",
-    jobKh: "សម្អាតសហគមន៍",
-    meta: "​ចូលរួម៖ ២ ថ្ងៃ",
-    dateKh: "២៤ មករា ២០២៥",
-    status: "pending",
-  },
-  {
-    id: "app-2",
-    avatar: "/images/ORG/computer-icons-user-profile-circle-abstract.jpg",
-    nameKh: "ដារា លី",
-    nameEn: "Dara Lee",
-    jobKh: "ដាំដើមឈើ",
-    meta: "ចំនួនម៉ោង៖ ៩",
-    dateKh: "២៤ មករា ២០២៥",
-    status: "approved",
-  },
-  {
-    id: "app-3",
-    avatar: "/images/ORG/computer-icons-user-profile-circle-abstract.jpg",
-    nameKh: "ពិសាក់ ស៊ុន",
-    nameEn: "Pisach Sun",
-    jobKh: "អភិរក្សព្រៃឈើ",
-    meta: "ចំនួនថ្ងៃ៖ ៣",
-    dateKh: "២៣ មករា ២០២៥",
-    status: "rejected",
-  },
-];
+import CommunityManager from "@/components/organizer/CommunityManager";
+import { getMyOpportunities, createOpportunity, deleteOpportunity, updateOpportunity } from "@/services/opportunities";
+import { getOrganizerApplications, updateApplicationStatus } from "@/services/applications";
+import { getOrganizerProfile, getOrganizerDashboard } from "@/services/organizer";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "react-hot-toast";
 
 export default function OrgDashboardPage() {
-  // Role guard (front-end only)
-  const [roleAllowed] = useState(() => {
-    if (typeof window === "undefined") return true;
-    const role = localStorage.getItem("role") || "organizer";
-    return role === "organizer";
-  });
+  const { user, loading: authLoading } = useAuth();
+  const [opportunities, setOpportunities] = useState([]);
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [orgProfile, setOrgProfile] = useState(null);
+  const [dashboardStats, setDashboardStats] = useState(null);
 
-  const [orgAvatarPreviewSrc, setOrgAvatarPreviewSrc] = useState(
-    "/images/ORG/company-icon.png"
-  );
+
 
   // Tabs (React-controlled)
   const [activeTab, setActiveTab] = useState("overview"); // overview | opportunities | applications | analytics | community | settings
 
   // Modal state
   const [createOpen, setCreateOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [selectedOp, setSelectedOp] = useState(null);
 
   // Opportunities state + filters
-  const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
   const [opSearch, setOpSearch] = useState("");
   const [opStatusFilter, setOpStatusFilter] = useState("all"); // all | active | closed | pending
+
+  // Applications state + filters
+  const [appSearch, setAppSearch] = useState("");
+  const [appStatusFilter, setAppStatusFilter] = useState("");
+
+  const fetchData = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const [oppsRes, appsRes, profileRes, dashRes] = await Promise.all([
+        getMyOpportunities(),
+        getOrganizerApplications(),
+        getOrganizerProfile(),
+        getOrganizerDashboard()
+      ]);
+      const dashboardStats = dashRes;
+
+      // Map opportunities to UI expectation
+      const mappedOpps = (oppsRes.data || []).map(op => ({
+        id: op.id,
+        titleKh: op.title,
+        titleEn: op.title, // Fallback
+        dateKh: op.date_range || "—",
+        locationKh: op.location || "—",
+        current: 0, // Need to fetch dynamicly if needed
+        capacity: op.capacity || 0,
+        registrations: 0, // Need stats
+        status: op.status,
+        image: Array.isArray(op.images) ? op.images[0] : (typeof op.images === 'string' ? op.images.split(',')[0] : "/images/ORG/Tree-conservation.png"),
+        raw: op,
+      }));
+
+      // Map applications to UI expectation
+      const mappedApps = (appsRes.data || []).map(app => ({
+        id: app.id,
+        avatar: app.user_avatar || "/images/ORG/computer-icons-user-profile-circle-abstract.jpg",
+        nameKh: (app.user_first_name || app.user_last_name)
+          ? `${app.user_first_name || ''} ${app.user_last_name || ''}`.trim()
+          : app.name,
+        nameEn: app.name,
+        jobKh: app.opportunity_title || `ឱកាស #${app.opportunity_id}`,
+        meta: `ជំនាញ៖ ${app.skills || '—'}`,
+        dateKh: new Date(app.created_at).toLocaleDateString('km-KH'),
+        status: app.status,
+        // Full fields for modal
+        email: app.user_email || app.email, // Prefer user profile email if available
+        phone_number: app.user_phone || app.phone_number,
+        message: app.message,
+        cv_url: app.cv_url,
+        skills: app.user_skills || app.skills, // Prefer user general skills, fallback to app specific
+        availability: app.availability,
+        sex: app.sex,
+        // New Profile Fields
+        bio: app.user_bio,
+        address: app.user_address,
+        education: app.user_education,
+        experience: app.user_experience,
+        interests: app.user_interests,
+      }));
+
+      setOpportunities(mappedOpps);
+      setApplications(mappedApps);
+      setOrgProfile(profileRes);
+      setDashboardStats(dashRes || {});
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err);
+      setError("បរាជ័យក្នុងការទាញយកទិន្នន័យ");
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchData();
+    }
+  }, [user, fetchData]);
 
   const filteredOps = useMemo(() => {
     const term = opSearch.trim().toLowerCase();
@@ -116,16 +131,10 @@ export default function OrgDashboardPage() {
       const matchText =
         !term ||
         op.titleKh.toLowerCase().includes(term) ||
-        op.titleEn.toLowerCase().includes(term) ||
         op.locationKh.toLowerCase().includes(term);
       return matchStatus && matchText;
     });
   }, [opportunities, opSearch, opStatusFilter]);
-
-  // Applications state + filters
-  const [applications, setApplications] = useState(INITIAL_APPLICATIONS);
-  const [appSearch, setAppSearch] = useState("");
-  const [appStatusFilter, setAppStatusFilter] = useState("");
 
   const filteredApps = useMemo(() => {
     const term = appSearch.trim().toLowerCase();
@@ -134,47 +143,155 @@ export default function OrgDashboardPage() {
       const matchText =
         !term ||
         app.nameKh.toLowerCase().includes(term) ||
-        app.nameEn.toLowerCase().includes(term) ||
         app.jobKh.toLowerCase().includes(term);
       return matchStatus && matchText;
     });
   }, [applications, appSearch, appStatusFilter]);
 
-  // Handle modal submit to create opportunity
-  const handleCreateOpportunity = (payload) => {
-    // payload = { titleKh, description, locationKh, dateISO, visibility, accessMode, accessCode, capacity, status, imageFile }
-    const newOp = {
-      id: `op-${Date.now()}`,
-      titleKh: payload.titleKh || "ឱកាសថ្មី",
-      titleEn: payload.titleEn || payload.titleKh || "New Opportunity",
-      dateKh: payload.dateKh || "—",
-      locationKh: payload.locationKh || "—",
-      current: 0,
-      capacity: Number(payload.capacity || 1),
-      registrations: 0,
-      status: payload.status || "pending",
-      image: payload.imagePreview || "/images/ORG/company-icon.png",
+  // Stats for OverviewPane
+  const stats = useMemo(() => {
+    // Use fetched stats if available, otherwise fallback (or mix)
+    if (dashboardStats) {
+      return {
+        activeOpps: dashboardStats.opportunities_count || 0,
+        totalVolunteers: dashboardStats.applications_total || 0, // Mapping total applications to volunteers logic
+        rating: 5.0,
+        eventsThisMonth: dashboardStats.applications_pending || 0 // Re-purposing for now or just 0
+      };
+    }
+
+    const activeOpps = opportunities.filter(o => o.status === 'active').length;
+    const totalVolunteers = applications.length;
+
+    return {
+      activeOpps: activeOpps,
+      totalVolunteers: totalVolunteers,
+      rating: 5.0,
+      eventsThisMonth: 0
     };
-    setOpportunities((prev) => [newOp, ...prev]);
-    setCreateOpen(false);
+  }, [opportunities, applications, dashboardStats]);
+
+  const recentApps = useMemo(() => applications.slice(0, 5), [applications]);
+
+
+  const handleCreateOpportunity = async (payload) => {
+    try {
+      const formData = new FormData();
+      formData.append("title", payload.titleKh);
+      formData.append("description", payload.description || "");
+      formData.append("category_label", payload.category);
+      formData.append("location_label", payload.locationKh);
+      formData.append("date_range", payload.dateISO || "");
+      formData.append("time_range", payload.timeRange || "");
+      formData.append("capacity", payload.capacity);
+      formData.append("transport", payload.transport || "");
+      formData.append("housing", payload.housing || "");
+      formData.append("meals", payload.meals || "");
+      formData.append("skills", JSON.stringify(payload.skills || []));
+      formData.append("tasks", JSON.stringify(payload.tasks || []));
+      formData.append("impact_description", payload.impactDescription || "");
+      formData.append("organization", user?.name || "អង្គការ");
+      formData.append("is_private", payload.visibility === "private");
+      if (payload.visibility === "private" && payload.accessCode) {
+        formData.append("access_key", payload.accessCode);
+      }
+      if (payload.imageFile) {
+        formData.append("images", payload.imageFile);
+      }
+
+      await createOpportunity(formData);
+      setCreateOpen(false);
+      fetchData(); // Refresh
+      toast.success("បានបង្កើតឱកាសដោយជោគជ័យ!");
+    } catch (error) {
+      console.error("Create opportunity error:", error);
+      toast.error("បរាជ័យក្នុងការបង្កើតឱកាស");
+    }
   };
 
-  // Organization brand header mock
-  const org = {
-    logo: "/images/ORG/company-icon.png",
-    nameKh: "អង្គការបរិស្ថានកម្ពុជា",
-    nameEn: "Cambodia Environment Organization • NGO",
+  const handleUpdateOpportunity = async (payload) => {
+    try {
+      // payload: { id, titleKh, titleEn, description, locationKh, dateISO, category, capacity, status, imageFile }
+      // For now, text-only update using PATCH. 
+      // If imageFile is provided, we might need a separate call or multipart patch.
+      const updateData = {
+        title: payload.titleKh, // Backend expects 'title'
+        // title_en: payload.titleEn, // Ignored by backend model if not present
+        description: payload.description,
+        location_label: payload.locationKh,
+        date_range: payload.dateISO || null,
+        time_range: payload.timeRange || null,
+        category_label: payload.category,
+        capacity: payload.capacity,
+        transport: payload.transport,
+        housing: payload.housing,
+        meals: payload.meals,
+        skills: payload.skills,
+        tasks: payload.tasks,
+        impact_description: payload.impactDescription,
+        status: payload.status,
+        is_private: payload.visibility === "private",
+        access_key: payload.accessCode || null,
+      };
+
+      await updateOpportunity(payload.id, updateData);
+      setEditOpen(false);
+      fetchData();
+      toast.success("បានកែប្រែទិន្នន័យដោយជោគជ័យ!");
+    } catch (error) {
+      console.error("Update opportunity error:", error);
+      toast.error("បរាជ័យក្នុងការកែប្រែទិន្នន័យ");
+    }
   };
+
+  const handleOpStatusUpdate = async (id, status) => {
+    try {
+      await updateOpportunity(id, { status });
+      fetchData();
+      toast.success(`បានប្តូរស្ថានភាពទៅជា ${status}`);
+    } catch (error) {
+      console.error("Status update error:", error);
+      toast.error("បរាជ័យក្នុងការប្តូរស្ថានភាព");
+    }
+  };
+
+  const handleDeleteOpportunity = async (id) => {
+    if (!window.confirm("តើអ្នកពិតជាចង់លុបឱកាសនេះមែនទេ?")) return;
+    try {
+      await deleteOpportunity(id);
+      fetchData();
+      toast.success("បានលុបឱកាសដោយជោគជ័យ!");
+    } catch (error) {
+      console.error("Delete opportunity error:", error);
+      toast.error("បរាជ័យក្នុងការលុបឱកាស");
+    }
+  };
+
+  const handleAppStatusUpdate = async (id, status) => {
+    try {
+      await updateApplicationStatus(id, status);
+      setApplications(prev => prev.map(a => a.id === id ? { ...a, status } : a));
+    } catch (err) {
+      console.error("Error updating status:", err);
+      alert("បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពស្ថានភាព");
+    }
+  };
+
+  const org = {
+    logo: orgProfile?.card_image_url || user?.profileImage || "/images/ORG/company-icon.png",
+    nameKh: orgProfile?.organization_name || user?.name || "អ្នករៀបចំ",
+    nameEn: user?.role === "organizer" ? "Verified Organizer" : "Pending Approval",
+    isVerified: !!orgProfile?.verified_at,
+  };
+
+  if (authLoading) return <div>Loading...</div>;
 
   return (
     <main className="flex-grow-1 org-dashboard">
       <div className="container py-4">
         {/* Role Guard */}
-        {!roleAllowed && (
-          <div
-            className="alert alert-warning d-flex align-items-center"
-            role="alert"
-          >
+        {user?.role !== "organizer" && (
+          <div className="alert alert-warning d-flex align-items-center" role="alert">
             <i className="bi bi-shield-lock-fill me-2"></i>
             <div>
               សម្រាប់ Organizer ដែលត្រូវបានបញ្ជាក់ដោយ Admin ប៉ុណ្ណោះ។ សូមចូលគណនី
@@ -182,6 +299,8 @@ export default function OrgDashboardPage() {
             </div>
           </div>
         )}
+
+        {error && <div className="alert alert-danger">{error}</div>}
 
         {/* Org brand header + CTA */}
         <OrgBrand org={org} onCreate={() => setCreateOpen(true)} />
@@ -200,11 +319,14 @@ export default function OrgDashboardPage() {
           ]}
         />
 
-        {/* Panes – we add `opacity-50 pe-none` when role is not allowed */}
-        <div
-          className={`tab-content mt-4 w-100 ${!roleAllowed ? "opacity-50 pe-none" : ""}`}
-        >
-          {activeTab === "overview" && <OverviewPane />}
+        {/* Panes */}
+        <div className={`tab-content mt-4 w-100 ${user?.role !== "organizer" ? "opacity-50 pe-none" : ""}`}>
+          {activeTab === "overview" && (
+            <OverviewPane
+              stats={stats}
+              recentApps={recentApps}
+            />
+          )}
 
           {activeTab === "opportunities" && (
             <OpportunitiesPane
@@ -214,6 +336,16 @@ export default function OrgDashboardPage() {
               statusFilter={opStatusFilter}
               onStatusFilter={setOpStatusFilter}
               onCreate={() => setCreateOpen(true)}
+              onView={(op) => {
+                setSelectedOp(op);
+                setDetailOpen(true);
+              }}
+              onEdit={(op) => {
+                setSelectedOp(op);
+                setEditOpen(true);
+              }}
+              onDelete={handleDeleteOpportunity}
+              onStatusUpdate={handleOpStatusUpdate}
             />
           )}
 
@@ -224,253 +356,21 @@ export default function OrgDashboardPage() {
               onSearch={setAppSearch}
               statusFilter={appStatusFilter}
               onStatusFilter={setAppStatusFilter}
-              onApprove={(id) => {
-                setApplications((prev) =>
-                  prev.map((a) =>
-                    a.id === id ? { ...a, status: "approved" } : a
-                  )
-                );
-              }}
-              onReject={(id) => {
-                setApplications((prev) =>
-                  prev.map((a) =>
-                    a.id === id ? { ...a, status: "rejected" } : a
-                  )
-                );
-              }}
-              onPending={(id) => {
-                setApplications((prev) =>
-                  prev.map((a) =>
-                    a.id === id ? { ...a, status: "pending" } : a
-                  )
-                );
-              }}
+              onApprove={(id) => handleAppStatusUpdate(id, "approved")}
+              onReject={(id) => handleAppStatusUpdate(id, "rejected")}
+              onPending={(id) => handleAppStatusUpdate(id, "pending")}
             />
           )}
 
           {activeTab === "analytics" && <AnalyticsPane />}
 
-          {activeTab === "community" && (
-            <div className="card shadow-sm mb-4" data-aos="fade-up">
-              <div className="card-body">
-                <h5 className="card-title mb-3">គ្រប់គ្រងសហគមន៍</h5>
-                <p className="text-muted mb-3">
-                  បង្កើត និងគ្រប់គ្រងប្រកាសសហគមន៍របស់អង្គការ
-                </p>
-                <a
-                  href="/organizer/community"
-                  className="btn btn-primary"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <i className="bi bi-box-arrow-up-right me-2"></i>
-                  បើកទំព័រគ្រប់គ្រងសហគមន៍
-                </a>
-              </div>
-            </div>
-          )}
+          {activeTab === "community" && <CommunityManager />}
 
           {activeTab === "settings" && (
-            <div className="card shadow-sm mb-4" data-aos="fade-up">
-              <div className="card-body">
-                <h5 className="card-title mb-1">ការកំណត់អង្គការ</h5>
-
-                {/* Avatar uploader (simple preview) */}
-                <div
-                  className="d-flex align-items-center justify-content-center gap-3 mb-3"
-                  data-aos="zoom-in"
-                  data-aos-delay="100"
-                >
-                  <label className="vh-avatar-uploader mb-0">
-                    <input
-                      type="file"
-                      className="d-none"
-                      id="orgAvatarInput"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (!f) return;
-                        const url = URL.createObjectURL(f);
-                        setOrgAvatarPreviewSrc(url);
-                      }}
-                    />
-                    <span className="vh-avatar ring">
-                      <Image
-                        src={orgAvatarPreviewSrc}
-                        alt="រូបភាព"
-                        width={80}
-                        height={80}
-                        unoptimized
-                      />
-                    </span>
-                    <span className="small d-block mt-1">ជ្រើសរើសរូបភាព</span>
-                  </label>
-                </div>
-
-                {/* Basic fields */}
-                <div
-                  className="row g-3"
-                  data-aos="fade-up"
-                  data-aos-delay="200"
-                >
-                  <div className="col-md-6">
-                    <label htmlFor="orgName" className="form-label">
-                      ឈ្មោះអង្គការ
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="orgName"
-                      placeholder="អង្គការបរិស្ថានកម្ពុជា"
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <label htmlFor="orgEmail" className="form-label">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      id="orgEmail"
-                      placeholder="info@environment.org.kh"
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <label htmlFor="orgPhone" className="form-label">
-                      Phone
-                    </label>
-                    <input
-                      type="tel"
-                      className="form-control"
-                      id="orgPhone"
-                      placeholder="+855 23 123 456"
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <label htmlFor="orgWebsite" className="form-label">
-                      Website
-                    </label>
-                    <input
-                      type="url"
-                      className="form-control"
-                      id="orgWebsite"
-                      placeholder="www.environment.org.kh"
-                    />
-                  </div>
-                  <div className="col-12">
-                    <label htmlFor="orgAddress" className="form-label">
-                      អាស័យដ្ឋាន
-                    </label>
-                    <textarea
-                      className="form-control"
-                      id="orgAddress"
-                      rows={2}
-                      placeholder="ផ្លូវ ២៧១, ភ្នំពេញ"
-                    ></textarea>
-                  </div>
-                </div>
-
-                <hr className="my-4" data-aos="fade-up" data-aos-delay="300" />
-
-                <h6 className="mb-2" data-aos="fade-up" data-aos-delay="400">
-                  បណ្តាញសង្គម
-                </h6>
-                <div
-                  className="row g-3"
-                  data-aos="fade-up"
-                  data-aos-delay="500"
-                >
-                  <div className="col-md-6 col-lg-3">
-                    <label className="form-label">Facebook</label>
-                    <input
-                      type="url"
-                      className="form-control"
-                      placeholder="https://facebook.com/yourpage"
-                    />
-                  </div>
-                  <div className="col-md-6 col-lg-3">
-                    <label className="form-label">Instagram</label>
-                    <input
-                      type="url"
-                      className="form-control"
-                      placeholder="https://instagram.com/yourpage"
-                    />
-                  </div>
-                  <div className="col-md-6 col-lg-3">
-                    <label className="form-label">Twitter / X</label>
-                    <input
-                      type="url"
-                      className="form-control"
-                      placeholder="https://x.com/yourpage"
-                    />
-                  </div>
-                  <div className="col-md-6 col-lg-3">
-                    <label className="form-label">LinkedIn</label>
-                    <input
-                      type="url"
-                      className="form-control"
-                      placeholder="https://linkedin.com/company/yourorg"
-                    />
-                  </div>
-                </div>
-
-                <hr className="my-4" data-aos="fade-up" data-aos-delay="600" />
-
-                <h6 className="mb-2" data-aos="fade-up" data-aos-delay="700">
-                  សុវត្ថិភាព / Security
-                </h6>
-                <div
-                  className="row g-3"
-                  data-aos="fade-up"
-                  data-aos-delay="800"
-                >
-                  <div className="col-md-4">
-                    <label className="form-label">
-                      ពាក្យសម្ងាត់បច្ចុប្បន្ន
-                    </label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      placeholder="********"
-                    />
-                  </div>
-                  <div className="col-md-4">
-                    <label className="form-label">ពាក្យសម្ងាត់ថ្មី</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      placeholder="********"
-                    />
-                  </div>
-                  <div className="col-md-4">
-                    <label className="form-label">
-                      បញ្ជាក់ពាក្យសម្ងាត់ថ្មី
-                    </label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      placeholder="********"
-                    />
-                  </div>
-                </div>
-
-                <div
-                  className="d-flex justify-content-end mt-4"
-                  data-aos="fade-up"
-                  data-aos-delay="900"
-                >
-                  <button
-                    type="reset"
-                    className="btn btn-outline-secondary me-2"
-                  >
-                    កំណត់ឡើងវិញ
-                  </button>
-                  <button type="submit" className="btn btn-primary">
-                    រក្សាទុកការផ្លាស់ប្តូរ
-                  </button>
-                </div>
-              </div>
-            </div>
+            <SettingsPane
+              profile={orgProfile}
+              onUpdate={fetchData}
+            />
           )}
         </div>
       </div>
@@ -480,6 +380,26 @@ export default function OrgDashboardPage() {
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         onSubmit={handleCreateOpportunity}
+      />
+
+      {/* Opportunity Detail Modal */}
+      <OpportunityDetailModal
+        open={detailOpen}
+        onClose={() => setDetailOpen(false)}
+        opportunity={selectedOp}
+        onEdit={(op) => {
+          setSelectedOp(op);
+          setEditOpen(true);
+        }}
+        onDelete={handleDeleteOpportunity}
+      />
+
+      {/* Edit Opportunity Modal */}
+      <EditOpportunityModal
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        opportunity={selectedOp}
+        onSubmit={handleUpdateOpportunity}
       />
     </main>
   );

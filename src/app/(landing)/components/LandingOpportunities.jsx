@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import OpportunityCard from "@/components/cards/OpportunityCard";
 
@@ -31,9 +31,9 @@ export default function LandingOpportunities({ items = [] }) {
               </p>
             </div>
             <div className="section-actions d-flex gap-2">
-              <a href="/opportunity" className="btn btn-outline-primary">
+              <Link href="/opportunities" className="btn btn-outline-primary">
                 <i className="bi bi-grid-3x3-gap me-2" /> មើលទាំងអស់
-              </a>
+              </Link>
             </div>
           </div>
         </div>

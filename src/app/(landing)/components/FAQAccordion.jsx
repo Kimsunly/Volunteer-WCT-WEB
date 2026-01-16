@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 
 const faqs = [
@@ -74,9 +75,8 @@ export default function FAQAccordion() {
                       <h3 className="mb-0">{f.q}</h3>
                       <div className="faq-toggle">
                         <i
-                          className={`bi ${
-                            active ? "bi-dash-lg" : "bi-plus-lg"
-                          }`}
+                          className={`bi ${active ? "bi-dash-lg" : "bi-plus-lg"
+                            }`}
                         />
                       </div>
                     </button>
@@ -99,7 +99,7 @@ export default function FAQAccordion() {
               <div className="faq-cta-content">
                 <i className="bi bi-chat-dots-fill" />
                 <p className="mb-0">
-                  មាន​សំណួរ​ទៀត​ទេ? <a href="/contact">ទាក់ទងយើងខ្ញុំ</a>
+                  មាន​សំណួរ​ទៀត​ទេ? <Link href="/contact">ទាក់ទងយើងខ្ញុំ</Link>
                 </p>
               </div>
             </div>

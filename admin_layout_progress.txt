@@ -1,0 +1,13 @@
+Remaining pages to fix (removing duplicate navbar/sidebar):
+
+- [x] dashboard ✓
+- [x] organizers ✓  
+- [ ] opportunities
+- [ ] categories
+- [ ] blogs
+- [ ] community
+- [ ] comments
+- [ ] users
+- [ ] donations
+
+Total: 7 remaining

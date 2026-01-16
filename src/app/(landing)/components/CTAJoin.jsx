@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function CTAJoin() {
   return (
     <section className="cta-area-modern">
@@ -31,13 +33,13 @@ export default function CTAJoin() {
                   </li>
                 </ul>
                 <div className="d-flex flex-wrap gap-3">
-                  <a
+                  <Link
                     href="/auth/login"
                     className="btn btn-cta-primary btn-lg px-5"
                   >
                     <i className="bi bi-person-plus-fill me-2" />{" "}
                     ចុះឈ្មោះឥឡូវនេះ <i className="bi bi-arrow-right ms-2" />
-                  </a>
+                  </Link>
                   <a href="#" className="btn btn-cta-outline btn-lg px-5">
                     <i className="bi bi-play-circle me-2" /> មើលវីដេអូ
                   </a>

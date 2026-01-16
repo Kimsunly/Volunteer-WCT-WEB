@@ -12,6 +12,7 @@ export default function AdminSidebar({ active }) {
     <Link
       className={`sidebar-link ${active === id ? "active" : ""}`}
       href={href}
+      prefetch={true}
     >
       <i className={icon}></i> {label}
     </Link>

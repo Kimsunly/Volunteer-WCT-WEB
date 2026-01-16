@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import logo from "../../../public/logos/logo.png";
 
 export default function SiteFooter() {
@@ -26,19 +27,20 @@ export default function SiteFooter() {
           <div className="col-lg-2 col-md-6">
             <h5 className="fw-bold mb-3" style={{ color: "var(--accent-primary)" }}>តំណរភ្ជាប់រហ័ស</h5>
             <ul className="list-unstyled footer-nav-links">
-              <li><a href="/">ទំព័រដើម</a></li>
-              <li><a href="/opportunity">ការងារស្ម័គ្រចិត្ត</a></li>
-              <li><a href="/eventpage">ព្រឹត្តិការណ៏</a></li>
-              <li><a href="/blogs">អត្ថបទ</a></li>
-              <li><a href="/donation">បរិច្ចាក</a></li>
+              <li><Link href="/">ទំព័រដើម</Link></li>
+              <li><Link href="/opportunities">ការងារស្ម័គ្រចិត្ត</Link></li>
+              <li><Link href="/community">សហគមន៍</Link></li>
+              <li><Link href="/eventpage">ព្រឹត្តិការណ៏</Link></li>
+              <li><Link href="/blogs">អត្ថបទ</Link></li>
+              <li><Link href="/donation">បរិច្ចាក</Link></li>
             </ul>
           </div>
 
           <div className="col-lg-3 col-md-6">
             <h5 className="fw-bold mb-3" style={{ color: "var(--accent-primary)" }}>ព័ត៌មាន</h5>
             <ul className="list-unstyled footer-nav-links">
-              <li><a href="/about">អំពីរយើង</a></li>
-              <li><a href="/contact">ទំនាក់ទំនង</a></li>
+              <li><Link href="/about">អំពីរយើង</Link></li>
+              <li><Link href="/contact">ទំនាក់ទំនង</Link></li>
               <li><a href="#">គោលការណ៍ឯកជន</a></li>
               <li><a href="#">លក្ខខណ្ឌប្រើប្រាស់</a></li>
               <li><a href="#">ជំនួយ</a></li>

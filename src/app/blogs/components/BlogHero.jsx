@@ -40,7 +40,13 @@ export default function BlogHero() {
 
           {/* Right image */}
           <div className="col-lg-6" data-aos="fade-left" data-aos-delay="200">
-            <div className="blog-hero-image">/images/homepage/cta-ipad.png</div>
+            <div className="blog-hero-image">
+              <img
+                src="/images/homepage/cta-ipad.png"
+                alt="Volunteer App Preview"
+                className="img-fluid"
+              />
+            </div>
           </div>
         </div>
       </div>

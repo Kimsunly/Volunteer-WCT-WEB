@@ -19,6 +19,10 @@ export default function OpportunitiesPane({
   statusFilter,
   onStatusFilter,
   onCreate,
+  onView,
+  onEdit,
+  onDelete,
+  onStatusUpdate,
 }) {
   return (
     <div className="tab-pane fade show active" id="opportunities">
@@ -47,45 +51,78 @@ export default function OpportunitiesPane({
           <option value="pending">Pending</option>
         </select>
         <button className="btn btn-primary" onClick={onCreate}>
-          បន្ថែមឱកាស
+          <i className="bi bi-plus-lg me-1"></i> បន្ថែមឱកាស
         </button>
       </div>
 
       {items.map((op, idx) => (
         <div
           key={op.id}
-          className="vh-card p-3 mb-3 vh-hover"
+          className="vh-card p-3 mb-3 vh-hover border rounded shadow-sm bg-white"
           data-aos="fade-right"
           data-aos-delay={idx * 100}
         >
-          <div className="d-flex align-items-center">
+          <div className="d-flex align-items-center flex-wrap flex-md-nowrap">
             <Image
-              className="vh-op-img me-3"
+              className="vh-op-img me-3 rounded mb-2 mb-md-0"
               src={op.image}
               alt=""
               width={64}
               height={64}
+              style={{ objectFit: "cover" }}
             />
             <div className="flex-grow-1">
-              <div className="fw-bold">{op.titleKh}</div>
-              <small>{op.titleEn}</small>
-              <div className="vh-op-line mt-1">
-                <i className="fa-regular fa-calendar"></i> {op.dateKh}{" "}
-                &nbsp;•&nbsp;
-                <i className="fa-solid fa-location-dot"></i> {op.locationKh}{" "}
-                &nbsp;•&nbsp;
-                <i className="fa-solid fa-user-group"></i> {op.current}/
-                {op.capacity}
+              <div className="d-flex justify-content-between align-items-start">
+                <div>
+                  <div className="fw-bold h5 mb-0 text-dark">{op.titleKh}</div>
+                  <small className="text-muted">{op.titleEn}</small>
+                </div>
+                <div className="ms-2">
+                  <select
+                    className="form-select form-select-sm"
+                    value={op.status}
+                    onChange={(e) => onStatusUpdate && onStatusUpdate(op.id, e.target.value)}
+                    style={{ width: "auto" }}
+                  >
+                    <option value="active">សកម្ម (Active)</option>
+                    <option value="pending">រង់ចាំ (Pending)</option>
+                    <option value="closed">បិទ (Closed)</option>
+                  </select>
+                </div>
               </div>
-              <small>ការចុះឈ្មោះ: {op.registrations}</small>
+              <div className="vh-op-line mt-2 text-secondary">
+                <i className="fa-regular fa-calendar me-1"></i> {op.dateKh}{" "}
+                <span className="mx-2">|</span>
+                <i className="fa-solid fa-location-dot me-1"></i> {op.locationKh}{" "}
+                <span className="mx-2">|</span>
+                <i className="fa-solid fa-user-group me-1"></i> {op.current}/
+                {op.capacity} នាក់
+              </div>
+              <div className="mt-1">
+                <small className="text-muted">ការចុះឈ្មោះ: {op.registrations || 0}</small>
+              </div>
             </div>
-            <StatusBadge status={op.status} />
           </div>
-          <div className="d-flex justify-content-end vh-row-actions mt-2">
-            <i className="fa-regular fa-eye" title="View"></i>
-            <i className="fa-regular fa-pen-to-square ms-2" title="Edit"></i>
-            <i className="fa-regular fa-trash-can ms-2" title="Delete"></i>
-            <i className="fa-solid fa-download ms-2" title="Export"></i>
+
+          <div className="d-flex justify-content-end gap-2 mt-3 pt-3 border-top">
+            <button
+              className="btn btn-sm btn-outline-info d-flex align-items-center"
+              onClick={() => onView && onView(op)}
+            >
+              <i className="bi bi-eye me-1"></i> លម្អិត
+            </button>
+            <button
+              className="btn btn-sm btn-outline-primary d-flex align-items-center"
+              onClick={() => onEdit && onEdit(op)}
+            >
+              <i className="bi bi-pencil me-1"></i> កែប្រែ
+            </button>
+            <button
+              className="btn btn-sm btn-outline-danger d-flex align-items-center"
+              onClick={() => onDelete && onDelete(op.id)}
+            >
+              <i className="bi bi-trash me-1"></i> លុប
+            </button>
           </div>
         </div>
       ))}

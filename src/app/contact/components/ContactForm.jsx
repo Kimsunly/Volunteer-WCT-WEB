@@ -1,8 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
+import { submitContactMessage } from "@/services/contact";
+import toast from "react-hot-toast";
+import LoadingButton from "@/components/common/LoadingButton";
 
 export default function ContactForm() {
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     lastName: "",
     firstName: "",
@@ -19,19 +23,25 @@ export default function ContactForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // TODO: replace with real API endpoint
-    // Example:
-    // const res = await fetch("/api/contact", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify(form),
-    // });
+    const payload = {
+      first_name: form.firstName,
+      last_name: form.lastName,
+      email: form.email,
+      phone: form.phone,
+      message: form.message,
+    };
 
-    console.log("Submit payload:", form);
-
-    alert("បានបញ្ជូនសារ! (Mock)");
-    // Optionally clear after success:
-    // setForm({ lastName: "", firstName: "", email: "", phone: "", message: "" });
+    try {
+      setSubmitting(true);
+      await submitContactMessage(payload);
+      toast.success("សាររបស់អ្នកត្រូវបានបញ្ជូនដោយជោគជ័យ! សូមអរគុណ។");
+      handleReset();
+    } catch (err) {
+      console.error("Contact submit error:", err);
+      toast.error("បរាជ័យក្នុងការបញ្ជូនសារ។ សូមព្យាយាមម្តងទៀត។");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleReset = () => {
@@ -134,13 +144,19 @@ export default function ContactForm() {
 
       {/* Actions */}
       <div className="mt-3">
-        <button type="submit" className="btn btn-primary fw-bold">
+        <LoadingButton
+          type="submit"
+          className="btn btn-primary fw-bold"
+          loading={submitting}
+          loadingText="កំពុងបញ្ជូន..."
+        >
           បញ្ជូន
-        </button>
+        </LoadingButton>
         <button
           type="button"
           className="btn btn-secondary fw-bold ms-2"
           onClick={handleReset}
+          disabled={submitting}
         >
           បោះបង់
         </button>

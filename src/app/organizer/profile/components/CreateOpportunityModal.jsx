@@ -1,32 +1,69 @@
 // src/app/org/dashboard/components/CreateOpportunityModal.jsx
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
+import { listCategories } from "@/services/categories";
 
 const INITIAL_FORM = {
   titleKh: "",
   titleEn: "",
   description: "",
   locationKh: "ភ្នំពេញ",
+  category: "environment", // environment | education | health | wildlife | childcare | agriculture | event
   dateISO: "",
   visibility: "public", // public | private
   accessMode: "approval", // approval | invite
   accessCode: "",
-  capacity: 10,
-  status: "pending", // active | pending | closed
+  housing: "",
+  meals: "",
+  transport: "",
+  timeRange: "",
+  skills: [],
+  tasks: [],
+  impactDescription: "",
+  capacity: 1,
+  status: "active"
 };
 
 export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
   const [form, setForm] = useState(INITIAL_FORM);
+  const [skillInput, setSkillInput] = useState("");
+  const [taskInput, setTaskInput] = useState("");
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
 
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const errRef = useRef(null);
   const objectUrlRef = useRef(null);
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setLoadingCategories(true);
+      try {
+        const data = await listCategories();
+        setCategories(data);
+        // Set default category if not set
+        if (!form.category && data.length > 0) {
+          setForm(f => ({ ...f, category: data[0].name.toLowerCase() }));
+        }
+      } catch (error) {
+        console.error("Failed to load categories:", error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    if (open) {
+      fetchCategories();
+    }
+  }, [open]);
+
   const resetLocalState = () => {
     setForm(INITIAL_FORM);
+    setSkillInput("");
+    setTaskInput("");
     setImageFile(null);
     setImagePreview("");
     if (objectUrlRef.current) {
@@ -69,15 +106,17 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Basic validity
-    if (
-      !form.titleKh ||
-      !form.description ||
-      !form.locationKh ||
-      !form.dateISO ||
-      !form.capacity ||
-      !form.status
-    ) {
-      alert("សូមបំពេញទិន្នន័យអប្បបរមា។");
+    const missing = [];
+    if (!form.titleKh) missing.push("ចំណងជើង (KH)");
+    if (!form.description) missing.push("ពិពណ៌នា");
+    if (!form.locationKh) missing.push("ទីតាំង");
+    if (!form.category) missing.push("ប្រភេទ");
+    if (!form.dateISO) missing.push("កាលបរិច្ឆេទ");
+    if (!form.capacity) missing.push("ចំនួនមុខតំណែង");
+    if (!form.status) missing.push("ស្ថានភាព");
+
+    if (missing.length > 0) {
+      alert(`សូមបំពេញ៖ ${missing.join(", ")}`);
       return;
     }
     onSubmit({
@@ -217,6 +256,30 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
                 </div>
               </div>
 
+              {/* Category */}
+              <div className="mb-3">
+                <label className="form-label fw-medium" htmlFor="opCategory">
+                  ប្រភេទ / Category
+                </label>
+                <select
+                  id="opCategory"
+                  className="form-select form-select-lg"
+                  value={form.category}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, category: e.target.value }))
+                  }
+                  required
+                  disabled={loadingCategories}
+                >
+                  <option value="" disabled>{loadingCategories ? "កំពុងផ្ទុក..." : "ជ្រើសរើសប្រភេទ"}</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.name.toLowerCase()}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               {/* Visibility */}
               <div className="mb-3">
                 <label className="form-label fw-medium">
@@ -346,6 +409,179 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
                     <option value="pending">Pending</option>
                     <option value="closed">Closed</option>
                   </select>
+                </div>
+              </div>
+
+              {/* Extra Info: Transport, Housing, Meals */}
+              <div className="row g-3 mb-3">
+                <div className="col-md-4">
+                  <label className="form-label fw-medium" htmlFor="timeRange">
+                    ពេលវេលា (ឧ. 8:00 AM - 5:00 PM)
+                  </label>
+                  <input
+                    id="timeRange"
+                    type="text"
+                    className="form-control form-control-lg"
+                    placeholder="8:00 AM - 5:00 PM"
+                    value={form.timeRange}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, timeRange: e.target.value }))
+                    }
+                  />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-medium" htmlFor="transport">
+                    ការដឹកជញ្ជូន
+                  </label>
+                  <input
+                    id="transport"
+                    type="text"
+                    className="form-control form-control-lg"
+                    placeholder="ឧ. មានឡានដឹក"
+                    value={form.transport}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, transport: e.target.value }))
+                    }
+                  />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-medium" htmlFor="housing">
+                    កន្លែងស្នាក់នៅ
+                  </label>
+                  <input
+                    id="housing"
+                    type="text"
+                    className="form-control form-control-lg"
+                    placeholder="ឧ. ផ្តល់កន្លែងស្នាក់នៅ"
+                    value={form.housing}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, housing: e.target.value }))
+                    }
+                  />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label fw-medium" htmlFor="meals">
+                    អាហារ
+                  </label>
+                  <input
+                    id="meals"
+                    type="text"
+                    className="form-control form-control-lg"
+                    placeholder="ឧ. ផ្តល់អាហារថ្ងៃត្រង់"
+                    value={form.meals}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, meals: e.target.value }))
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* Advanced Details: Skills, Tasks, Impact */}
+              <div className="border-top pt-3 mt-3">
+                <h6 className="fw-bold mb-3 text-primary">ព័ត៌មានលម្អិតបន្ថែម (Advanced)</h6>
+
+                <div className="mb-3">
+                  <label className="form-label fw-medium">ជំនាញដែលត្រូវការ (Skills)</label>
+                  <div className="input-group mb-2">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="ឧ. ការប្រាស្រ័យទាក់ទង"
+                      value={skillInput}
+                      onChange={(e) => setSkillInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (skillInput.trim()) {
+                            setForm(f => ({ ...f, skills: [...f.skills, skillInput.trim()] }));
+                            setSkillInput("");
+                          }
+                        }
+                      }}
+                    />
+                    <button
+                      className="btn btn-outline-primary"
+                      type="button"
+                      onClick={() => {
+                        if (skillInput.trim()) {
+                          setForm(f => ({ ...f, skills: [...f.skills, skillInput.trim()] }));
+                          setSkillInput("");
+                        }
+                      }}
+                    >
+                      <i className="bi bi-plus-lg"></i>
+                    </button>
+                  </div>
+                  <div className="d-flex flex-wrap gap-2">
+                    {form.skills.map((s, i) => (
+                      <span key={i} className="badge bg-primary-subtle text-primary border border-primary-subtle d-flex align-items-center gap-2 px-3 py-2 rounded-pill">
+                        {s}
+                        <i
+                          className="bi bi-x-lg cursor-pointer"
+                          role="button"
+                          onClick={() => setForm(f => ({ ...f, skills: f.skills.filter((_, idx) => idx !== i) }))}
+                        ></i>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label fw-medium">ភារកិច្ចសំខាន់ៗ (Tasks)</label>
+                  <div className="input-group mb-2">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="ឧ. រៀបចំកម្មវិធី"
+                      value={taskInput}
+                      onChange={(e) => setTaskInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (taskInput.trim()) {
+                            setForm(f => ({ ...f, tasks: [...f.tasks, taskInput.trim()] }));
+                            setTaskInput("");
+                          }
+                        }
+                      }}
+                    />
+                    <button
+                      className="btn btn-outline-primary"
+                      type="button"
+                      onClick={() => {
+                        if (taskInput.trim()) {
+                          setForm(f => ({ ...f, tasks: [...f.tasks, taskInput.trim()] }));
+                          setTaskInput("");
+                        }
+                      }}
+                    >
+                      <i className="bi bi-plus-lg"></i>
+                    </button>
+                  </div>
+                  <div className="d-flex flex-wrap gap-2">
+                    {form.tasks.map((t, i) => (
+                      <span key={i} className="badge bg-info-subtle text-info border border-info-subtle d-flex align-items-center gap-2 px-3 py-2 rounded-pill">
+                        {t}
+                        <i
+                          className="bi bi-x-lg cursor-pointer"
+                          role="button"
+                          onClick={() => setForm(f => ({ ...f, tasks: f.tasks.filter((_, idx) => idx !== i) }))}
+                        ></i>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label fw-medium" htmlFor="impactDescription">ផលប៉ះពាល់នៃកម្មវិធី (Impact Description)</label>
+                  <textarea
+                    id="impactDescription"
+                    className="form-control"
+                    rows={3}
+                    placeholder="ពិពណ៌នាអំពីផលប៉ះពាល់ដែលអ្នកស្ម័គ្រចិត្តនឹងបង្កើត..."
+                    value={form.impactDescription}
+                    onChange={(e) => setForm(f => ({ ...f, impactDescription: e.target.value }))}
+                  />
                 </div>
               </div>
 

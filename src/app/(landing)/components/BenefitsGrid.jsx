@@ -31,6 +31,8 @@ const benefits = [
   },
 ];
 
+import Link from "next/link";
+
 export default function BenefitsGrid() {
   return (
     <section className="benefits-modern position-relative">
@@ -90,10 +92,10 @@ export default function BenefitsGrid() {
               <p>
                 ចូលរួមជាមួយយើងថ្ងៃនេះ និងក្លាយជាផ្នែកមួយនៃការផ្លាស់ប្តូរវិជ្ជមាន
               </p>
-              <a href="/auth/login" className="cta-button">
+              <Link href="/auth/login" className="cta-button">
                 <span>ចុះឈ្មោះឥឡូវ</span>
                 <i className="bi bi-arrow-right" />
-              </a>
+              </Link>
             </div>
           </div>
         </div>
