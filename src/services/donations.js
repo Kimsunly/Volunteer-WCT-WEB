@@ -5,7 +5,7 @@ import { api } from './api';
  * Submit a new donation.
  */
 export async function createDonation(payload) {
-    const { data } = await api.post('/api/donations/', payload);
+    const { data } = await api.post('/api/donations', payload);
     return data;
 }
 
