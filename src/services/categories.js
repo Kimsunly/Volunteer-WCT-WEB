@@ -1,6 +1,4 @@
-import axios from "axios";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+import { api } from "./api";
 
 /**
  * Fetch all active categories
@@ -8,8 +6,8 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8
  */
 export const listCategories = async () => {
     try {
-        const response = await axios.get(`${API_BASE_URL}/api/categories/`);
-        return response.data;
+        const { data } = await api.get("/api/categories");
+        return data;
     } catch (error) {
         console.error("Error fetching categories:", error);
         throw error;
