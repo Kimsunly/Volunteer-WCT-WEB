@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 
-const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000';
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://volunteer-wct-api.onrender.com';
 if (!process.env.NEXT_PUBLIC_API_BASE_URL && typeof window !== 'undefined') {
   // Dev-friendly warning to ensure environment is configured
   console.warn('[api] NEXT_PUBLIC_API_BASE_URL not set. Using default:', baseURL);
