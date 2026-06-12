@@ -3,11 +3,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
-import { getUserProfile, updateUserProfile, uploadUserAvatar } from "@/services/user";
+import {
+  getUserProfile,
+  updateUserProfile,
+  uploadUserAvatar,
+} from "@/services/user";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AccountSettingsModal({ open, onClose }) {
+  const { setUser } = useAuth();
   const [avatarUrl, setAvatarUrl] = useState(
-    "/images/ORG/computer-icons-user-profile-circle-abstract.jpg"
+    "/images/ORG/computer-icons-user-profile-circle-abstract.jpg",
   );
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -29,7 +35,7 @@ export default function AccountSettingsModal({ open, onClose }) {
     address_street: "",
     address_city: "",
     address_district: "",
-    address_province: ""
+    address_province: "",
   });
 
   const aboutMax = 400;
@@ -58,7 +64,7 @@ export default function AccountSettingsModal({ open, onClose }) {
         email: data.email || "",
         phone: data.phone || "",
         location: data.location || "",
-        birth_date: data.birth_date ? data.birth_date.split('T')[0] : "",
+        birth_date: data.birth_date ? data.birth_date.split("T")[0] : "",
         about_me: data.about_me || "",
         skills: data.skills || "",
         availability: data.availability || "weekend",
@@ -68,10 +74,16 @@ export default function AccountSettingsModal({ open, onClose }) {
         address_street: data.address_street || "",
         address_city: data.address_city || "",
         address_district: data.address_district || "",
-        address_province: data.address_province || ""
+        address_province: data.address_province || "",
       });
       if (data.avatar_url) {
-        setAvatarUrl(data.avatar_url);
+        let finalAvatar = data.avatar_url;
+        if (finalAvatar && !finalAvatar.startsWith("http")) {
+          const apiBase =
+            process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+          finalAvatar = `${apiBase.replace(/\/$/, "")}/${finalAvatar.replace(/^\//, "")}`;
+        }
+        setAvatarUrl(finalAvatar);
       }
     } catch (error) {
       console.error("Failed to fetch profile", error);
@@ -83,13 +95,13 @@ export default function AccountSettingsModal({ open, onClose }) {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    // Handle select inputs which might not have id matching state key perfectly in previous code, 
+    // Handle select inputs which might not have id matching state key perfectly in previous code,
     // but we will align them.
-    setFormData(prev => ({ ...prev, [id]: value }));
+    setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleSelectChange = (key, value) => {
-    setFormData(prev => ({ ...prev, [key]: value }));
+    setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleAvatarChange = async (e) => {
@@ -98,21 +110,38 @@ export default function AccountSettingsModal({ open, onClose }) {
 
     // Show preview immediately
     const previewUrl = URL.createObjectURL(file);
+    const oldAvatarUrl = avatarUrl;
     setAvatarUrl(previewUrl);
 
     // Upload immediately
     const uploadToast = toast.loading("កំពុងផ្លាស់ប្តូររូបភាព...");
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await uploadUserAvatar(formData);
-      setAvatarUrl(res.avatar_url);
+      const fd = new FormData();
+      fd.append("avatar", file); // Backend expects 'avatar' key
+      const res = await uploadUserAvatar(fd);
+
+      // Ensure the URL is absolute for Next.js Image
+      let finalUrl = res.avatar_url;
+      if (finalUrl && !finalUrl.startsWith("http")) {
+        const apiBase =
+          process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+        finalUrl = `${apiBase.replace(/\/$/, "")}/${finalUrl.replace(/^\//, "")}`;
+      }
+
+      setAvatarUrl(finalUrl);
+
+      // Update global user context immediately
+      setUser((prev) => ({
+        ...prev,
+        avatar: finalUrl,
+        avatar_url: finalUrl,
+      }));
+
       toast.success("បានផ្លាស់ប្តូររូបភាពដោយជោគជ័យ", { id: uploadToast });
     } catch (error) {
       console.error("Avatar upload error", error);
       toast.error("បរាជ័យក្នុងការផ្លាស់ប្តូររូបភាព", { id: uploadToast });
-      // Revert preview if needed, or just let it stay as 'failed' state visually? 
-      // Better to revert if we had old one, but simplify for now.
+      setAvatarUrl(oldAvatarUrl);
     }
   };
 
@@ -125,10 +154,12 @@ export default function AccountSettingsModal({ open, onClose }) {
 
       await updateUserProfile(payload);
       toast.success("បានរក្សាទុកការកែប្រែ");
-      onClose();
-      // Optional: Refresh page or trigger context update? 
-      // For now assume local state is enough or user reloads manually.
-      window.location.reload();
+
+      // Update global user context
+      const updatedUser = await getUserProfile();
+      setUser(updatedUser);
+
+      close();
     } catch (error) {
       console.error("Update profile error", error);
       toast.error("បរាជ័យក្នុងការរក្សាទុក");
@@ -215,6 +246,7 @@ export default function AccountSettingsModal({ open, onClose }) {
                           className="w-100 h-100 object-fit-cover"
                           width={120}
                           height={120}
+                          unoptimized
                         />
                       </span>
                       <span className="small d-block mt-2 text-center text-muted">
@@ -235,7 +267,7 @@ export default function AccountSettingsModal({ open, onClose }) {
                             className="form-label fw-medium"
                             htmlFor="first_name"
                           >
-                            នាមខ្លួន
+                            នាមខ្លួន / First Name
                           </label>
                           <input
                             id="first_name"
@@ -252,7 +284,7 @@ export default function AccountSettingsModal({ open, onClose }) {
                             className="form-label fw-medium"
                             htmlFor="last_name"
                           >
-                            នាមត្រកូល
+                            នាមត្រកូល / Last Name
                           </label>
                           <input
                             id="last_name"
@@ -265,17 +297,20 @@ export default function AccountSettingsModal({ open, onClose }) {
                         </div>
 
                         <div className="col-sm-6">
-                          <label className="form-label fw-medium" htmlFor="email">
-                            អ៊ីមែល
+                          <label
+                            className="form-label fw-medium"
+                            htmlFor="email"
+                          >
+                            អ៊ីមែល / Email
                           </label>
                           <div className="input-group">
-                            <span className="input-group-text">
-                              <i className="bi bi-envelope-fill"></i>
+                            <span className="input-group-text bg-light">
+                              <i className="bi bi-envelope-fill text-secondary"></i>
                             </span>
                             <input
                               id="email"
                               type="email"
-                              className="form-control form-control-lg"
+                              className="form-control form-control-lg bg-light"
                               placeholder="sophea.chan@email.com"
                               value={formData.email}
                               disabled // Email usually not editable directly
@@ -284,8 +319,11 @@ export default function AccountSettingsModal({ open, onClose }) {
                         </div>
 
                         <div className="col-sm-6">
-                          <label className="form-label fw-medium" htmlFor="phone">
-                            ទូរស័ព្ទ
+                          <label
+                            className="form-label fw-medium"
+                            htmlFor="phone"
+                          >
+                            ទូរស័ព្ទ / Phone
                           </label>
                           <div className="input-group">
                             <span className="input-group-text">
@@ -307,7 +345,7 @@ export default function AccountSettingsModal({ open, onClose }) {
                             className="form-label fw-medium"
                             htmlFor="location"
                           >
-                            ទីតាំង
+                            ទីតាំង / Location
                           </label>
                           <div className="input-group">
                             <span className="input-group-text">
@@ -325,8 +363,11 @@ export default function AccountSettingsModal({ open, onClose }) {
                         </div>
 
                         <div className="col-sm-6">
-                          <label className="form-label fw-medium" htmlFor="birth_date">
-                            ថ្ងៃខែឆ្នាំកំណើត
+                          <label
+                            className="form-label fw-medium"
+                            htmlFor="birth_date"
+                          >
+                            ថ្ងៃខែឆ្នាំកំណើត / Birth Date
                           </label>
                           <div className="input-group">
                             <span className="input-group-text">
@@ -343,28 +384,40 @@ export default function AccountSettingsModal({ open, onClose }) {
                         </div>
 
                         <div className="col-12">
-                          <label className="form-label fw-medium" htmlFor="about_me">
-                            ពីអំពីខ្ញុំ
+                          <label
+                            className="form-label fw-medium"
+                            htmlFor="about_me"
+                          >
+                            ពីអំពីខ្ញុំ / About Me
                           </label>
-                          <textarea
-                            id="about_me"
-                            className="form-control form-control-lg"
-                            rows={3}
-                            maxLength={aboutMax}
-                            value={formData.about_me}
-                            onChange={handleChange}
-                            placeholder="សូមពិពណ៌នាខ្លីៗអំពីបទពិសោធន៍ និងចំណាប់អារម្មណ៍…"
-                          />
-                          <div className="d-flex justify-content-end mt-1">
-                            <small>
-                              {(formData.about_me || "").length}/{aboutMax}
-                            </small>
+                          <div className="position-relative">
+                            <textarea
+                              id="about_me"
+                              className="form-control form-control-lg"
+                              rows={3}
+                              maxLength={aboutMax}
+                              value={formData.about_me}
+                              onChange={handleChange}
+                              placeholder="សូមពិពណ៌នាខ្លីៗអំពីបទពិសោធន៍ និងចំណាប់អារម្មណ៍…"
+                              style={{ paddingBottom: "25px" }}
+                            />
+                            <div
+                              className="position-absolute bottom-0 end-0 p-2"
+                              style={{ pointerEvents: "none" }}
+                            >
+                              <small className="text-muted">
+                                {(formData.about_me || "").length}/{aboutMax}
+                              </small>
+                            </div>
                           </div>
                         </div>
 
                         <div className="col-12">
-                          <label className="form-label fw-medium" htmlFor="skills">
-                            ជំនាញ
+                          <label
+                            className="form-label fw-medium"
+                            htmlFor="skills"
+                          >
+                            ជំនាញ / Skills
                           </label>
                           <input
                             id="skills"
@@ -389,10 +442,14 @@ export default function AccountSettingsModal({ open, onClose }) {
                         <select
                           className="form-select form-select-lg"
                           value={formData.availability}
-                          onChange={(e) => handleSelectChange('availability', e.target.value)}
+                          onChange={(e) =>
+                            handleSelectChange("availability", e.target.value)
+                          }
                         >
                           <option value="weekend">អាទិត្យ / Weekend</option>
-                          <option value="weekdays">ថ្ងៃធ្វើការ / Weekdays</option>
+                          <option value="weekdays">
+                            ថ្ងៃធ្វើការ / Weekdays
+                          </option>
                           <option value="flexible">បត់បែនពេល / Flexible</option>
                         </select>
                       </div>
@@ -400,7 +457,12 @@ export default function AccountSettingsModal({ open, onClose }) {
                         <select
                           className="form-select form-select-lg"
                           value={formData.time_preference}
-                          onChange={(e) => handleSelectChange('time_preference', e.target.value)}
+                          onChange={(e) =>
+                            handleSelectChange(
+                              "time_preference",
+                              e.target.value,
+                            )
+                          }
                         >
                           <option value="morning">ព្រឹក</option>
                           <option value="afternoon">រសៀល</option>
@@ -417,6 +479,9 @@ export default function AccountSettingsModal({ open, onClose }) {
                     </h6>
                     <div className="row g-3">
                       <div className="col-sm-6">
+                        <label className="form-label small fw-medium">
+                          ឈ្មោះ / Name
+                        </label>
                         <input
                           id="emergency_contact_name"
                           type="text"
@@ -427,6 +492,9 @@ export default function AccountSettingsModal({ open, onClose }) {
                         />
                       </div>
                       <div className="col-sm-6">
+                        <label className="form-label small fw-medium">
+                          លេខទូរស័ព្ទ / Phone Number
+                        </label>
                         <input
                           id="emergency_contact_phone"
                           type="tel"
@@ -509,10 +577,15 @@ export default function AccountSettingsModal({ open, onClose }) {
               >
                 {saving ? (
                   <>
-                    <span className="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      aria-hidden="true"
+                    ></span>
                     <span role="status">កំពុងរក្សាទុក...</span>
                   </>
-                ) : "រក្សាទុក / Save Changes"}
+                ) : (
+                  "រក្សាទុក / Save Changes"
+                )}
               </button>
             </div>
           </div>

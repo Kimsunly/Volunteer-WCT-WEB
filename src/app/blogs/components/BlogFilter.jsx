@@ -5,9 +5,11 @@ import React from "react";
 
 const FILTERS = [
   { id: "all", label: "ទាំងអស់", icon: "bi bi-grid-fill" },
+  { id: "general", label: "ទូទៅ", icon: "bi bi-lightbulb" },
   { id: "education", label: "អប់រំ", icon: "bi bi-book" },
   { id: "health", label: "សុខភាព", icon: "bi bi-heart-pulse" },
   { id: "environment", label: "បរិស្ថាន", icon: "bi bi-tree" },
+  { id: "childcare", label: "ថែទាំកុមារ", icon: "bi bi-heart" },
   { id: "community", label: "សហគមន៍", icon: "bi bi-people" },
 ];
 

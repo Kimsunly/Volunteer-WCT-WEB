@@ -1,7 +1,23 @@
 export function parseApiError(err) {
-    const data = err?.response?.data;
-    const detail = data?.detail;
+    // Handle Unauthorized (401) specifically for Khmer translation
+    if (err?.response?.status === 401) {
+        return "សូមប្រាកដថាអ្នកបានចូលក្នុងគណនី។";
+    }
 
+    const data = err?.response?.data;
+    
+    // Handle Standardized Laravel API response
+    if (data && data.success === false) {
+        // If there are specific validation errors
+        if (data.errors) {
+            const firstError = Object.values(data.errors)[0];
+            if (Array.isArray(firstError)) return firstError[0];
+            return String(firstError);
+        }
+        return data.message || "Request failed";
+    }
+
+    const detail = data?.detail;
     if (typeof detail === "string") {
         return detail;
     }

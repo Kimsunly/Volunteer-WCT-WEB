@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { PageHeader, RoleGuard, storage } from "../components";
+import { RoleGuard } from "../components";
 import {
   approveOrganizer,
   listOrganizers,
@@ -10,15 +10,12 @@ import {
 } from "@/services/admin";
 import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
-import Skeleton from "@/components/common/Skeleton";
-import LoadingButton from "@/components/common/LoadingButton";
 
 export default function AdminOrganizersPage() {
   const { user, loading: authLoading } = useAuth();
   const [organizers, setOrganizers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
-  const [limit, setLimit] = useState(20);
   const [offset, setOffset] = useState(0);
   const [filter, setFilter] = useState("all");
   const [detail, setDetail] = useState(null);
@@ -30,43 +27,50 @@ export default function AdminOrganizersPage() {
     setMounted(true);
   }, []);
 
-  const fetchOrganizers = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const fetchData = useCallback(async () => {
     try {
       const res = await listOrganizers({
         status: filter === "all" ? null : filter,
-        limit,
+        limit: 20,
         offset,
       });
       setOrganizers(res?.data || []);
       setTotal(res?.total ?? res?.data?.length ?? 0);
+      setError(null);
     } catch (err) {
       console.error("Fetch organizers error:", err);
-      setError("បរាជ័យក្នុងការទាញយកអ្នករៀបចំ");
+      setError("Failed to fetch organizers");
     } finally {
       setLoading(false);
     }
-  }, [filter, limit, offset]);
+  }, [filter, offset]);
 
   useEffect(() => {
     if (!authLoading && user?.role?.toLowerCase() === "admin") {
-      fetchOrganizers();
+      fetchData();
+
+      // Set up polling for real-time updates every 10 seconds
+      const interval = setInterval(() => {
+        fetchData();
+      }, 10000);
+
+      // Cleanup interval on unmount
+      return () => clearInterval(interval);
     }
-  }, [fetchOrganizers, authLoading, user]);
+  }, [fetchData, authLoading, user]);
 
   const viewDetail = (org) => setDetail(org);
 
   const handleApprove = async (org) => {
-    if (!org || !confirm("អនុម័តអ្នករៀបចំនេះ?")) return;
+    if (!org || !confirm("Approve this organizer?")) return;
     setActionLoading(org.id);
     try {
       await approveOrganizer(org.id);
-      toast.success("បានអនុម័តដោយជោគជ័យ");
-      await fetchOrganizers();
+      toast.success("Organizer approved successfully!");
+      await fetchData();
     } catch (err) {
       console.error(err);
-      toast.error("បរាជ័យក្នុងការអនុម័ត");
+      toast.error("Failed to approve organizer");
     } finally {
       setActionLoading(null);
     }
@@ -74,16 +78,16 @@ export default function AdminOrganizersPage() {
 
   const handleReject = async (org) => {
     if (!org) return;
-    const reason = prompt("មូលហេតុនៃការបដិសេធ (យ៉ាងហោចណាស់ ១០ តួអក្សរ):");
+    const reason = prompt("Reason for rejection (minimum 10 characters):");
     if (!reason || reason.length < 10) return;
     setActionLoading(org.id);
     try {
       await rejectOrganizer(org.id, reason);
-      toast.success("បានបដិសេធដោយជោគជ័យ");
-      await fetchOrganizers();
+      toast.success("Organizer rejected successfully!");
+      await fetchData();
     } catch (err) {
       console.error(err);
-      toast.error("បរាជ័យក្នុងការបដិសេធ");
+      toast.error("Failed to reject organizer");
     } finally {
       setActionLoading(null);
     }
@@ -91,16 +95,16 @@ export default function AdminOrganizersPage() {
 
   const handleSuspend = async (org) => {
     if (!org) return;
-    const reason = prompt("មូលហេតុនៃការផ្អាក់ (យ៉ាងហោចណាស់ ១០ តួអក្សរ):");
+    const reason = prompt("Reason for suspension (minimum 10 characters):");
     if (!reason || reason.length < 10) return;
     setActionLoading(org.id);
     try {
       await suspendOrganizer(org.id, reason);
-      toast.success("បានផ្អាក់ដោយជោគជ័យ");
-      await fetchOrganizers();
+      toast.success("Organizer suspended successfully!");
+      await fetchData();
     } catch (err) {
       console.error(err);
-      toast.error("បរាជ័យក្នុងការផ្អាក់");
+      toast.error("Failed to suspend organizer");
     } finally {
       setActionLoading(null);
     }
@@ -113,22 +117,14 @@ export default function AdminOrganizersPage() {
     return d.toISOString().slice(0, 10);
   };
 
-  const statusBadge = (s) => {
-    const map = {
-      verified: "success",
-      rejected: "danger",
-      pending: "warning",
-      suspended: "secondary",
-    };
+  const statusBadge = (status) => {
+    let label = status;
+    if (status === "verified") label = "Active";
     return (
-      <span className={`status-badge bg-${map[s] || "secondary"} text-white`}>
-        {s === "verified"
-          ? "Verified"
-          : s === "rejected"
-            ? "Rejected"
-            : s === "pending"
-              ? "Pending"
-              : "Suspended"}
+      <span
+        className={`status-badge ${status === "pending" ? "pending" : status === "verified" ? "active" : "rejected"}`}
+      >
+        {label.charAt(0).toUpperCase() + label.slice(1)}
       </span>
     );
   };
@@ -136,320 +132,523 @@ export default function AdminOrganizersPage() {
   if (!mounted) return null;
 
   return (
-    <>
+    <div className="space-y-6">
       <RoleGuard />
 
-      <PageHeader
-        title="ផ្ទៀងផ្ទាត់អ្នករៀបចំ"
-        subtitle="Approve or reject organizer verification requests"
-        actions={
-          <div className="d-flex gap-2">
-            {["all", "pending", "verified", "rejected"].map((s) => (
-              <button
-                key={s}
-                className={`btn ${filter === s ? "btn" : "btn-outline"}-${s === "pending" ? "warning" : s === "verified" ? "success" : s === "rejected" ? "danger" : "secondary"} pill`}
-                onClick={() => {
-                  setOffset(0);
-                  setFilter(s);
-                }}
-                disabled={loading}
-              >
-                {s.charAt(0).toUpperCase() + s.slice(1)}
-              </button>
-            ))}
-          </div>
-        }
-      />
+      {/* Page Header */}
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Organizer Applications</h1>
+          <p
+            style={{
+              color: "var(--color-text-secondary)",
+              fontSize: "0.875rem",
+              marginTop: "4px",
+            }}
+          >
+            Approve or reject organizer verification requests
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            className="btn-secondary"
+            onClick={fetchData}
+            disabled={loading}
+          >
+            <i
+              className={`bi bi-arrow-clockwise me-2 ${loading ? "animate-spin" : ""}`}
+            ></i>
+            Refresh
+          </button>
+          <button className="btn-primary">
+            <i className="bi bi-download me-2"></i>Export CSV
+          </button>
+        </div>
+      </div>
 
-      <div className={user?.role !== "admin" ? "opacity-50 pe-none" : ""}>
+      <div
+        className={
+          user?.role !== "admin" ? "opacity-50 pointer-events-none" : ""
+        }
+      >
         {error && (
-          <div className="alert alert-danger mb-3" role="alert">
+          <div
+            className="card"
+            style={{
+              marginBottom: "24px",
+              background: "rgba(255,77,77,0.1)",
+              border: "1px solid rgba(255,77,77,0.3)",
+            }}
+          >
             {error}
           </div>
         )}
-        <div className="admin-card p-3">
+
+        {/* Filter Tabs */}
+        <div className="filter-tabs">
+          {["all", "pending", "verified", "rejected"].map((status) => (
+            <button
+              key={status}
+              className={`filter-tab ${filter === status ? "active" : ""}`}
+              onClick={() => {
+                setOffset(0);
+                setFilter(status);
+              }}
+              disabled={loading}
+            >
+              {status.charAt(0).toUpperCase() + status.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        {/* Data Table */}
+        <div className="card" style={{ padding: "0" }}>
+          <div
+            style={{
+              padding: "20px",
+              borderBottom: "1px solid var(--color-border)",
+            }}
+          >
+            <div className="card-header" style={{ marginBottom: "0" }}>
+              <div className="card-title">Applications</div>
+              <button className="card-menu-btn">
+                <i className="bi bi-three-dots"></i>
+              </button>
+            </div>
+          </div>
+
           {loading && (
-            <div className="d-flex align-items-center gap-2 mb-3 text-muted small">
+            <div style={{ padding: "20px" }}>
               <div
-                className="spinner-border spinner-border-sm"
-                role="status"
-              ></div>
-              កំពុងផ្ទុកទិន្នន័យ...
+                className="flex items-center gap-2"
+                style={{
+                  color: "var(--color-text-secondary)",
+                  fontSize: "0.875rem",
+                }}
+              >
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                Loading organizers...
+              </div>
             </div>
           )}
-          <div className="table-responsive">
-            <table className="table align-middle mb-0">
-              <thead>
-                <tr>
-                  <th>អង្គការ</th>
-                  <th>អ្នកទំនាក់ទំនង</th>
-                  <th>អ៊ីមែល</th>
-                  <th>ទូរស័ព្ទ</th>
-                  <th>ថ្ងៃស្នើសុំ</th>
-                  <th>ស្ថានភាព</th>
-                  <th>សកម្មភាព</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
+
+          {!loading && !organizers.length ? (
+            <div
+              style={{
+                padding: "60px 20px",
+                textAlign: "center",
+                color: "var(--color-text-muted)",
+              }}
+            >
+              No organizers found
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="data-table" style={{ width: "100%" }}>
+                <thead>
                   <tr>
-                    <td colSpan={7} className="p-0">
-                      <Skeleton variant="table" lines={5} />
-                    </td>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Submission Date</th>
+                    <th>Actions</th>
                   </tr>
-                ) : !organizers.length ? (
-                  <tr>
-                    <td
-                      colSpan={7}
-                      className="text-center text-muted py-4"
-                    >
-                      គ្មានទិន្នន័យ
-                    </td>
-                  </tr>
-                ) : !organizers.length ? (
-                  <tr>
-                    <td
-                      colSpan={7}
-                      className="text-center text-muted py-4"
-                    >
-                      គ្មានទិន្នន័យ
-                    </td>
-                  </tr>
-                ) : (
-                  organizers.map((o) => (
-                    <tr key={o.id}>
+                </thead>
+                <tbody>
+                  {organizers.map((org) => (
+                    <tr key={org.id}>
                       <td>
-                        <strong>{o.organization_name}</strong>
-                      </td>
-                      <td>{o.contact_person || "—"}</td>
-                      <td>{o.email}</td>
-                      <td>{o.phone || "—"}</td>
-                      <td>{formatDate(o.submitted_at)}</td>
-                      <td>{statusBadge(o.status)}</td>
-                      <td>
-                        <div className="d-flex gap-1">
-                          <button
-                            className="btn btn-sm btn-outline-primary pill"
-                            onClick={() => viewDetail(o)}
-                            title="View Details"
-                            disabled={actionLoading === o.id}
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="avatar"
+                            style={{
+                              width: "36px",
+                              height: "36px",
+                              fontSize: "0.875rem",
+                            }}
                           >
-                            <i className="bi bi-eye"></i>
+                            {(
+                              org.contact_person ||
+                              org.organization_name ||
+                              "O"
+                            )
+                              .charAt(0)
+                              .toUpperCase()}
+                          </div>
+                          <div>
+                            <div
+                              style={{
+                                color: "var(--color-text-primary)",
+                                fontWeight: "500",
+                              }}
+                            >
+                              {org.organization_name}
+                            </div>
+                            {org.contact_person && (
+                              <div
+                                style={{
+                                  color: "var(--color-text-muted)",
+                                  fontSize: "0.75rem",
+                                }}
+                              >
+                                {org.contact_person}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span
+                          style={{
+                            color: "var(--color-text-secondary)",
+                            fontSize: "0.875rem",
+                          }}
+                        >
+                          {org.organizer_type || "—"}
+                        </span>
+                      </td>
+                      <td>{statusBadge(org.status)}</td>
+                      <td
+                        style={{
+                          color: "var(--color-text-secondary)",
+                          fontSize: "0.875rem",
+                        }}
+                      >
+                        {formatDate(org.submitted_at)}
+                      </td>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <button
+                            className="btn-secondary"
+                            style={{ padding: "4px 10px", fontSize: "0.75rem" }}
+                            onClick={() => viewDetail(org)}
+                            disabled={actionLoading === org.id}
+                          >
+                            View Details
                           </button>
-                          {o.status === "pending" && (
+                          {org.status === "pending" && (
                             <>
-                              <LoadingButton
-                                className="btn btn-sm btn-success pill"
-                                onClick={() => handleApprove(o)}
-                                title="Approve"
-                                loading={actionLoading === o.id}
+                              <button
+                                className="btn-approve"
+                                onClick={() => handleApprove(org)}
+                                disabled={actionLoading === org.id}
                               >
-                                <i className="bi bi-check-circle"></i>
-                              </LoadingButton>
-                              <LoadingButton
-                                className="btn btn-sm btn-danger pill"
-                                onClick={() => handleReject(o)}
-                                title="Reject"
-                                loading={actionLoading === o.id}
+                                Approve
+                              </button>
+                              <button
+                                className="btn-reject"
+                                onClick={() => handleReject(org)}
+                                disabled={actionLoading === org.id}
                               >
-                                <i className="bi bi-x-circle"></i>
-                              </LoadingButton>
+                                Reject
+                              </button>
                             </>
                           )}
-                          {o.status === "verified" && (
-                            <LoadingButton
-                              className="btn btn-sm btn-warning pill"
-                              onClick={() => handleSuspend(o)}
-                              title="Suspend"
-                              loading={actionLoading === o.id}
+                          {org.status === "verified" && (
+                            <button
+                              className="btn-reject"
+                              style={{
+                                borderColor: "var(--color-warning)",
+                                color: "var(--color-warning)",
+                              }}
+                              onClick={() => handleSuspend(org)}
+                              disabled={actionLoading === org.id}
                             >
-                              <i className="bi bi-pause-circle"></i>
-                            </LoadingButton>
+                              Suspend
+                            </button>
                           )}
                         </div>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
-        <div className="d-flex align-items-center justify-content-between mt-3">
-          <small className="text-muted">
-            ទិន្នន័យសរុប: <strong>{total}</strong>
+        {/* Pagination */}
+        <div
+          className="flex items-center justify-between"
+          style={{ marginTop: "16px" }}
+        >
+          <small style={{ color: "var(--color-text-secondary)" }}>
+            Total:{" "}
+            <strong style={{ color: "var(--color-text-primary)" }}>
+              {total}
+            </strong>
             {loading && (
-              <span className="ms-2 spinner-border spinner-border-sm"></span>
+              <span className="ml-2 w-4 h-4 border-2 border-current border-t-transparent rounded-full inline-block animate-spin"></span>
             )}
           </small>
-          <nav>
-            <ul className="pagination pagination-sm mb-0">
-              <li
-                className={`page-item ${offset === 0 || loading ? "disabled" : ""}`}
-              >
-                <button
-                  className="page-link"
-                  onClick={() => setOffset(Math.max(0, offset - limit))}
-                  disabled={offset === 0 || loading}
-                >
-                  Previous
-                </button>
-              </li>
-              <li className="page-item disabled">
-                <span className="page-link">
-                  {Math.floor(offset / limit) + 1}
-                </span>
-              </li>
-              <li
-                className={`page-item ${offset + limit >= total || loading ? "disabled" : ""}`}
-              >
-                <button
-                  className="page-link"
-                  onClick={() => setOffset(offset + limit)}
-                  disabled={offset + limit >= total || loading}
-                >
-                  Next
-                </button>
-              </li>
-            </ul>
-          </nav>
-        </div>
-
-        {/* Detail Modal (inline) */}
-        {detail && (
-          <>
-            <div
-              className="modal-backdrop fade show"
-              style={{ zIndex: 1040 }}
-              onClick={() => setDetail(null)}
-            ></div>
-            <div
-              className="modal fade show"
-              style={{ display: "block", zIndex: 1050 }}
-              aria-modal="true"
-              role="dialog"
+          <div className="flex items-center gap-2">
+            <button
+              className="btn-secondary"
+              style={{ padding: "6px 14px", fontSize: "0.8125rem" }}
+              onClick={() => setOffset(Math.max(0, offset - 20))}
+              disabled={offset === 0 || loading}
             >
-              <div className="modal-dialog modal-lg">
-                <div
-                  className="modal-content"
-                  style={{
-                    background: "var(--bg-card)",
-                    color: "var(--text-main)",
-                  }}
+              Previous
+            </button>
+            <span
+              className="status-badge active"
+              style={{
+                background: "var(--color-bg-input)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-text-primary)",
+              }}
+            >
+              {Math.floor(offset / 20) + 1}
+            </span>
+            <button
+              className="btn-secondary"
+              style={{ padding: "6px 14px", fontSize: "0.8125rem" }}
+              onClick={() => setOffset(offset + 20)}
+              disabled={offset + 20 >= total || loading}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Detail Modal */}
+      {detail && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+            onClick={() => setDetail(null)}
+          ></div>
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: "100vh",
+            }}
+          >
+            {" "}
+            <div
+              className="card"
+              style={{
+                width: "100%",
+                maxWidth: "550px",
+                borderRadius: "12px",
+                boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+                animation: "modalIn 0.3s ease-out",
+              }}
+            >
+              <style>{`
+                @keyframes modalIn {
+                  from {
+                    opacity: 0;
+                    transform: translateY(-20px) scale(0.95);
+                  }
+                  to {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                  }
+                }
+              `}</style>
+              <div
+                className="card-header"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  borderRadius: "12px 12px 0 0",
+                  padding: "1.25rem 1.5rem",
+                  margin: "-1px",
+                }}
+              >
+                <div className="card-title" style={{ color: "white" }}>
+                  <i className="bi bi-buildings-fill me-2"></i>
+                  Organizer Details
+                </div>
+                <button
+                  className="card-menu-btn"
+                  onClick={() => setDetail(null)}
+                  style={{ color: "white" }}
                 >
-                  <div
-                    className="modal-header border-bottom"
-                    style={{ borderColor: "var(--border)" }}
+                  <i className="bi bi-x-lg"></i>
+                </button>
+              </div>
+
+              <div className="space-y-4" style={{ padding: "1.5rem" }}>
+                <div>
+                  <label
+                    className="block mb-1"
+                    style={{
+                      fontSize: "0.75rem",
+                      color: "var(--color-text-muted)",
+                      fontWeight: "500",
+                    }}
                   >
-                    <h5 className="modal-title">ព័ត៌មានលម្អិត</h5>
-                    <button
-                      type="button"
-                      className="btn-close"
-                      onClick={() => setDetail(null)}
-                    ></button>
-                  </div>
-                  <div className="modal-body">
-                    <div className="row g-3">
-                      <div className="col-12">
-                        <h6 className="text-primary mb-3">
-                          អង្គការ Information
-                        </h6>
-                      </div>
-                      <div className="col-md-6">
-                        <label className="fw-bold small text-muted">
-                          អង្គការ Name
-                        </label>
-                        <p className="mb-0">{detail.organization_name}</p>
-                      </div>
-                      <div className="col-md-6">
-                        <label className="fw-bold small text-muted">
-                          Registration Number
-                        </label>
-                        <p className="mb-0">
-                          {detail.registration_number || "—"}
-                        </p>
-                      </div>
-                      <div className="col-md-6">
-                        <label className="fw-bold small text-muted">
-                          Contact Person
-                        </label>
-                        <p className="mb-0">
-                          {detail.contact_person || "—"}
-                        </p>
-                      </div>
-                      <div className="col-md-6">
-                        <label className="fw-bold small text-muted">
-                          Email
-                        </label>
-                        <p className="mb-0">{detail.email}</p>
-                      </div>
-                      <div className="col-md-6">
-                        <label className="fw-bold small text-muted">
-                          Phone
-                        </label>
-                        <p className="mb-0">{detail.phone || "—"}</p>
-                      </div>
-                      <div className="col-md-6">
-                        <label className="fw-bold small text-muted">
-                          Website
-                        </label>
-                        <p className="mb-0">{detail.website || "N/A"}</p>
-                      </div>
-                      <div className="col-12">
-                        <label className="fw-bold small text-muted">
-                          Address
-                        </label>
-                        <p className="mb-0">{detail.address || "—"}</p>
-                      </div>
-                      <div className="col-12">
-                        <label className="fw-bold small text-muted">
-                          Description
-                        </label>
-                        <p className="mb-0">{detail.description || "—"}</p>
-                      </div>
-                      <div className="col-md-6">
-                        <label className="fw-bold small text-muted">
-                          Request Date
-                        </label>
-                        <p className="mb-0">
-                          {formatDate(detail.submitted_at)}
-                        </p>
-                      </div>
-                      <div className="col-md-6">
-                        <label className="fw-bold small text-muted">
-                          Status
-                        </label>
-                        <p className="mb-0">{statusBadge(detail.status)}</p>
-                      </div>
-                      {detail.rejection_reason && (
-                        <div className="col-12">
-                          <label className="fw-bold small text-muted">
-                            Rejection Reason
-                          </label>
-                          <p className="mb-0">{detail.rejection_reason}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                    Organization Name
+                  </label>
                   <div
-                    className="modal-footer border-top"
-                    style={{ borderColor: "var(--border)" }}
+                    style={{
+                      color: "var(--color-text-primary)",
+                      fontSize: "1.125rem",
+                      fontWeight: "600",
+                    }}
                   >
-                    <button
-                      type="button"
-                      className="btn btn-secondary pill"
-                      onClick={() => setDetail(null)}
-                    >
-                      បិត
-                    </button>
+                    {detail.organization_name}
                   </div>
                 </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      className="block mb-1"
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "var(--color-text-muted)",
+                        fontWeight: "500",
+                      }}
+                    >
+                      Contact Person
+                    </label>
+                    <div style={{ color: "var(--color-text-primary)" }}>
+                      {detail.contact_person || "—"}
+                    </div>
+                  </div>
+                  <div>
+                    <label
+                      className="block mb-1"
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "var(--color-text-muted)",
+                        fontWeight: "500",
+                      }}
+                    >
+                      Email
+                    </label>
+                    <div style={{ color: "var(--color-text-primary)" }}>
+                      {detail.email}
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      className="block mb-1"
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "var(--color-text-muted)",
+                        fontWeight: "500",
+                      }}
+                    >
+                      Phone
+                    </label>
+                    <div style={{ color: "var(--color-text-primary)" }}>
+                      {detail.phone || "—"}
+                    </div>
+                  </div>
+                  <div>
+                    <label
+                      className="block mb-1"
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "var(--color-text-muted)",
+                        fontWeight: "500",
+                      }}
+                    >
+                      Submitted
+                    </label>
+                    <div style={{ color: "var(--color-text-primary)" }}>
+                      {formatDate(detail.submitted_at)}
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label
+                    className="block mb-1"
+                    style={{
+                      fontSize: "0.75rem",
+                      color: "var(--color-text-muted)",
+                      fontWeight: "500",
+                    }}
+                  >
+                    Status
+                  </label>
+                  <div>{statusBadge(detail.status)}</div>
+                </div>
+
+                {detail.document_url && (
+                  <div>
+                    <label
+                      className="block mb-1"
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "var(--color-text-muted)",
+                        fontWeight: "500",
+                      }}
+                    >
+                      Verification Document (ឯកសារបញ្ជាក់)
+                    </label>
+                    <div>
+                      <a
+                        href={detail.document_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-outline-primary btn-sm rounded-3 d-inline-flex align-items-center gap-2"
+                        style={{
+                          fontSize: "0.85rem",
+                          padding: "8px 16px",
+                          textDecoration: "none",
+                          borderRadius: "8px",
+                        }}
+                      >
+                        <i className="bi bi-file-earmark-pdf-fill"></i>
+                        មើលឯកសារ / View Document
+                      </a>
+                    </div>
+                  </div>
+                )}
+
+                {detail.rejection_reason && (
+                  <div>
+                    <label
+                      className="block mb-1"
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "var(--color-text-muted)",
+                        fontWeight: "500",
+                      }}
+                    >
+                      Rejection Reason
+                    </label>
+                    <div
+                      style={{
+                        color: "var(--color-negative)",
+                        fontSize: "0.875rem",
+                      }}
+                    >
+                      {detail.rejection_reason}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div
+                className="flex items-center justify-end gap-3 mt-4 pt-4"
+                style={{
+                  borderTop: "1px solid var(--color-border)",
+                  padding: "0 1.5rem 1.5rem",
+                }}
+              >
+                <button
+                  className="btn-secondary"
+                  onClick={() => setDetail(null)}
+                  style={{ borderRadius: "8px" }}
+                >
+                  Close
+                </button>
               </div>
             </div>
-          </>
-        )}
-      </div>
-    </>
+          </div>
+        </>
+      )}
+    </div>
   );
 }

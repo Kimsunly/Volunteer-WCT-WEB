@@ -17,6 +17,10 @@ export const authOptions = {
         GitHubProvider({
             clientId: process.env.GITHUB_CLIENT_ID || "",
             clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+            allowDangerousEmailAccountLinking: true,
+            httpOptions: {
+                timeout: 10000,
+            },
         }),
         CredentialsProvider({
             name: "Credentials",
@@ -61,8 +65,9 @@ export const authOptions = {
                 token.id = user.id;
                 token.role = user.role || "user";
             }
-            if (account?.provider) {
+            if (account) {
                 token.provider = account.provider;
+                token.accessToken = account.access_token;
             }
             return token;
         },
@@ -71,6 +76,7 @@ export const authOptions = {
                 session.user.id = token.id;
                 session.user.role = token.role;
                 session.user.provider = token.provider;
+                session.user.accessToken = token.accessToken;
             }
             return session;
         },
@@ -87,6 +93,7 @@ export const authOptions = {
     session: {
         strategy: "jwt",
     },
+    debug: process.env.NODE_ENV === "development",
     secret: process.env.NEXTAUTH_SECRET,
 };
 

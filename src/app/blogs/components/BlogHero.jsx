@@ -1,6 +1,11 @@
+"use client";
 import React from "react";
+import { useAuth } from "@/context/AuthContext";
+import Link from "next/link";
 
 export default function BlogHero() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   return (
     <section className="blog-hero">
       <div className="container">
@@ -22,7 +27,7 @@ export default function BlogHero() {
               និងរបៀបដែលអ្នកអាចបង្កើតការផ្លាស់ប្តូរវិជ្ជមានក្នុងសហគមន៍របស់អ្នក។
             </p>
 
-            <div className="blog-stats mt-4">
+            <div className="blog-stats mt-4 mb-4">
               <div className="stat-item">
                 <h3>150+</h3>
                 <p>អត្ថបទ</p>
@@ -36,6 +41,18 @@ export default function BlogHero() {
                 <p>ប្រភេទ</p>
               </div>
             </div>
+
+            {isAdmin && (
+              <div className="admin-actions mt-4">
+                <Link
+                  href="/admin/blogs"
+                  className="btn btn-primary btn-lg rounded-pill shadow-sm px-4"
+                >
+                  <i className="bi bi-plus-circle me-2"></i>
+                  បង្កើតអត្ថបទថ្មី
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Right image */}

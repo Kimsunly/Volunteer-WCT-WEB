@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 export default function HeroBanner() {
   return (
@@ -29,20 +30,20 @@ export default function HeroBanner() {
             </p>
 
             <div className="hero-action d-flex gap-3 justify-content-center mb-5">
-              <button
-                type="button"
+              <Link
+                href="/contact"
                 className="btn hero-contact btn-lg shadow-sm"
               >
                 <i className="bi bi-envelope-fill me-2" />
                 ទាក់ទងមកយើង
-              </button>
-              <button
-                type="button"
+              </Link>
+              <Link
+                href="/opportunities"
                 className="btn as-volunteer btn-lg shadow-sm"
               >
                 <i className="bi bi-people-fill me-2" />
                 ក្លាយជាអ្នកស្ម័គ្រចិត្ត
-              </button>
+              </Link>
             </div>
 
             <div className="hero-stats animate__animated animate__fadeInUp animate__delay-2s">

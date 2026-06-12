@@ -15,6 +15,11 @@ function extractToken(resp) {
         resp?.data?.accessToken,
         resp?.data?.jwt,
         resp?.data?.idToken,
+        // Sanctum API specific meta structure
+        resp?.meta?.access_token,
+        resp?.meta?.token,
+        resp?.data?.meta?.access_token,
+        resp?.data?.meta?.token,
         // nested under sessions/session
         resp?.sessions?.access_token,
         resp?.sessions?.accessToken,
@@ -29,10 +34,23 @@ function extractToken(resp) {
     return t || null;
 }
 
+function extractRefreshToken(resp) {
+    const candidates = [
+        resp?.refresh_token,
+        resp?.refreshToken,
+        resp?.data?.refresh_token,
+        resp?.data?.refreshToken,
+        resp?.meta?.refresh_token,
+        resp?.data?.meta?.refresh_token,
+    ];
+    const t = candidates.find((v) => typeof v === "string" && v.length > 0);
+    return t || null;
+}
+
 // User auth endpoints
 export async function login({ email, password }) {
     const { data } = await api.post("/api/auth/login", { email, password });
-    return { data, token: extractToken(data) };
+    return { data, token: extractToken(data), refreshToken: extractRefreshToken(data) };
 }
 
 export async function register(payload) {
@@ -69,7 +87,8 @@ export async function logout() {
 export async function me() {
     try {
         const { data } = await api.get("/api/auth/me");
-        return data;
+        // data is { success: true, data: { ...user... } }
+        return data?.data || null;
     } catch (err) {
         // Gracefully handle unauthenticated state (401 Unauthorized or 403 Forbidden)
         if (err?.response?.status === 401 || err?.response?.status === 403) return null;
@@ -85,4 +104,32 @@ export async function debugPing() {
 export async function debugEcho(payload) {
     const { data } = await api.post("/api/auth/debug/echo", payload);
     return data;
+}
+
+export async function verifyOtp({ email, otp }) {
+    const { data } = await api.post("/verify-otp", { email, otp });
+    return data;
+}
+
+export async function resendOtp({ email }) {
+    const { data } = await api.post("/resend-otp", { email });
+    return data;
+}
+
+export async function forgotPassword({ email }) {
+    const { data } = await api.post("/forgot-password", { email });
+    return data;
+}
+
+export async function resetPassword({ email, otp, password, password_confirmation }) {
+    const { data } = await api.post("/reset-password", { email, otp, password, password_confirmation });
+    return data;
+}
+
+export async function socialLogin({ provider, accessToken }) {
+    const { data } = await api.post("/api/auth/social-login", {
+        provider,
+        access_token: accessToken,
+    });
+    return { data, token: extractToken(data) };
 }

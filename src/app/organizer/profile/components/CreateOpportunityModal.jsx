@@ -4,13 +4,14 @@
 import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { listCategories } from "@/services/categories";
+import { showToast } from "@/components/common/CustomToaster";
 
 const INITIAL_FORM = {
   titleKh: "",
   titleEn: "",
   description: "",
   locationKh: "ភ្នំពេញ",
-  category: "environment", // environment | education | health | wildlife | childcare | agriculture | event
+  category_id: "", // populated from DB
   dateISO: "",
   visibility: "public", // public | private
   accessMode: "approval", // approval | invite
@@ -23,7 +24,7 @@ const INITIAL_FORM = {
   tasks: [],
   impactDescription: "",
   capacity: 1,
-  status: "active"
+  status: "active",
 };
 
 export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
@@ -33,11 +34,12 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
 
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState("");
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const [thumbnailIndex, setThumbnailIndex] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const errRef = useRef(null);
-  const objectUrlRef = useRef(null);
+  const objectUrlRefs = useRef([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -46,8 +48,8 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
         const data = await listCategories();
         setCategories(data);
         // Set default category if not set
-        if (!form.category && data.length > 0) {
-          setForm(f => ({ ...f, category: data[0].name.toLowerCase() }));
+        if (!form.category_id && data.length > 0) {
+          setForm((f) => ({ ...f, category_id: data[0].id }));
         }
       } catch (error) {
         console.error("Failed to load categories:", error);
@@ -65,12 +67,11 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
     setForm(INITIAL_FORM);
     setSkillInput("");
     setTaskInput("");
-    setImageFile(null);
-    setImagePreview("");
-    if (objectUrlRef.current) {
-      URL.revokeObjectURL(objectUrlRef.current);
-      objectUrlRef.current = null;
-    }
+    setImageFiles([]);
+    setImagePreviews([]);
+    setThumbnailIndex(0);
+    objectUrlRefs.current.forEach((url) => URL.revokeObjectURL(url));
+    objectUrlRefs.current = [];
     if (errRef.current) errRef.current.textContent = "";
   };
 
@@ -79,29 +80,64 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
     onClose();
   };
 
-  const onFile = (file) => {
-    const MAX = 2 * 1024 * 1024;
+  const MAX_IMAGES = 6;
+
+  const onFiles = (files) => {
+    const MAX = 5 * 1024 * 1024; // 5MB per file
     const OK_TYPES = ["image/jpeg", "image/png", "image/webp"];
-    if (!file) return;
-    if (!OK_TYPES.includes(file.type)) {
+
+    if (!files || files.length === 0) return;
+
+    const remaining = MAX_IMAGES - imageFiles.length;
+    if (remaining <= 0) {
       if (errRef.current)
-        errRef.current.textContent = "សូមផ្ទុកឡើងជារូបភាព PNG, JPG ឬ WebP។";
+        errRef.current.textContent = `អ្នកបានផ្ទុករូបភាពអតិបរមា ${MAX_IMAGES} រួចហើយ។`;
       return;
     }
-    if (file.size > MAX) {
-      if (errRef.current)
-        errRef.current.textContent = "រូបភាពមានទំហំធំពេក។ អតិបរមា 2 MB។";
-      return;
+
+    const newFiles = Array.from(files).slice(0, remaining);
+    const validFiles = [];
+    const newPreviews = [];
+
+    for (const file of newFiles) {
+      if (!OK_TYPES.includes(file.type)) {
+        if (errRef.current)
+          errRef.current.textContent = "សូមផ្ទុកឡើងជារូបភាព PNG, JPG ឬ WebP។";
+        continue;
+      }
+      if (file.size > MAX) {
+        if (errRef.current)
+          errRef.current.textContent = `រូបភាព ${file.name} មានទំហំធំពេក។ អតិបរមា 5 MB។`;
+        continue;
+      }
+
+      const url = URL.createObjectURL(file);
+      objectUrlRefs.current.push(url);
+      validFiles.push(file);
+      newPreviews.push(url);
     }
-    if (objectUrlRef.current) {
-      URL.revokeObjectURL(objectUrlRef.current);
-      objectUrlRef.current = null;
-    }
-    const url = URL.createObjectURL(file);
-    objectUrlRef.current = url;
-    setImageFile(file);
-    setImagePreview(url);
+
+    setImageFiles((prev) => [...prev, ...validFiles]);
+    setImagePreviews((prev) => [...prev, ...newPreviews]);
     if (errRef.current) errRef.current.textContent = "";
+  };
+
+  const removeImage = (index) => {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => {
+      const urlToRemove = prev[index];
+      URL.revokeObjectURL(urlToRemove);
+      objectUrlRefs.current = objectUrlRefs.current.filter(
+        (url) => url !== urlToRemove,
+      );
+      return prev.filter((_, i) => i !== index);
+    });
+    // Reset thumbnail index: if removed image was thumbnail, move to 0; if after, shift down
+    setThumbnailIndex((prev) => {
+      if (prev === index) return 0;
+      if (prev > index) return prev - 1;
+      return prev;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -111,22 +147,39 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
     if (!form.titleKh) missing.push("ចំណងជើង (KH)");
     if (!form.description) missing.push("ពិពណ៌នា");
     if (!form.locationKh) missing.push("ទីតាំង");
-    if (!form.category) missing.push("ប្រភេទ");
+    if (!form.category_id) missing.push("ប្រភេទ");
     if (!form.dateISO) missing.push("កាលបរិច្ឆេទ");
     if (!form.capacity) missing.push("ចំនួនមុខតំណែង");
     if (!form.status) missing.push("ស្ថានភាព");
 
     if (missing.length > 0) {
-      alert(`សូមបំពេញ៖ ${missing.join(", ")}`);
+      showToast.error(`សូមបំពេញ៖ ${missing.join(", ")}`, "ខ្វះខាតព័ត៌មាន");
       return;
+    }
+
+    if (form.visibility === "private") {
+      if (!form.accessCode || !form.accessCode.trim()) {
+        showToast.error("សូមបញ្ចូលកូដសម្ងាត់សម្រាប់កម្មវិធីឯកជន", "ខ្វះខាតព័ត៌មាន");
+        return;
+      }
+      if (form.accessCode.trim().length < 8) {
+        showToast.error("កូដសម្ងាត់ត្រូវតែមានយ៉ាងតិច ៨ ខ្ទង់", "កូដសម្ងាត់ខ្លីពេក");
+        return;
+      }
     }
     try {
       setSubmitting(true);
+      // Reorder imageFiles so thumbnail comes first
+      const reorderedFiles = [...imageFiles];
+      if (thumbnailIndex > 0 && thumbnailIndex < reorderedFiles.length) {
+        const [thumb] = reorderedFiles.splice(thumbnailIndex, 1);
+        reorderedFiles.unshift(thumb);
+      }
       await onSubmit({
         ...form,
-        imageFile,
-        imagePreview,
-        dateKh: new Date(form.dateISO).toLocaleDateString("km-KH"), // simple conversion
+        imageFiles: reorderedFiles,
+        thumbnailIndex: 0, // after reorder, thumbnail is always index 0
+        dateKh: new Date(form.dateISO).toLocaleDateString("km-KH"),
         status: form.status,
       });
     } finally {
@@ -153,38 +206,34 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
         style={{ zIndex: 1 }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="modal-content border-0 shadow-lg rounded-4">
+        <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
           {/* Header */}
-          <div
-            className="modal-header p-4 text-white"
-            style={{
-              background: "linear-gradient(90deg, #ff416c, #ff4b2b)",
-              borderBottom: "none",
-            }}
-          >
-            <h5 className="modal-title d-flex align-items-center gap-2">
-              <i className="bi bi-briefcase-fill"></i> ឱកាសការងារថ្មី
+          <div className="modal-header p-4 text-white d-flex align-items-center justify-content-between">
+            <h5 className="modal-title d-flex align-items-center gap-2 mb-0">
+              <i className="bi bi-briefcase-fill fs-4"></i> ឱកាសការងារថ្មី (New Opportunity)
             </h5>
             <button
               type="button"
-              className="btn-close btn-close-white"
+              className="btn-close-custom"
               aria-label="Close"
               onClick={handleClose}
-            ></button>
+            >
+              <i className="bi bi-x-lg"></i>
+            </button>
           </div>
 
           {/* Body */}
           <form className="needs-validation" noValidate onSubmit={handleSubmit}>
             <div className="modal-body p-4">
               {/* Titles */}
-              <div className="mb-3">
-                <label className="form-label fw-medium" htmlFor="opTitleKh">
-                  ចំណងជើងការងារ (KH)
+              <div className="mb-4">
+                <label className="form-label fw-bold" htmlFor="opTitleKh">
+                  ចំណងជើងការងារ (KH) <span className="text-danger">*</span>
                 </label>
                 <input
                   id="opTitleKh"
                   type="text"
-                  className="form-control form-control-lg"
+                  className="form-control"
                   placeholder="ឧ. មន្ត្រីផ្សព្វផ្សាយសហគមន៍"
                   value={form.titleKh}
                   onChange={(e) =>
@@ -194,14 +243,14 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
                 />
               </div>
 
-              <div className="mb-3">
-                <label className="form-label fw-medium" htmlFor="opTitleEn">
+              <div className="mb-4">
+                <label className="form-label fw-bold" htmlFor="opTitleEn">
                   Job Title (EN)
                 </label>
                 <input
                   id="opTitleEn"
                   type="text"
-                  className="form-control form-control-lg"
+                  className="form-control"
                   placeholder="e.g., Community Outreach Officer"
                   value={form.titleEn}
                   onChange={(e) =>
@@ -211,15 +260,15 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
               </div>
 
               {/* Description */}
-              <div className="mb-3">
-                <label className="form-label fw-medium" htmlFor="opDescription">
-                  ពិពណ៌នា
+              <div className="mb-4">
+                <label className="form-label fw-bold" htmlFor="opDescription">
+                  ពិពណ៌នាការងារ <span className="text-danger">*</span>
                 </label>
                 <textarea
                   id="opDescription"
-                  className="form-control form-control-lg"
+                  className="form-control text-area-modern"
                   rows={4}
-                  placeholder="ពិពណ៌នាខ្លីអំពីតួនាទី..."
+                  placeholder="ពិពណ៌នាខ្លីអំពីតួនាទី និងទំនួលខុសត្រូវរបស់សមាជិកស្ម័គ្រចិត្ត..."
                   value={form.description}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, description: e.target.value }))
@@ -229,30 +278,30 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
               </div>
 
               {/* Location & date */}
-              <div className="row g-3 mb-3">
+              <div className="row g-3 mb-4">
                 <div className="col-md-6">
-                  <label className="form-label fw-medium" htmlFor="opLocation">
-                    ទីតាំង
+                  <label className="form-label fw-bold" htmlFor="opLocation">
+                    ទីតាំង <span className="text-danger">*</span>
                   </label>
                   <input
                     id="opLocation"
                     type="text"
-                    className="form-control form-control-lg"
+                    className="form-control"
                     value={form.locationKh}
                     onChange={(e) =>
-                      setForm((f) => ({ ...f, locationKh: e.target.value }))
+                       setForm((f) => ({ ...f, locationKh: e.target.value }))
                     }
                     required
                   />
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label fw-medium" htmlFor="opDateISO">
-                    កាលបរិច្ឆេទចាប់ផ្តើម
+                  <label className="form-label fw-bold" htmlFor="opDateISO">
+                    កាលបរិច្ឆេទចាប់ផ្តើម <span className="text-danger">*</span>
                   </label>
                   <input
                     id="opDateISO"
                     type="date"
-                    className="form-control form-control-lg"
+                    className="form-control"
                     value={form.dateISO}
                     onChange={(e) =>
                       setForm((f) => ({ ...f, dateISO: e.target.value }))
@@ -263,23 +312,25 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
               </div>
 
               {/* Category */}
-              <div className="mb-3">
-                <label className="form-label fw-medium" htmlFor="opCategory">
-                  ប្រភេទ / Category
+              <div className="mb-4">
+                <label className="form-label fw-bold" htmlFor="opCategory">
+                  ប្រភេទ / Category <span className="text-danger">*</span>
                 </label>
                 <select
                   id="opCategory"
-                  className="form-select form-select-lg"
-                  value={form.category}
+                  className="form-select"
+                  value={form.category_id}
                   onChange={(e) =>
-                    setForm((f) => ({ ...f, category: e.target.value }))
+                    setForm((f) => ({ ...f, category_id: Number(e.target.value) }))
                   }
                   required
                   disabled={loadingCategories}
                 >
-                  <option value="" disabled>{loadingCategories ? "កំពុងផ្ទុក..." : "ជ្រើសរើសប្រភេទ"}</option>
+                  <option value="" disabled>
+                    {loadingCategories ? "កំពុងផ្ទុក..." : "ជ្រើសរើសប្រភេទ"}
+                  </option>
                   {categories.map((cat) => (
-                    <option key={cat.id} value={cat.name.toLowerCase()}>
+                    <option key={cat.id} value={cat.id}>
                       {cat.name}
                     </option>
                   ))}
@@ -287,60 +338,58 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
               </div>
 
               {/* Visibility */}
-              <div className="mb-3">
-                <label className="form-label fw-medium">
+              <div className="mb-4">
+                <label className="form-label fw-bold mb-2">
                   ការមើលឃើញ / Visibility
                 </label>
-                <div className="d-flex flex-wrap gap-3">
-                  <div className="form-check">
+                <div className="d-flex flex-row gap-3">
+                  <div
+                    className={`visibility-card ${form.visibility === "public" ? "active" : ""}`}
+                    onClick={() => setForm((f) => ({ ...f, visibility: "public" }))}
+                  >
                     <input
-                      className="form-check-input"
                       type="radio"
                       id="visPublic"
                       name="vis"
                       checked={form.visibility === "public"}
-                      onChange={() =>
-                        setForm((f) => ({ ...f, visibility: "public" }))
-                      }
+                      onChange={() => {}}
                     />
-                    <label className="form-check-label" htmlFor="visPublic">
-                      សាធារណៈ (Public)
-                    </label>
+                    <div>
+                      <div className="fw-bold text-dark fs-6">សាធារណៈ (Public)</div>
+                      <div className="small text-muted" style={{ fontSize: "11px" }}>បង្ហាញជាសាធារណៈសម្រាប់គ្រប់គ្នា</div>
+                    </div>
                   </div>
-                  <div className="form-check">
+                  <div
+                    className={`visibility-card ${form.visibility === "private" ? "active" : ""}`}
+                    onClick={() => setForm((f) => ({ ...f, visibility: "private" }))}
+                  >
                     <input
-                      className="form-check-input"
                       type="radio"
                       id="visPrivate"
                       name="vis"
                       checked={form.visibility === "private"}
-                      onChange={() =>
-                        setForm((f) => ({ ...f, visibility: "private" }))
-                      }
+                      onChange={() => {}}
                     />
-                    <label className="form-check-label" htmlFor="visPrivate">
-                      ឯកជន (Private)
-                    </label>
+                    <div>
+                      <div className="fw-bold text-dark fs-6">ឯកជន (Private)</div>
+                      <div className="small text-muted" style={{ fontSize: "11px" }}>ទាមទារកូដអញ្ជើញ ឬការអនុម័ត</div>
+                    </div>
                   </div>
                 </div>
-                <small className="text-muted d-block mt-1">
-                  Organizer គ្រប់គ្រងការចុះឈ្មោះសម្រាប់ឯកជន និងអាចទាមទារអនុម័ត
-                  ឬកូដអញ្ជើញ។
-                </small>
               </div>
 
               {form.visibility === "private" && (
-                <div className="row g-3 mb-3">
+                <div className="row g-3 mb-4 animate-slide-down">
                   <div className="col-md-6">
                     <label
-                      className="form-label fw-medium"
+                      className="form-label fw-bold"
                       htmlFor="accessMode"
                     >
                       របៀបចុះឈ្មោះ
                     </label>
                     <select
                       id="accessMode"
-                      className="form-select form-select-lg"
+                      className="form-select"
                       value={form.accessMode}
                       onChange={(e) =>
                         setForm((f) => ({ ...f, accessMode: e.target.value }))
@@ -352,7 +401,7 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
                   </div>
                   <div className="col-md-6">
                     <label
-                      className="form-label fw-medium"
+                      className="form-label fw-bold"
                       htmlFor="accessCode"
                     >
                       កូដឬសេចក្តីណែនាំ
@@ -360,14 +409,14 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
                     <input
                       id="accessCode"
                       type="text"
-                      className="form-control form-control-lg"
+                      className="form-control"
                       placeholder="ឧ. CODE-2026"
                       value={form.accessCode}
                       onChange={(e) =>
                         setForm((f) => ({ ...f, accessCode: e.target.value }))
                       }
                     />
-                    <small className="text-muted">
+                    <small className="text-muted d-block mt-1" style={{ fontSize: "11px" }}>
                       ចែករំលែកតែជាមួយអ្នកទទួលអញ្ជើញ (បើមាន)
                     </small>
                   </div>
@@ -375,15 +424,15 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
               )}
 
               {/* Capacity & Status */}
-              <div className="row g-3 mb-3">
+              <div className="row g-3 mb-4">
                 <div className="col-md-6">
-                  <label className="form-label fw-medium" htmlFor="capacity">
-                    ចំនួនមុខតំណែង
+                  <label className="form-label fw-bold" htmlFor="capacity">
+                    ចំនួនមុខតំណែងស្វែងរក <span className="text-danger">*</span>
                   </label>
                   <input
                     id="capacity"
                     type="number"
-                    className="form-control form-control-lg"
+                    className="form-control"
                     min={1}
                     value={form.capacity}
                     onChange={(e) =>
@@ -396,12 +445,12 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
                   />
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label fw-medium" htmlFor="status">
-                    ស្ថានភាព
+                  <label className="form-label fw-bold" htmlFor="status">
+                    ស្ថានភាពការងារ <span className="text-danger">*</span>
                   </label>
                   <select
                     id="status"
-                    className="form-select form-select-lg"
+                    className="form-select"
                     value={form.status}
                     onChange={(e) =>
                       setForm((f) => ({ ...f, status: e.target.value }))
@@ -418,16 +467,16 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
                 </div>
               </div>
 
-              {/* Extra Info: Transport, Housing, Meals */}
-              <div className="row g-3 mb-3">
-                <div className="col-md-4">
-                  <label className="form-label fw-medium" htmlFor="timeRange">
+              {/* Logistic Info: Time, Transport, Housing, Meals */}
+              <div className="row g-3 mb-4">
+                <div className="col-md-6">
+                  <label className="form-label fw-bold" htmlFor="timeRange">
                     ពេលវេលា (ឧ. 8:00 AM - 5:00 PM)
                   </label>
                   <input
                     id="timeRange"
                     type="text"
-                    className="form-control form-control-lg"
+                    className="form-control"
                     placeholder="8:00 AM - 5:00 PM"
                     value={form.timeRange}
                     onChange={(e) =>
@@ -435,44 +484,44 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
                     }
                   />
                 </div>
-                <div className="col-md-4">
-                  <label className="form-label fw-medium" htmlFor="transport">
+                <div className="col-md-6">
+                  <label className="form-label fw-bold" htmlFor="transport">
                     ការដឹកជញ្ជូន
                   </label>
                   <input
                     id="transport"
                     type="text"
-                    className="form-control form-control-lg"
-                    placeholder="ឧ. មានឡានដឹក"
+                    className="form-control"
+                    placeholder="ឧ. មានឡានដឹកបញ្ជូន"
                     value={form.transport}
                     onChange={(e) =>
                       setForm((f) => ({ ...f, transport: e.target.value }))
                     }
                   />
                 </div>
-                <div className="col-md-4">
-                  <label className="form-label fw-medium" htmlFor="housing">
+                <div className="col-md-6">
+                  <label className="form-label fw-bold" htmlFor="housing">
                     កន្លែងស្នាក់នៅ
                   </label>
                   <input
                     id="housing"
                     type="text"
-                    className="form-control form-control-lg"
-                    placeholder="ឧ. ផ្តល់កន្លែងស្នាក់នៅ"
+                    className="form-control"
+                    placeholder="ឧ. ផ្តល់កន្លែងស្នាក់នៅសមរម្យ"
                     value={form.housing}
                     onChange={(e) =>
                       setForm((f) => ({ ...f, housing: e.target.value }))
                     }
                   />
                 </div>
-                <div className="col-md-4">
-                  <label className="form-label fw-medium" htmlFor="meals">
-                    អាហារ
+                <div className="col-md-6">
+                  <label className="form-label fw-bold" htmlFor="meals">
+                    អាហារនិងភេសជ្ជៈ
                   </label>
                   <input
                     id="meals"
                     type="text"
-                    className="form-control form-control-lg"
+                    className="form-control"
                     placeholder="ឧ. ផ្តល់អាហារថ្ងៃត្រង់"
                     value={form.meals}
                     onChange={(e) =>
@@ -483,11 +532,15 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
               </div>
 
               {/* Advanced Details: Skills, Tasks, Impact */}
-              <div className="border-top pt-3 mt-3">
-                <h6 className="fw-bold mb-3 text-primary">ព័ត៌មានលម្អិតបន្ថែម (Advanced)</h6>
+              <div className="section-divider">
+                <h6 className="section-title">
+                  ព័ត៌មានលម្អិតបន្ថែម (Advanced Details)
+                </h6>
 
-                <div className="mb-3">
-                  <label className="form-label fw-medium">ជំនាញដែលត្រូវការ (Skills)</label>
+                <div className="mb-4">
+                  <label className="form-label fw-bold">
+                    ជំនាញដែលត្រូវការ (Required Skills)
+                  </label>
                   <div className="input-group mb-2">
                     <input
                       type="text"
@@ -496,21 +549,27 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
                       value={skillInput}
                       onChange={(e) => setSkillInput(e.target.value)}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
+                        if (e.key === "Enter") {
                           e.preventDefault();
                           if (skillInput.trim()) {
-                            setForm(f => ({ ...f, skills: [...f.skills, skillInput.trim()] }));
+                            setForm((f) => ({
+                              ...f,
+                              skills: [...f.skills, skillInput.trim()],
+                            }));
                             setSkillInput("");
                           }
                         }
                       }}
                     />
                     <button
-                      className="btn btn-outline-primary"
+                      className="btn btn-tag-add"
                       type="button"
                       onClick={() => {
                         if (skillInput.trim()) {
-                          setForm(f => ({ ...f, skills: [...f.skills, skillInput.trim()] }));
+                          setForm((f) => ({
+                            ...f,
+                            skills: [...f.skills, skillInput.trim()],
+                          }));
                           setSkillInput("");
                         }
                       }}
@@ -518,45 +577,61 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
                       <i className="bi bi-plus-lg"></i>
                     </button>
                   </div>
-                  <div className="d-flex flex-wrap gap-2">
+                  <div className="d-flex flex-wrap gap-2 mt-2">
                     {form.skills.map((s, i) => (
-                      <span key={i} className="badge bg-primary-subtle text-primary border border-primary-subtle d-flex align-items-center gap-2 px-3 py-2 rounded-pill">
+                      <span
+                        key={i}
+                        className="badge bg-primary-subtle text-primary border border-primary-subtle d-flex align-items-center gap-2 px-3 py-2 rounded-pill badge-tag"
+                      >
                         {s}
                         <i
-                          className="bi bi-x-lg cursor-pointer"
+                          className="bi bi-x-circle-fill cursor-pointer text-primary"
                           role="button"
-                          onClick={() => setForm(f => ({ ...f, skills: f.skills.filter((_, idx) => idx !== i) }))}
+                          onClick={() =>
+                            setForm((f) => ({
+                              ...f,
+                              skills: f.skills.filter((_, idx) => idx !== i),
+                            }))
+                          }
                         ></i>
                       </span>
                     ))}
                   </div>
                 </div>
 
-                <div className="mb-3">
-                  <label className="form-label fw-medium">ភារកិច្ចសំខាន់ៗ (Tasks)</label>
+                <div className="mb-4">
+                  <label className="form-label fw-bold">
+                    ភារកិច្ចចម្បងស្ម័គ្រចិត្ត (Main Tasks)
+                  </label>
                   <div className="input-group mb-2">
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="ឧ. រៀបចំកម្មវិធី"
+                      placeholder="ឧ. រៀបចំសម្របសម្រួលកម្មវិធី"
                       value={taskInput}
                       onChange={(e) => setTaskInput(e.target.value)}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
+                        if (e.key === "Enter") {
                           e.preventDefault();
                           if (taskInput.trim()) {
-                            setForm(f => ({ ...f, tasks: [...f.tasks, taskInput.trim()] }));
+                            setForm((f) => ({
+                              ...f,
+                              tasks: [...f.tasks, taskInput.trim()],
+                            }));
                             setTaskInput("");
                           }
                         }
                       }}
                     />
                     <button
-                      className="btn btn-outline-primary"
+                      className="btn btn-tag-add"
                       type="button"
                       onClick={() => {
                         if (taskInput.trim()) {
-                          setForm(f => ({ ...f, tasks: [...f.tasks, taskInput.trim()] }));
+                          setForm((f) => ({
+                            ...f,
+                            tasks: [...f.tasks, taskInput.trim()],
+                          }));
                           setTaskInput("");
                         }
                       }}
@@ -564,48 +639,70 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
                       <i className="bi bi-plus-lg"></i>
                     </button>
                   </div>
-                  <div className="d-flex flex-wrap gap-2">
+                  <div className="d-flex flex-wrap gap-2 mt-2">
                     {form.tasks.map((t, i) => (
-                      <span key={i} className="badge bg-info-subtle text-info border border-info-subtle d-flex align-items-center gap-2 px-3 py-2 rounded-pill">
+                      <span
+                        key={i}
+                        className="badge bg-info-subtle text-info border border-info-subtle d-flex align-items-center gap-2 px-3 py-2 rounded-pill badge-tag"
+                      >
                         {t}
                         <i
-                          className="bi bi-x-lg cursor-pointer"
+                          className="bi bi-x-circle-fill cursor-pointer text-info"
                           role="button"
-                          onClick={() => setForm(f => ({ ...f, tasks: f.tasks.filter((_, idx) => idx !== i) }))}
+                          onClick={() =>
+                            setForm((f) => ({
+                              ...f,
+                              tasks: f.tasks.filter((_, idx) => idx !== i),
+                            }))
+                          }
                         ></i>
                       </span>
                     ))}
                   </div>
                 </div>
 
-                <div className="mb-3">
-                  <label className="form-label fw-medium" htmlFor="impactDescription">ផលប៉ះពាល់នៃកម្មវិធី (Impact Description)</label>
+                <div className="mb-4">
+                  <label
+                    className="form-label fw-bold"
+                    htmlFor="impactDescription"
+                  >
+                    ផលប៉ះពាល់នៃការចូលរួម (Impact Description)
+                  </label>
                   <textarea
                     id="impactDescription"
-                    className="form-control"
+                    className="form-control text-area-modern"
                     rows={3}
-                    placeholder="ពិពណ៌នាអំពីផលប៉ះពាល់ដែលអ្នកស្ម័គ្រចិត្តនឹងបង្កើត..."
+                    placeholder="សរសេររៀបរាប់អំពីអត្ថប្រយោជន៍ ឬឥទ្ធិពលវិជ្ជមាននៃការចូលរួមរបស់សមាជិកស្ម័គ្រចិត្ត..."
                     value={form.impactDescription}
-                    onChange={(e) => setForm(f => ({ ...f, impactDescription: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        impactDescription: e.target.value,
+                      }))
+                    }
                   />
                 </div>
               </div>
 
               {/* Image upload */}
-              <div className="mb-3">
-                <label className="form-label fw-medium">
-                  រូបភាពគម្រូ / គម្រោង
+              <div className="mb-4">
+                <label className="form-label fw-bold d-flex align-items-center justify-content-between">
+                  <span>រូបថតសកម្មភាព (Activity Photos)</span>
+                  <span className={`badge ${imagePreviews.length >= MAX_IMAGES ? 'bg-danger' : 'bg-success'}`} style={{ borderRadius: "100px" }}>
+                    {imagePreviews.length}/{MAX_IMAGES} រូប
+                  </span>
                 </label>
                 <div
-                  className="dropzone p-4 border border-dashed rounded-3 text-center"
-                  role="button"
-                  tabIndex={0}
-                  style={{ cursor: "pointer" }}
-                  onClick={() =>
-                    document.getElementById("opImageInput")?.click()
-                  }
+                  className="premium-dropzone text-center"
+                  role={imagePreviews.length < MAX_IMAGES ? "button" : undefined}
+                  tabIndex={imagePreviews.length < MAX_IMAGES ? 0 : -1}
+                  style={{ cursor: imagePreviews.length >= MAX_IMAGES ? "not-allowed" : "pointer" }}
+                  onClick={() => {
+                    if (imagePreviews.length < MAX_IMAGES)
+                      document.getElementById("opImageInput")?.click();
+                  }}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
+                    if ((e.key === "Enter" || e.key === " ") && imagePreviews.length < MAX_IMAGES) {
                       e.preventDefault();
                       document.getElementById("opImageInput")?.click();
                     }
@@ -613,13 +710,21 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={(e) => {
                     e.preventDefault();
-                    const file = e.dataTransfer.files?.[0];
-                    if (file) onFile(file);
+                    if (imagePreviews.length < MAX_IMAGES) {
+                      const files = e.dataTransfer.files;
+                      if (files) onFiles(files);
+                    }
                   }}
                 >
-                  <i className="bi bi-cloud-arrow-up-fill fs-3 mb-2 text-muted"></i>
-                  <div className="small text-muted">
-                    ចុចដើម្បីជ្រើសរើស ឬទាញរូបភាពទីនេះ
+                  <i className="bi bi-images fs-3 mb-2 text-success"></i>
+                  <div className="fw-bold text-dark" style={{ fontSize: "14px" }}>
+                    {imagePreviews.length >= MAX_IMAGES
+                      ? `បានដល់ចំនួនអតិបរមា ${MAX_IMAGES} រូបហើយ`
+                      : "ទាញរូបភាពមកទីនេះ ឬចុចជ្រើសរើសឯកសារ"
+                    }
+                  </div>
+                  <div className="small text-muted mt-1" style={{ fontSize: "11px" }}>
+                    គាំទ្រប្រភេទ JPEG, PNG ឬ WebP (ទំហំអតិបរមា 5MB ក្នុងមួយសន្លឹក)
                   </div>
                 </div>
 
@@ -628,52 +733,80 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
                   id="opImageInput"
                   className="d-none"
                   accept="image/*"
-                  onChange={(e) => onFile(e.target.files?.[0])}
+                  multiple
+                  disabled={imagePreviews.length >= MAX_IMAGES}
+                  onChange={(e) => onFiles(e.target.files)}
                 />
 
-                {imagePreview && (
+                {imagePreviews.length > 0 && (
                   <div className="mt-3">
-                    <div className="d-flex align-items-center gap-3">
-                      {/* Use <img> for blob: previews to avoid next/image restrictions */}
-                      <img
-                        src={imagePreview}
-                        className="img-thumbnail rounded"
-                        alt="Preview"
-                        width={80}
-                        height={80}
-                        style={{ objectFit: "cover" }}
-                      />
-                      <div className="flex-grow-1">
-                        <div className="small fw-semibold">
-                          {imageFile?.name}
-                        </div>
-                        <div className="small text-muted">
-                          {imageFile?.size
-                            ? (imageFile.size / 1024).toFixed(0)
-                            : 0}{" "}
-                          KB • {imageFile?.type}
-                        </div>
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-outline-danger mt-2"
-                          onClick={() => {
-                            setImageFile(null);
-                            setImagePreview("");
-                            if (objectUrlRef.current) {
-                              URL.revokeObjectURL(objectUrlRef.current);
-                              objectUrlRef.current = null;
-                            }
-                            if (errRef.current) errRef.current.textContent = "";
-                          }}
-                        >
-                          Remove
-                        </button>
-                      </div>
+                    <div className="small fw-semibold text-success mb-2" style={{ fontSize: "12px" }}>
+                      <i className="bi bi-hand-index-thumb me-1"></i>
+                      ចុចលើរូបភាពដើម្បីជ្រើសរើសជា Thumbnail (រូបតំណាងប័ណ្ណ)
                     </div>
+                    <div className="row g-2">
+                      {imagePreviews.map((preview, index) => (
+                        <div className="col-4" key={index}>
+                          <div
+                            className={`photo-preview-card ${index === thumbnailIndex ? "thumbnail-selected" : ""}`}
+                            onClick={() => setThumbnailIndex(index)}
+                            role="button"
+                            title={index === thumbnailIndex ? "Thumbnail បច្ចុប្បន្ន" : "ចុចដើម្បីជ្រើសជា Thumbnail"}
+                          >
+                            <img
+                              src={preview}
+                              className="img-thumbnail rounded-3 w-100"
+                              alt={`Preview ${index + 1}`}
+                              style={{ height: "110px", objectFit: "cover", cursor: "pointer" }}
+                            />
+                            {/* Thumbnail crown badge */}
+                            {index === thumbnailIndex && (
+                              <div
+                                className="position-absolute top-0 start-0 m-1"
+                                style={{ zIndex: 3 }}
+                              >
+                                <span
+                                  className="badge"
+                                  style={{
+                                    background: "linear-gradient(135deg, #2d6a4f, #40916c)",
+                                    fontSize: "10px",
+                                    borderRadius: "8px",
+                                    padding: "3px 7px",
+                                  }}
+                                >
+                                  <i className="bi bi-image-fill me-1"></i>Thumbnail
+                                </span>
+                              </div>
+                            )}
+                            {/* Remove button */}
+                            <button
+                              type="button"
+                              className="remove-btn position-absolute top-0 end-0 m-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeImage(index);
+                              }}
+                            >
+                              <i className="bi bi-x-lg"></i>
+                            </button>
+                            {/* Index badge (shown when not thumbnail) */}
+                            {index !== thumbnailIndex && (
+                              <div className="position-absolute bottom-0 start-0 m-1">
+                                <span className="badge bg-dark bg-opacity-50 small">{index + 1}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <small className="text-muted mt-2 d-block" style={{ fontSize: "12px" }}>
+                      <i className="bi bi-info-circle me-1 text-success"></i>
+                      រូបភាពដែលមានស្លាក <strong>Thumbnail</strong> នឹងបង្ហាញជាគម្របប័ណ្ណឱកាស។
+                    </small>
                   </div>
                 )}
 
-                <div className="invalid-feedback d-block" ref={errRef}></div>
+                <div className="invalid-feedback d-block mt-2 text-danger" ref={errRef}></div>
               </div>
             </div>
 
@@ -681,19 +814,23 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
             <div className="modal-footer border-0 justify-content-end p-4">
               <button
                 type="button"
-                className="btn btn-light btn-lg rounded-pill"
+                className="btn-premium-cancel me-2"
                 onClick={handleClose}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="btn btn-primary btn-lg rounded-pill px-4"
+                className="btn-premium-submit"
                 disabled={submitting}
               >
                 {submitting ? (
                   <>
-                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
                     កំពុងបញ្ជូន...
                   </>
                 ) : (
@@ -706,7 +843,211 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
           </form>
         </div>
       </div>
+
+      <style jsx>{`
+        .modal-backdrop {
+          backdrop-filter: blur(8px) !important;
+          background-color: rgba(17, 24, 39, 0.4) !important;
+        }
+        .modal-header {
+          background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
+          border-bottom: none;
+        }
+        .btn-close-custom {
+          background: transparent;
+          border: none;
+          color: white;
+          opacity: 0.8;
+          font-size: 1.25rem;
+          transition: all 0.2s ease;
+          padding: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .btn-close-custom:hover {
+          opacity: 1;
+          transform: rotate(90deg);
+        }
+        .form-label {
+          color: #374151;
+          font-size: 13.5px;
+          margin-bottom: 6px;
+        }
+        .form-control, .form-select {
+          background-color: #f9fafb;
+          border: 1.5px solid #e5e7eb;
+          border-radius: 12px;
+          padding: 11px 16px;
+          font-size: 14px;
+          color: #1f2937;
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .form-control:focus, .form-select:focus {
+          background-color: white;
+          border-color: #2d6a4f;
+          box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.12);
+          outline: none;
+        }
+        .text-area-modern {
+          resize: none;
+          line-height: 1.5;
+        }
+        .visibility-card {
+          border: 1.5px solid #e5e7eb;
+          background-color: #f9fafb;
+          border-radius: 16px;
+          padding: 14px 18px;
+          cursor: pointer;
+          transition: all 0.25s ease;
+          flex: 1;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .visibility-card:hover {
+          border-color: #2d6a4f;
+          background-color: #f4fbf7;
+        }
+        .visibility-card.active {
+          border-color: #2d6a4f;
+          background-color: #f4fbf7;
+          box-shadow: 0 4px 12px rgba(45, 106, 79, 0.06);
+        }
+        .visibility-card input[type="radio"] {
+          accent-color: #2d6a4f;
+          width: 18px;
+          height: 18px;
+          cursor: pointer;
+        }
+        .section-divider {
+          border-top: 1.5px dashed #e5e7eb;
+          margin-top: 28px;
+          margin-bottom: 24px;
+          padding-top: 20px;
+        }
+        .section-title {
+          font-size: 15px;
+          font-weight: 700;
+          color: #1b4332;
+          margin-bottom: 18px;
+        }
+        .btn-tag-add {
+          border: 1.5px solid #2d6a4f;
+          color: #2d6a4f;
+          background: transparent;
+          border-radius: 0 12px 12px 0;
+          padding: 0 16px;
+          transition: all 0.2s ease;
+        }
+        .btn-tag-add:hover {
+          background-color: #2d6a4f;
+          color: white;
+        }
+        .form-control:has(+ .btn-tag-add) {
+          border-radius: 12px 0 0 12px;
+        }
+        .badge-tag {
+          font-size: 12px;
+          transition: all 0.2s ease;
+        }
+        .badge-tag i {
+          font-size: 13.5px;
+          transition: color 0.15s ease;
+        }
+        .badge-tag i:hover {
+          color: #ef4444 !important;
+        }
+        .premium-dropzone {
+          border: 2px dashed #a3b899;
+          background-color: #f4fbf7;
+          border-radius: 16px;
+          padding: 30px;
+          transition: all 0.25s ease;
+        }
+        .premium-dropzone:hover {
+          background-color: #eaf7f0;
+          border-color: #2d6a4f;
+          transform: translateY(-1px);
+        }
+        .photo-preview-card {
+          position: relative;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+          transition: all 0.25s ease;
+          border: 2.5px solid transparent;
+        }
+        .photo-preview-card:hover {
+          transform: scale(1.02);
+        }
+        .photo-preview-card.thumbnail-selected {
+          border-color: #2d6a4f;
+          box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.25), 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+        .remove-btn {
+          background: rgba(239, 68, 68, 0.9);
+          border: none;
+          color: white;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+          padding: 0;
+        }
+        .remove-btn:hover {
+          background: #ef4444;
+          transform: scale(1.1);
+        }
+        .btn-premium-cancel {
+          border: none;
+          background: #f3f4f6;
+          color: #4b5563;
+          padding: 10px 24px;
+          border-radius: 100px;
+          font-weight: 600;
+          font-size: 14px;
+          transition: all 0.2s ease;
+        }
+        .btn-premium-cancel:hover {
+          background: #e5e7eb;
+          color: #1f2937;
+        }
+        .btn-premium-submit {
+          border: none;
+          background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%);
+          color: white;
+          padding: 10px 28px;
+          border-radius: 100px;
+          font-weight: 600;
+          font-size: 14px;
+          box-shadow: 0 4px 12px rgba(45, 106, 79, 0.2);
+          transition: all 0.25s ease;
+        }
+        .btn-premium-submit:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(45, 106, 79, 0.3);
+        }
+        .btn-premium-submit:active {
+          transform: translateY(0);
+        }
+        .animate-slide-down {
+          animation: slideDown 0.3s ease-out forwards;
+        }
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
-``;

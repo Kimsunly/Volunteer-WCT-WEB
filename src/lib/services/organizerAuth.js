@@ -5,10 +5,12 @@ function extractToken(resp) {
     const t =
         resp?.token ||
         resp?.access_token ||
+        resp?.meta?.access_token ||
         resp?.session?.access_token ||
         resp?.session?.token ||
         resp?.data?.token ||
-        resp?.data?.access_token;
+        resp?.data?.access_token ||
+        resp?.data?.meta?.access_token;
     return t || null;
 }
 

@@ -3,18 +3,24 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { storage } from "@/app/admin/components";
+import DeleteCommunityPostModal from "@/components/modals/DeleteCommunityPostModal";
+import OrganizerCommunityPostDetailModal from "@/components/modals/OrganizerCommunityPostDetailModal";
+import OrganizerCommunityPostFormModal from "@/components/modals/OrganizerCommunityPostFormModal";
 
 export default function OrganizerCommunityPage() {
   const [mounted, setMounted] = useState(false);
   const [posts, setPosts] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editIdx, setEditIdx] = useState(null);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [form, setForm] = useState({
     title: "",
     titleKh: "",
     content: "",
     contentKh: "",
-    category: "update",
+    category: "discussion",
     visibility: "public",
     tags: "",
   });
@@ -36,20 +42,26 @@ export default function OrganizerCommunityPage() {
   };
 
   const openCreate = () => {
+    setSelectedPost(null);
     setEditIdx(null);
     setForm({
       title: "",
       titleKh: "",
       content: "",
       contentKh: "",
-      category: "update",
+      category: "discussion",
       visibility: "public",
       tags: "",
     });
     setModalOpen(true);
   };
 
+  const openDetail = (post) => {
+    setSelectedPost(post);
+  };
+
   const openEdit = (idx) => {
+    setSelectedPost(null);
     const p = posts[idx];
     setEditIdx(idx);
     setForm({
@@ -64,10 +76,21 @@ export default function OrganizerCommunityPage() {
     setModalOpen(true);
   };
 
-  const deletePost = (idx) => {
-    if (!confirm("លុបប្រកាសនេះ?")) return;
-    const next = posts.filter((_, i) => i !== idx);
+  const openDelete = (post) => {
+    setSelectedPost(null);
+    setDeleteTarget(post);
+    setDeleteModalOpen(true);
+  };
+
+  const deletePost = () => {
+    if (!deleteTarget) return;
+    const next = posts.filter((p) => p.id !== deleteTarget.id);
     save(next);
+    if (selectedPost?.id === deleteTarget.id) {
+      setSelectedPost(null);
+    }
+    setDeleteModalOpen(false);
+    setDeleteTarget(null);
   };
 
   const commit = () => {
@@ -90,9 +113,13 @@ export default function OrganizerCommunityPage() {
               tags,
               updatedAt: new Date().toISOString().slice(0, 10),
             }
-          : p
+          : p,
       );
       save(next);
+      const updated = next[editIdx];
+      if (selectedPost?.id === updated.id) {
+        setSelectedPost(updated);
+      }
     } else {
       const newPost = {
         id: Date.now(),
@@ -112,9 +139,11 @@ export default function OrganizerCommunityPage() {
         tags,
       };
       save([...posts, newPost]);
+      setSelectedPost(newPost);
     }
 
     setModalOpen(false);
+    setEditIdx(null);
   };
 
   if (!mounted) return null;
@@ -201,7 +230,11 @@ export default function OrganizerCommunityPage() {
               <div className="row g-3">
                 {posts.map((p, i) => (
                   <div key={p.id} className="col-md-6 col-lg-4">
-                    <div className="card h-100">
+                    <div
+                      className="card h-100 shadow-sm border-0"
+                      style={{ cursor: "pointer" }}
+                      onClick={() => openDetail(p)}
+                    >
                       <div className="card-body">
                         <div className="d-flex justify-content-between align-items-start mb-2">
                           <span
@@ -237,16 +270,34 @@ export default function OrganizerCommunityPage() {
                         </p>
                         <div className="d-flex justify-content-between align-items-center mt-3">
                           <small className="text-muted">{p.createdAt}</small>
-                          <div className="btn-group btn-group-sm">
+                          <div
+                            className="btn-group btn-group-sm"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <button
+                              className="btn btn-outline-secondary"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openDetail(p);
+                              }}
+                            >
+                              <i className="bi bi-eye"></i>
+                            </button>
                             <button
                               className="btn btn-outline-primary"
-                              onClick={() => openEdit(i)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openEdit(i);
+                              }}
                             >
                               <i className="bi bi-pencil"></i>
                             </button>
                             <button
                               className="btn btn-outline-danger"
-                              onClick={() => deletePost(i)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openDelete(p);
+                              }}
                             >
                               <i className="bi bi-trash"></i>
                             </button>
@@ -270,134 +321,49 @@ export default function OrganizerCommunityPage() {
         </div>
       </div>
 
-      {/* Create/Edit Modal */}
-      {modalOpen && (
-        <div
-          className="modal fade show d-block"
-          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-          onClick={() => setModalOpen(false)}
-        >
-          <div
-            className="modal-dialog modal-lg"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  {editIdx !== null ? "កែប្រែប្រកាសសហគមន៍" : "បង្កើតប្រកាសថ្មី"}
-                </h5>
-                <button
-                  className="btn-close"
-                  onClick={() => setModalOpen(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <div className="row g-3">
-                  <div className="col-md-6">
-                    <label className="form-label">ចំណងជើង (English)</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={form.title}
-                      onChange={(e) =>
-                        setForm({ ...form, title: e.target.value })
-                      }
-                      placeholder="Title"
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">ចំណងជើង (ខ្មែរ)</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={form.titleKh}
-                      onChange={(e) =>
-                        setForm({ ...form, titleKh: e.target.value })
-                      }
-                      placeholder="ចំណងជើង"
-                    />
-                  </div>
-                  <div className="col-12">
-                    <label className="form-label">មាតិកា (English)</label>
-                    <textarea
-                      className="form-control"
-                      rows="4"
-                      value={form.content}
-                      onChange={(e) =>
-                        setForm({ ...form, content: e.target.value })
-                      }
-                      placeholder="Content"
-                    ></textarea>
-                  </div>
-                  <div className="col-12">
-                    <label className="form-label">មាតិកា (ខ្មែរ)</label>
-                    <textarea
-                      className="form-control"
-                      rows="4"
-                      value={form.contentKh}
-                      onChange={(e) =>
-                        setForm({ ...form, contentKh: e.target.value })
-                      }
-                      placeholder="មាតិកា"
-                    ></textarea>
-                  </div>
-                  <div className="col-md-4">
-                    <label className="form-label">ប្រភេទ</label>
-                    <select
-                      className="form-select"
-                      value={form.category}
-                      onChange={(e) =>
-                        setForm({ ...form, category: e.target.value })
-                      }
-                    >
-                      <option value="update">Update</option>
-                      <option value="event">Event</option>
-                      <option value="discussion">Discussion</option>
-                      <option value="story">Story</option>
-                    </select>
-                  </div>
-                  <div className="col-md-4">
-                    <label className="form-label">ភាពមើលឃើញ</label>
-                    <select
-                      className="form-select"
-                      value={form.visibility}
-                      onChange={(e) =>
-                        setForm({ ...form, visibility: e.target.value })
-                      }
-                    >
-                      <option value="public">Public</option>
-                      <option value="members">Members Only</option>
-                    </select>
-                  </div>
-                  <div className="col-md-4">
-                    <label className="form-label">Tags (comma separated)</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={form.tags}
-                      onChange={(e) =>
-                        setForm({ ...form, tags: e.target.value })
-                      }
-                      placeholder="tag1, tag2"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setModalOpen(false)}
-                >
-                  បោះបង់
-                </button>
-                <button className="btn btn-primary" onClick={commit}>
-                  រក្សាទុក
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <OrganizerCommunityPostDetailModal
+        open={Boolean(selectedPost)}
+        post={selectedPost}
+        onClose={() => setSelectedPost(null)}
+        onEdit={() => {
+          if (!selectedPost) return;
+          const idx = posts.findIndex((p) => p.id === selectedPost.id);
+          if (idx >= 0) {
+            openEdit(idx);
+          }
+        }}
+        onDelete={() => {
+          if (!selectedPost) return;
+          openDelete(selectedPost);
+        }}
+      />
+
+      <OrganizerCommunityPostFormModal
+        open={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setEditIdx(null);
+        }}
+        onSubmit={(e) => {
+          e.preventDefault();
+          commit();
+        }}
+        editMode={editIdx !== null}
+        form={form}
+        setForm={setForm}
+      />
+
+      <DeleteCommunityPostModal
+        open={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setDeleteTarget(null);
+        }}
+        onConfirm={deletePost}
+        postTitle={deleteTarget?.title}
+        postAuthor={deleteTarget?.organizerName}
+        commentCount={deleteTarget?.comments || 0}
+      />
     </main>
   );
 }

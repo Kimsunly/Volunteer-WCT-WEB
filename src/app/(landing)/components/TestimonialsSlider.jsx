@@ -6,7 +6,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-const testimonials = [
+const defaultTestimonials = [
   {
     text: "ការចូលរួមជាស្ម័គ្រចិត្តក្នុងវិស័យអប់រំនេះ បានផ្តល់ឱកាសដ៏អស្ចារ្យមួយឱ្យខ្ញុំ។ ពេលដែលឃើញកូនក្មេងមានមុខញញឹម ពេលពួកគេចាប់ផ្តើមយល់ដឹងពីអ្វីដែលខ្ញុំបានបង្រៀន នោះជាការទទួលបានដែលមានតម្លៃជាងអ្វីៗទាំងអស់។",
     name: "លី គឹមស៊ុន",
@@ -39,7 +39,15 @@ const testimonials = [
   },
 ];
 
-export default function TestimonialsSlider() {
+export default function TestimonialsSlider({ testimonials = [] }) {
+  const displayTestimonials = testimonials.length > 0 ? testimonials.map(t => ({
+    text: t.comment || t.text,
+    name: t.name || (t.user ? `${t.user.first_name} ${t.user.last_name}` : "Anonymous"),
+    role: t.role || "Volunteer",
+    avatar: t.avatar || (t.user?.avatar_url) || "/images/profile.png",
+    rating: t.rating || 5
+  })) : defaultTestimonials;
+
   return (
     <section className="testimonials-modern position-relative">
       <div className="testimonial-bg">
@@ -80,7 +88,7 @@ export default function TestimonialsSlider() {
               1024: { slidesPerView: 3 },
             }}
           >
-            {testimonials.map((t, idx) => (
+            {displayTestimonials.map((t, idx) => (
               <SwiperSlide key={idx}>
                 <div className="testimonial-card-modern">
                   <div className="quote-icon">
@@ -89,7 +97,7 @@ export default function TestimonialsSlider() {
                   <div className="testimonial-content-wrapper">
                     <p className="testimonial-text">{t.text}</p>
                     <div className="testimonial-rating">
-                      {[...Array(5)].map((_, i) => (
+                      {[...Array(t.rating || 5)].map((_, i) => (
                         <i key={i} className="bi bi-star-fill" />
                       ))}
                     </div>
@@ -99,9 +107,13 @@ export default function TestimonialsSlider() {
                       src={t.avatar}
                       alt={t.name}
                       className="author-avatar"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "/images/profile.png";
+                      }}
                     />
                     <div className="author-info">
-                      <h4 className="author-name">{t.name}</h4>
+                      <h6 className="author-name">{t.name}</h6>
                       <p className="author-role">{t.role}</p>
                     </div>
                   </div>

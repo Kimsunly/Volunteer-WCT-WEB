@@ -1,117 +1,177 @@
 "use client";
 
-import React from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AuthShell, PasswordField, StrengthMeter } from "../components";
+import { resetPassword } from "@/lib/services/auth";
+import toast from "react-hot-toast";
 
-export default function ResetPasswordPage() {
-  const onSubmit = (e) => {
+function ResetPasswordForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") || "";
+  const [otp, setOtp] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const onSubmit = async (e) => {
     e.preventDefault();
     const p = document.getElementById("password")?.value;
     const c = document.getElementById("cf-password")?.value;
-    if (p !== c) {
-      document.getElementById("cf-password")?.classList.add("is-invalid");
+
+    if (!email) {
+      toast.error("រកមិនឃើញអ៊ីមែលសម្រាប់ការកំណត់ឡើងវិញទេ");
       return;
     }
-    alert("កំណត់ពាក្យសម្ងាត់ថ្មី (Mock)");
+    if (!otp || otp.length !== 6) {
+      toast.error("សូមបញ្ចូលកូដ OTP ៦ ខ្ទង់");
+      return;
+    }
+    if (p !== c) {
+      document.getElementById("cf-password")?.classList.add("is-invalid");
+      toast.error("ពាក្យសម្ងាត់ និងការបញ្ជាក់មិនត្រូវគ្នាឡើយ");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      await resetPassword({
+        email,
+        otp,
+        password: p,
+        password_confirmation: c,
+      });
+      toast.success("កំណត់ពាក្យសម្ងាត់ថ្មីជោគជ័យ! សូមចូលគណនីរបស់អ្នក។");
+      router.push("/auth/login");
+    } catch (err) {
+      console.error(err);
+      toast.error(
+        err.response?.data?.message || "បរាជ័យក្នុងការកំណត់ពាក្យសម្ងាត់ឡើងវិញ",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
+  return (
+    <form
+      id="resetForm"
+      className="row gy-3 needs-validation"
+      noValidate
+      onSubmit={onSubmit}
+    >
+      <div className="col-12">
+        <input
+          type="text"
+          className="auth-modern-input w-100"
+          id="otp"
+          placeholder="Enter 6-digit OTP"
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+          maxLength={6}
+          required
+        />
+      </div>
+
+      <PasswordField
+        id="password"
+        placeholder="New Password"
+        defaultValue="VolunteerCambo"
+        minLength={6}
+      />
+
+      <div className="col-12">
+        <div
+          className="alert alert-info"
+          style={{
+            background: "#f8f9fa",
+            border: "1px solid #ddd",
+            borderRadius: 15,
+            padding: 20,
+          }}
+        >
+          <p
+            className="mb-2"
+            style={{
+              fontWeight: 700,
+              color: "#2d6a4f",
+              fontSize: 15,
+            }}
+          >
+            <i className="bi bi-shield-lock me-2"></i>
+            Password Requirements:
+          </p>
+          <ul
+            className="mb-0 ps-3"
+            style={{
+              color: "#444",
+              fontSize: 14,
+              lineHeight: 1.6,
+            }}
+          >
+            <li>At least 6 characters</li>
+            <li>Use numbers and letters</li>
+            <li>Mix uppercase and lowercase</li>
+            <li>Special characters (@, #, $, % ...)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="col-12">
+        <StrengthMeter
+          getPassword={() => document.getElementById("password")?.value || ""}
+        />
+      </div>
+
+      <PasswordField
+        id="cf-password"
+        placeholder="Confirm New Password"
+        defaultValue="VolunteerCambo"
+        minLength={6}
+      />
+
+      <div className="col-12">
+        <button type="submit" className="auth-modern-btn" disabled={submitting}>
+          {submitting ? (
+            <>
+              <span
+                className="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              កំពុងកំណត់ឡើងវិញ...
+            </>
+          ) : (
+            "Reset Password"
+          )}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+export default function ResetPasswordPage() {
   return (
     <div className="authentication-body">
       <main>
         <section>
           <div className="container">
             <div className="row justify-content-center">
-              <div className="col-12 col-xl-10">
+              <div className="col-12">
                 <AuthShell
-                  imageSrc="/images/homepage/reset-img.jpg"
-                  title="ផ្លាស់ប្តូរពាក្យសម្ងាត់"
-                  subtitle="បញ្ចូលពាក្យសម្ងាត់ថ្មីសម្រាប់គណនីរបស់អ្នក"
+                  imageSrc="/images/svg_login/Volunteering-bro.svg"
+                  title="Reset Password"
+                  switchText="Back to"
+                  switchLink="/auth/login"
+                  switchAction="Login"
                 >
-                  <form
-                    id="resetForm"
-                    className="row gy-3 needs-validation"
-                    noValidate
-                    onSubmit={onSubmit}
+                  <Suspense
+                    fallback={
+                      <div className="text-center p-3">កំពុងផ្ទុក...</div>
+                    }
                   >
-                    <PasswordField
-                      id="password"
-                      label="ពាក្យសម្ងាត់ថ្មី"
-                      defaultValue="VolunteerCambo"
-                      minLength={6}
-                    />
-                    <div className="col-12">
-                      <div
-                        className="alert alert-info"
-                        style={{
-                          background: "#e0f2fe",
-                          border: "2px solid #bae6fd",
-                          borderRadius: 12,
-                          padding: 16,
-                        }}
-                      >
-                        <p
-                          className="mb-2"
-                          style={{
-                            fontWeight: 600,
-                            color: "#0c4a6e",
-                            fontSize: 14,
-                          }}
-                        >
-                          <i className="bi bi-shield-check me-2"></i>
-                          តម្រូវការសុវត្ថិភាពពាក្យសម្ងាត់:
-                        </p>
-                        <ul
-                          className="mb-0 ps-4"
-                          style={{
-                            color: "#0c4a6e",
-                            fontSize: 13,
-                            lineHeight: 1.8,
-                          }}
-                        >
-                          <li>យ៉ាងហោចណាស់ 6 តួអក្សរ</li>
-                          <li>ប្រើលេខ និង អក្សរ</li>
-                          <li>ប្រើអក្សរធំ និង អក្សរតូច</li>
-                          <li>មានតួអក្សរពិសេស (@, #, $, % ...)</li>
-                        </ul>
-                      </div>
-                    </div>
-
-                    {/* Strength meter binds to #password value */}
-                    <div className="col-12">
-                      <StrengthMeter
-                        getPassword={() =>
-                          document.getElementById("password")?.value || ""
-                        }
-                      />
-                    </div>
-
-                    {/* Confirm */}
-                    <PasswordField
-                      id="cf-password"
-                      label="បញ្ជាក់ពាក្យសម្ងាត់ថ្មី"
-                      defaultValue="VolunteerCambo"
-                      minLength={6}
-                    />
-                    <div
-                      className="invalid-feedback d-block"
-                      style={{ display: "none" }}
-                    >
-                      ពាក្យសម្ងាត់មិនត្រូវគ្នា។
-                    </div>
-
-                    <div className="col-12">
-                      <button type="submit" className="btn btn-primary">
-                        កំណត់ពាក្យសម្ងាត់ថ្មី
-                      </button>
-                    </div>
-
-                    <div className="col-12">
-                      <p className="text-center">
-                        ចូលគណនីផ្សេងទៀត? <Link href="/auth/login">ចូលគណនី</Link>
-                      </p>
-                    </div>
-                  </form>
+                    <ResetPasswordForm />
+                  </Suspense>
                 </AuthShell>
               </div>
             </div>

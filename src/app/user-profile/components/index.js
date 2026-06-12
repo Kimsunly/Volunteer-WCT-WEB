@@ -7,3 +7,5 @@ export { default as ActivitiesPane } from "./panes/ActivitiesPane";
 export { default as RegistrationsPane } from "./panes/RegistrationsPane";
 export { default as AchievementsPane } from "./panes/AchievementsPane";
 export { default as RecommendationsPane } from "./panes/RecommendationsPane";
+export { default as ConnectionsPane } from "./panes/ConnectionsPane";
+export { default as FavoritesPane } from "./panes/FavoritesPane";

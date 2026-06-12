@@ -5,7 +5,7 @@ import { api } from './api';
  */
 export async function getDashboardMetrics() {
     const { data } = await api.get('/admin/metrics');
-    return data;
+    return data?.data ?? data;
 }
 
 /**
@@ -35,22 +35,23 @@ export async function suspendOrganizer(id, reason) {
  * CATEGORIES MANAGEMENT
  */
 export async function listCategories(activeOnly = false) {
-    const { data } = await api.get('/admin/categories', { params: { active_only: activeOnly } });
-    return data;
+    const { data } = await api.get('/categories', { params: { active_only: activeOnly } });
+    // API returns { success, data: [...] } — extract the array
+    return Array.isArray(data) ? data : (data?.data ?? []);
 }
 
 export async function createCategory(payload) {
-    const { data } = await api.post('/admin/categories', payload);
+    const { data } = await api.post('/categories', payload);
     return data;
 }
 
 export async function updateCategory(id, payload) {
-    const { data } = await api.put(`/admin/categories/${id}`, payload);
+    const { data } = await api.put(`/categories/${id}`, payload);
     return data;
 }
 
 export async function deleteCategory(id) {
-    await api.delete(`/admin/categories/${id}`);
+    await api.delete(`/categories/${id}`);
 }
 
 /**
@@ -67,6 +68,15 @@ export async function createOpportunityAsAdmin(payload) {
 }
 
 export async function updateOpportunity(id, payload) {
+    if (payload instanceof FormData) {
+        // Use POST with _method=PUT for multipart updates in Laravel
+        const { data } = await api.post(`/admin/opportunities/${id}`, payload, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return data;
+    }
     const { data } = await api.put(`/admin/opportunities/${id}`, payload);
     return data;
 }
@@ -84,11 +94,27 @@ export async function listBlogs(publishedOnly = false) {
 }
 
 export async function createBlog(payload) {
+    if (payload instanceof FormData) {
+        const { data } = await api.post('/admin/blogs', payload, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return data;
+    }
     const { data } = await api.post('/admin/blogs', payload);
     return data;
 }
 
 export async function updateBlog(id, payload) {
+    if (payload instanceof FormData) {
+        const { data } = await api.post(`/admin/blogs/${id}`, payload, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return data;
+    }
     const { data } = await api.put(`/admin/blogs/${id}`, payload);
     return data;
 }

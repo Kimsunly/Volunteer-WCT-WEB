@@ -7,8 +7,8 @@ import Image from "next/image";
 function StatusBadge({ status }) {
   if (status === "active")
     return <span className="vh-badge vh-badge--success">សកម្ម</span>;
-  if (status === "pending")
-    return <span className="vh-badge vh-badge--warning">កំពុង</span>;
+  if (status === "draft")
+    return <span className="vh-badge vh-badge--warning">ព្រាង</span>;
   return <span className="vh-badge vh-badge--danger">បិទ</span>;
 }
 
@@ -48,7 +48,7 @@ export default function OpportunitiesPane({
           <option value="all">ស្ថានភាពទាំងអស់</option>
           <option value="active">Available</option>
           <option value="closed">Closed</option>
-          <option value="pending">Pending</option>
+          <option value="draft">Draft</option>
         </select>
         <button className="btn btn-primary" onClick={onCreate}>
           <i className="bi bi-plus-lg me-1"></i> បន្ថែមឱកាស
@@ -85,7 +85,7 @@ export default function OpportunitiesPane({
                     style={{ width: "auto" }}
                   >
                     <option value="active">សកម្ម (Active)</option>
-                    <option value="pending">រង់ចាំ (Pending)</option>
+                    <option value="draft">ព្រាង (Draft)</option>
                     <option value="closed">បិទ (Closed)</option>
                   </select>
                 </div>

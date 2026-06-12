@@ -1,6 +1,21 @@
+"use client";
+
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function CTAJoin() {
+  const { user } = useAuth();
+  const [destination, setDestination] = useState("/auth/login");
+
+  useEffect(() => {
+    if (user) {
+      setDestination("/opportunities");
+    } else {
+      setDestination("/auth/login");
+    }
+  }, [user]);
+
   return (
     <section className="cta-area-modern">
       <div className="container">
@@ -34,7 +49,7 @@ export default function CTAJoin() {
                 </ul>
                 <div className="d-flex flex-wrap gap-3">
                   <Link
-                    href="/auth/login"
+                    href={destination}
                     className="btn btn-cta-primary btn-lg px-5"
                   >
                     <i className="bi bi-person-plus-fill me-2" />{" "}

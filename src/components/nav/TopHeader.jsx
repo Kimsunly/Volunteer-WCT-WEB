@@ -1,14 +1,17 @@
 "use client";
-import { useState } from "react";
+import { useSettings } from "@/context/SettingsContext";
 import Link from "next/link";
 
 export default function TopHeader() {
-  const [theme, setTheme] = useState("light");
+  const { settings, updateSetting } = useSettings();
 
   const handleThemeToggle = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    document.documentElement.setAttribute("data-theme", newTheme);
+    const newTheme = settings.theme === "light" ? "dark" : "light";
+    updateSetting("theme", newTheme);
+  };
+
+  const handleLanguageChange = (lang) => {
+    updateSetting("language", lang);
   };
 
   return (
@@ -101,20 +104,6 @@ export default function TopHeader() {
 
         {/* Right Actions */}
         <div className="nav-action d-flex align-items-center">
-          {/* Search */}
-          <button
-            type="button"
-            className="btn border-0 me-3 d-none d-lg-block"
-            data-bs-toggle="collapse"
-            data-bs-target="#searchBar"
-            aria-label="Toggle Search"
-          >
-            <i
-              className="bi bi-search"
-              style={{ color: "var(--text-white-fixed)" }}
-            ></i>
-          </button>
-
           {/* Language */}
           <div className="dropdown me-3">
             <button
@@ -136,9 +125,9 @@ export default function TopHeader() {
               }}
             >
               <li>
-                <a
+                <button
                   className="dropdown-item"
-                  href="#km"
+                  onClick={() => handleLanguageChange("km")}
                   style={{ color: "var(--text-main)", cursor: "pointer" }}
                 >
                   <img
@@ -147,13 +136,13 @@ export default function TopHeader() {
                     style={{ width: "20px", marginRight: "8px" }}
                   />
                   ភាសាខ្មែរ
-                </a>
+                </button>
               </li>
               <li>
-                <a
+                <button
                   className="dropdown-item"
-                  href="#en"
-                  style={{ color: "var(--text-main)", cursor: "pointer" }}
+                  onClick={() => handleLanguageChange("en")}
+                  style={{ color: "var(--text-main)", cursor: "pointer", border: "none", background: "none", width: "100%", textAlign: "left" }}
                 >
                   <img
                     src="/images/Icon/england.png"
@@ -161,7 +150,7 @@ export default function TopHeader() {
                     style={{ width: "20px", marginRight: "8px" }}
                   />
                   English
-                </a>
+                </button>
               </li>
             </ul>
           </div>
@@ -174,36 +163,10 @@ export default function TopHeader() {
             aria-label="Change theme"
           >
             <i
-              className="bi bi-moon-fill"
+              className={settings.theme === "light" ? "bi bi-moon-fill" : "bi bi-sun-fill"}
               style={{ color: "var(--text-white-fixed)" }}
             ></i>
           </button>
-        </div>
-      </div>
-
-      {/* Search Bar */}
-      <div
-        className="collapse bg-white"
-        id="searchBar"
-        style={{ backgroundColor: "var(--navabr) !important" }}
-      >
-        <div className="container py-2">
-          <form className="position-relative">
-            <input
-              type="text"
-              className="form-control ps-5"
-              placeholder="ស្វែងរកឱកាស ព្រឹត្តិការណ៍ ឬសកម្មភាព..."
-              style={{
-                borderColor: "var(--border)",
-                backgroundColor: "var(--bg-card)",
-                color: "var(--text-main)",
-              }}
-            />
-            <i
-              className="bi bi-search position-absolute top-50 translate-middle-y ms-3"
-              style={{ color: "var(--text-muted)" }}
-            ></i>
-          </form>
         </div>
       </div>
     </div>

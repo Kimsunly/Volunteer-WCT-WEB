@@ -4,16 +4,21 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AuthShell, UploadArea, PasswordField } from "../../components";
-import { organizerRegister } from "@/lib/services/organizerAuth";
+import { api } from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
+import { setAuth } from "@/lib/utils/authState";
+import { showToast } from "@/components/common/CustomToaster";
+import { parseApiError } from "@/lib/utils/apiError";
 
 export default function OrgRegisterPage() {
   const router = useRouter();
+  const { setUser } = useAuth();
   const [orgType, setOrgType] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const onFile = (file) => {
-    // You can upload to backend or store in state
-    console.log("Selected file:", file);
+    setSelectedFile(file);
   };
 
   const onSubmit = async (e) => {
@@ -23,21 +28,54 @@ export default function OrgRegisterPage() {
       form?.classList.add("was-validated");
       return;
     }
-    const payload = {
-      orgname: form.querySelector("#orgname")?.value,
-      email: form.querySelector("#email")?.value,
-      phone: form.querySelector("#phone")?.value,
-      password: form.querySelector("#password")?.value,
-      orgType,
-    };
+    if (!selectedFile) {
+      showToast.error("សូមជ្រើសរើស និងផ្ទុកឡើងនូវឯកសារបញ្ជាក់អង្គភាព ឬស្ថាប័នរបស់អ្នក។", "ខ្វះឯកសារបញ្ជាក់");
+      return;
+    }
+
     try {
       setSubmitting(true);
-      await organizerRegister(payload);
-      alert("បានចុះឈ្មោះអង្គការ! សូមបន្តការផ្ទៀងផ្ទាត់");
-      router.push("/auth/org/confirm");
+
+      const formData = new FormData();
+      formData.append(
+        "organization_name",
+        form.querySelector("#orgname")?.value,
+      );
+      formData.append("email", form.querySelector("#email")?.value);
+      formData.append("phone", form.querySelector("#phone")?.value);
+      formData.append("password", form.querySelector("#password")?.value);
+      formData.append("organizer_type", orgType);
+      formData.append("document", selectedFile);
+
+      const { data } = await api.post("/api/organizer/register", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      // Store token if needed
+      const token =
+        data?.meta?.access_token ||
+        data?.token ||
+        data?.access_token ||
+        data?.data?.token ||
+        data?.data?.access_token;
+      const refreshToken =
+        data?.meta?.refresh_token ||
+        data?.refresh_token;
+
+      if (token) {
+        setAuth({ token, refreshToken, role: data?.data?.role || "user" });
+        setUser(data?.data);
+      }
+
+      showToast.success(
+        "គណនីអ្នករៀបចំត្រូវបានស្នើសុំដោយជោគជ័យ! សូមរង់ចាំការពិនិត្យ និងអនុម័តពីអភិបាលប្រព័ន្ធ (Admin Approval)។",
+        "ការស្នើសុំជោគជ័យ"
+      );
+      router.push("/");
     } catch (err) {
       console.error("Organizer register error", err);
-      alert("ការចុះឈ្មោះអង្គការបរាជ័យ");
+      const msg = parseApiError(err) || "ការចុះឈ្មោះជាអ្នករៀបចំបរាជ័យ";
+      showToast.error(msg, "ចុះឈ្មោះបរាជ័យ");
     } finally {
       setSubmitting(false);
     }
@@ -49,142 +87,131 @@ export default function OrgRegisterPage() {
         <section>
           <div className="container">
             <div className="row justify-content-center">
-              <div className="col-12 col-xl-9 d-flex">
+              <div className="col-12">
                 <AuthShell
-                  imageSrc="/images/homepage/register-img.jpg"
-                  title="បង្កើតគណនីរបស់អង្គការ"
+                  imageSrc="/images/svg_login/Volunteering-bro.svg"
+                  title="Organizer Register"
+                  switchText="Already have an organization account?"
+                  switchLink="/auth/org/login"
+                  switchAction="Login"
                 >
                   <form
                     id="orgRegisterForm"
-                    className="row gy-2 needs-validation"
+                    className="row gy-3 needs-validation"
                     noValidate
                     onSubmit={onSubmit}
                   >
                     <div className="col-xl-12">
-                      <label htmlFor="orgname" className="form-label">
-                        ឈ្មោះអង្គការ ៖
-                      </label>
                       <input
                         type="text"
-                        className="form-control"
+                        className="auth-modern-input w-100"
                         id="orgname"
-                        defaultValue="អង្គការមនុស្សធម៏ដើម្បីកម្ពុជា"
-                        placeholder="បញ្ចូលឈ្មោះអង្គការ"
+                        defaultValue="អង្គការមនុស្សធម៌ដើម្បីកម្ពុជា"
+                        placeholder="Organization Name"
                         required
                       />
-                      <div className="invalid-feedback">
-                        សូមបញ្ចូលឈ្មោះអង្គការ។
-                      </div>
                     </div>
 
                     <div className="col-xl-6">
-                      <label htmlFor="email" className="form-label">
-                        អ៊ីមែល ៖
-                      </label>
                       <input
                         type="email"
-                        className="form-control"
+                        className="auth-modern-input w-100"
                         id="email"
                         defaultValue="Volunteer@gmail.com"
-                        placeholder="បញ្ចូលអ៊ីមែល"
+                        placeholder="Email Address"
                         required
                       />
-                      <div className="invalid-feedback">
-                        សូមបញ្ចូលអ៊ីមែលត្រឹមត្រូវ។
-                      </div>
                     </div>
 
                     <div className="col-xl-6">
-                      <label htmlFor="phone" className="form-label">
-                        លេខទូរស័ព្ទ ៖
-                      </label>
                       <input
                         type="tel"
-                        className="form-control"
+                        className="auth-modern-input w-100"
                         id="phone"
                         defaultValue="+855 683 828 00"
-                        placeholder="បញ្ចូលលេខទូរស័ព្ទ"
+                        placeholder="Phone Number"
                         required
                       />
-                      <div className="invalid-feedback">
-                        សូមបញ្ចូលលេខទូរស័ព្ទ។
-                      </div>
                     </div>
 
                     <PasswordField
                       id="password"
-                      label="ពាក្យសម្ងាត់ ៖"
+                      placeholder="Password"
                       defaultValue="SokryPes@123"
                     />
 
                     <div className="col-xl-12">
-                      <label htmlFor="orgType" className="form-label">
-                        ប្រភេទអង្គការ ៖
-                      </label>
                       <select
                         id="orgType"
-                        className="form-control"
+                        className="auth-modern-input w-100"
                         value={orgType}
                         onChange={(e) => setOrgType(e.target.value)}
                         required
+                        style={{ appearance: "none" }}
                       >
-                        <option value="">ជ្រើសរើសប្រភេទអង្គការ</option>
-                        <option value="ngo">អង្គការមិនមែនរដ្ឋាភិបាល (NGO)</option>
-                        <option value="nonprofit">សមាគមមិនរកប្រាក់ចំណេញ (Non-profit)</option>
-                        <option value="community">សហគមន៍ (Community)</option>
-                        <option value="educational">គ្រឹះស្ថានអប់រំ (Educational)</option>
-                        <option value="religious">ស្ថាប័នសាសនា (Religious)</option>
-                        <option value="government">ស្ថាប័នរដ្ឋ (Government)</option>
-                        <option value="corporate">ក្រុមហ៊ុន/សហគ្រាស (Corporate)</option>
-                        <option value="other">ផ្សេងៗ (Other)</option>
+                        <option value="">Select Organization Type</option>
+                        <option value="ngo">NGO</option>
+                        <option value="nonprofit">Non-profit</option>
+                        <option value="community">Community</option>
+                        <option value="educational">Educational</option>
+                        <option value="religious">Religious</option>
+                        <option value="government">Government</option>
+                        <option value="corporate">Corporate</option>
+                        <option value="other">Other</option>
                       </select>
-                      <div className="invalid-feedback">
-                        សូមជ្រើសរើសប្រភេទអង្គការ។
-                      </div>
                     </div>
 
                     <div className="col-xl-12">
-                      <label className="form-label">រូបសញ្ញាអង្គការ ៖</label>
+                      <label className="form-label ms-3 mb-2 fw-bold text-muted">
+                        Organization Document
+                      </label>
                       <UploadArea onFile={onFile} />
                     </div>
 
                     <div className="col-xl-12">
-                      <div>
+                      <div className="auth-modern-checkbox-container">
                         <input
                           type="checkbox"
-                          className="form-check-input"
                           id="agree"
                           defaultChecked
                           required
                         />
-                        <label className="form-check-label" htmlFor="agree">
-                          លក្ខខណ្ឌ និង គោរពគោលការណ៏ឯកជន
+                        <label htmlFor="agree">
+                          Receive news and updates for organizers
                         </label>
-                        <div className="invalid-feedback">
-                          ត្រូវតែយល់ព្រមមុនពេលបន្ត។
-                        </div>
                       </div>
                     </div>
 
                     <div className="col-xl-12">
                       <button
                         type="submit"
-                        className="text-white btn btn-primary w-100"
+                        className="auth-modern-btn"
                         disabled={submitting}
                       >
                         {submitting ? (
                           <>
-                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            <span
+                              className="spinner-border spinner-border-sm me-2"
+                              role="status"
+                              aria-hidden="true"
+                            ></span>
                             កំពុងបង្កើត...
                           </>
-                        ) : "បង្កើតគណនី"}
+                        ) : (
+                          "Get Started"
+                        )}
                       </button>
                     </div>
 
-                    <div className="col-xl-12">
-                      <p className="text-center">
-                        មានគណនីអង្គការរួចហើយ?{" "}
-                        <Link href="/auth/org/login">ចូលគណនី</Link>
+                    <div className="col-xl-12 mt-4">
+                      <p className="text-center mb-0 text-muted">
+                        Are you a volunteer?{" "}
+                        <Link
+                          href="/auth/register"
+                          style={{ color: "#2d6a4f", fontWeight: 700 }}
+                        >
+                          Register as Volunteer
+                        </Link>
                       </p>
                     </div>
                   </form>

@@ -1,4 +1,21 @@
+"use client";
+
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
+
 export default function CTAJoin() {
+  const { user } = useAuth();
+  const [destination, setDestination] = useState("/auth/login");
+
+  useEffect(() => {
+    if (user) {
+      setDestination("/opportunities");
+    } else {
+      setDestination("/auth/login");
+    }
+  }, [user]);
+
   return (
     <section className="cta-area-modern">
       <div className="container">
@@ -19,9 +36,9 @@ export default function CTAJoin() {
                   <li className="mb-3"><i className="bi bi-check-circle-fill text-success me-2" />ទទួលបានវិញ្ញាបនប័ត្រ</li>
                 </ul>
                 <div className="d-flex flex-wrap gap-3">
-                  <a href="/auth/login" className="btn btn-cta-primary btn-lg px-5">
+                  <Link href={destination} className="btn btn-cta-primary btn-lg px-5">
                     <i className="bi bi-person-plus-fill me-2" /> ចុះឈ្មោះឥឡូវនេះ <i className="bi bi-arrow-right ms-2" />
-                  </a>
+                  </Link>
                   <a href="#" className="btn btn-cta-outline btn-lg px-5">
                     <i className="bi bi-play-circle me-2" /> មើលវីដេអូ
                   </a>

@@ -15,6 +15,7 @@ export default function DonationCard({
   bloodTypes = [],
   onInfo,
   onRegister,
+  onDonate,
 }) {
   const barRef = useRef(null);
 
@@ -92,7 +93,7 @@ export default function DonationCard({
             }
             if (a.type === "donate") {
               return (
-                <button key={idx} className="btn btn-primary">
+                <button key={idx} className="btn btn-primary" onClick={onDonate}>
                   <i className="bi bi-heart-fill me-1"></i> បរិច្ចាគ
                 </button>
               );

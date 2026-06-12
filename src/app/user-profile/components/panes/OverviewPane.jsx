@@ -2,7 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { getUserStats, getUserActivities, getRecommendedActivities } from "@/services/user";
+import {
+  getUserStats,
+  getUserActivities,
+  getRecommendedActivities,
+} from "@/services/user";
 
 export default function OverviewPane() {
   const [stats, setStats] = useState(null);
@@ -16,11 +20,11 @@ export default function OverviewPane() {
         const [statsRes, actRes, recRes] = await Promise.all([
           getUserStats(),
           getUserActivities(),
-          getRecommendedActivities()
+          getRecommendedActivities(),
         ]);
         setStats(statsRes);
-        setActivities(actRes);
-        setRecommendations(recRes);
+        setActivities(Array.isArray(actRes) ? actRes : []);
+        setRecommendations(Array.isArray(recRes) ? recRes : []);
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
       } finally {
@@ -36,7 +40,10 @@ export default function OverviewPane() {
 
   // Calculate progress percent for fun (or based on target)
   const hoursTarget = 200;
-  const hoursProgress = Math.min(((stats?.total_hours || 0) / hoursTarget) * 100, 100);
+  const hoursProgress = Math.min(
+    ((stats?.total_hours || 0) / hoursTarget) * 100,
+    100,
+  );
 
   return (
     <div className="tab-pane fade show active" id="tabOverview">
@@ -56,7 +63,9 @@ export default function OverviewPane() {
                   style={{ width: `${hoursProgress}%` }}
                 ></div>
               </div>
-              <small className="d-block">{stats?.total_hours || 0} / {hoursTarget}</small>
+              <small className="d-block">
+                {stats?.total_hours || 0} / {hoursTarget}
+              </small>
             </div>
           </div>
         </div>
@@ -68,7 +77,9 @@ export default function OverviewPane() {
             </div>
             <div className="flex-grow-1">
               <div className="small">គម្រោងបញ្ចប់</div>
-              <div className="fs-3 fw-bold">{stats?.completed_projects || 0}</div>
+              <div className="fs-3 fw-bold">
+                {stats?.completed_projects || 0}
+              </div>
             </div>
           </div>
         </div>
@@ -111,33 +122,74 @@ export default function OverviewPane() {
                 </div>
               </div>
 
-              {activities.length === 0 ? (
-                <div className="text-center text-muted py-4">មិនទាន់មានសកម្មភាពទេ</div>
+              {!Array.isArray(activities) || activities.length === 0 ? (
+                <div className="text-center text-muted py-4">
+                  មិនទាន់មានសកម្មភាពទេ
+                </div>
               ) : (
                 <ul className="list-unstyled m-0">
-                  {activities.slice(0, 5).map((act) => (
-                    <li key={act.id} className="vh-activity-item">
-                      <div className={`vh-activity-dot ${act.status === 'completed' ? 'bg-success-subtle text-success' : 'bg-primary-subtle text-primary'}`}>
-                        {act.status === 'completed' ? <i className="bi bi-check2"></i> : <i className="bi bi-clock"></i>}
-                      </div>
-                      <div className="flex-grow-1">
-                        <div className="fw-semibold">{act.title || "Untitled"}</div>
-                        <div className="small">
-                          {act.date ? new Date(act.date).toLocaleDateString('km-KH') : 'TBD'} • {act.location || "N/A"} • {act.hours}h
+                  {activities.slice(0, 5).map((act) => {
+                    const activityStatus = act.activity_status || act.status;
+                    const isCompleted = activityStatus === "completed";
+                    const isPending = activityStatus === "pending";
+
+                    return (
+                      <li key={act.id} className="vh-activity-item">
+                        <div
+                          className={`vh-activity-dot ${isCompleted ? "bg-success-subtle text-success" : "bg-primary-subtle text-primary"}`}
+                        >
+                          {isCompleted ? (
+                            <i className="bi bi-check2"></i>
+                          ) : (
+                            <i className="bi bi-clock"></i>
+                          )}
                         </div>
-                      </div>
-                      <span className={`badge rounded-pill ${act.status === 'completed' ? 'text-bg-success-subtle text-success' :
-                        act.status === 'pending' ? 'text-bg-warning-subtle text-warning' :
-                          'text-bg-primary-subtle text-primary'
-                        }`}>
-                        {act.status === 'completed' ? 'បញ្ចប់' : act.status === 'pending' ? 'រង់ចាំ' : 'កំពុងធ្វើ'}
-                      </span>
-                    </li>
-                  ))}
+                        <div className="flex-grow-1">
+                          <div className="fw-semibold">
+                            {act.title || "Untitled"}
+                          </div>
+                          <div className="small">
+                            {act.date
+                              ? new Date(act.date).toLocaleDateString("km-KH")
+                              : "TBD"}{" "}
+                            • {act.location || "N/A"} •{" "}
+                            {isCompleted
+                              ? `${act.hours || act.planned_hours || 0}h`
+                              : act.planned_hours
+                                ? `~${act.planned_hours}h`
+                                : "—"}
+                          </div>
+                        </div>
+                        <span
+                          className={`badge rounded-pill ${
+                            isCompleted
+                              ? "text-bg-success-subtle text-success"
+                              : isPending
+                                ? "text-bg-warning-subtle text-warning"
+                                : activityStatus === "upcoming"
+                                  ? "text-bg-info-subtle text-info"
+                                  : "text-bg-primary-subtle text-primary"
+                          }`}
+                        >
+                          {isCompleted
+                            ? "បញ្ចប់"
+                            : isPending
+                              ? "រង់ចាំ"
+                              : activityStatus === "upcoming"
+                                ? "បានអនុម័ត"
+                                : "កំពុងដំណើរការ"}
+                        </span>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
 
-              <Link href="#" className="small mt-3 d-inline-block" onClick={(e) => e.preventDefault()}>
+              <Link
+                href="#"
+                className="small mt-3 d-inline-block"
+                onClick={(e) => e.preventDefault()}
+              >
                 {/* Placeholder link, could go to full history tab */}
                 មើលទាំងអស់ / View All
               </Link>
@@ -152,12 +204,13 @@ export default function OverviewPane() {
                 <small>Recommended for You</small>
               </div>
 
-              {recommendations.length === 0 ? (
+              {!Array.isArray(recommendations) ||
+              recommendations.length === 0 ? (
                 <div className="text-center text-muted py-4">
                   មិនមានការណែនាំទេ សូមបំពេញជំនាញក្នុងប្រវត្តិរូប
                 </div>
               ) : (
-                recommendations.map(rec => (
+                recommendations.map((rec) => (
                   <div key={rec.id} className="vh-reco-card mb-2">
                     <div className="d-flex justify-content-between align-items-start">
                       <div>
@@ -166,10 +219,13 @@ export default function OverviewPane() {
                         <div className="small mt-1 d-flex flex-wrap gap-3">
                           <span>
                             <i className="bi bi-calendar2 me-1"></i>
-                            {rec.date ? new Date(rec.date).toLocaleDateString('km-KH') : 'TBD'}
+                            {rec.date
+                              ? new Date(rec.date).toLocaleDateString("km-KH")
+                              : "TBD"}
                           </span>
                           <span>
-                            <i className="bi bi-geo-alt me-1"></i> {rec.location || "Online"}
+                            <i className="bi bi-geo-alt me-1"></i>{" "}
+                            {rec.location || "Online"}
                           </span>
                         </div>
                         <div className="small mt-2 badge bg-light text-dark border">

@@ -5,7 +5,7 @@ import { clearAuth } from "@/lib/utils/authState";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-export default function ProfileDropdown() {
+export default function ProfileDropdown({ onBecomeOrganizer }) {
   const { user, setUser } = useAuth();
   const router = useRouter();
 
@@ -62,8 +62,28 @@ export default function ProfileDropdown() {
             <span className="ps-2">មើលគណនី</span>
           </Link>
         </li>
+        {user.role === "user" && (
+          <li>
+            <button
+              className="dropdown-item text-primary"
+              onClick={(e) => {
+                e.preventDefault();
+                onBecomeOrganizer();
+              }}
+              style={{
+                border: "none",
+                background: "none",
+                width: "100%",
+                textAlign: "left",
+              }}
+            >
+              <i className="bi bi-briefcase"></i>
+              <span className="ps-2">ក្លាយជាអ្នករៀបចំ</span>
+            </button>
+          </li>
+        )}
         <li>
-          <Link className="dropdown-item" href="/settings">
+          <Link className="dropdown-item" href="/user-profile">
             <i className="bi bi-gear"></i>
             <span className="ps-2">ការកំណត់</span>
           </Link>

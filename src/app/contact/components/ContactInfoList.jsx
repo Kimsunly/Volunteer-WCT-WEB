@@ -38,13 +38,13 @@ export default function ContactInfoList() {
 
       {/* Email */}
       <li className="py-2">
-        <a href="mailto:sengmenghorn82@gmail.com" className="contact-link text-decoration-none">
+        <a href="mailto:kimsunly49@gmail.com" className="contact-link text-decoration-none">
           <div className="contact-icon">
             <i className="bi bi-envelope"></i>
           </div>
           <div className="ps-3 mt-2">
             <h3 className="p-0 fs-5">អ៊ីម៉ែល</h3>
-            <p className="p-0">sengmenghorn82@gmail.com</p>
+            <p className="p-0">kimsunly49@gmail.com</p>
           </div>
         </a>
       </li>

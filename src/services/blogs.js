@@ -7,8 +7,8 @@ import { api } from './api';
  */
 export async function listBlogs(params = { published_only: true }) {
     const { data } = await api.get('/api/blogs', { params });
-    // Returns an array of blogs
-    return data;
+    // Returns an array of blogs (extract from data.data if wrapped)
+    return data.data || data;
 }
 
 /**
@@ -16,7 +16,7 @@ export async function listBlogs(params = { published_only: true }) {
  */
 export async function getBlogById(id) {
     const { data } = await api.get(`/api/blogs/${id}`);
-    return data;
+    return data.data || data;
 }
 
 /**

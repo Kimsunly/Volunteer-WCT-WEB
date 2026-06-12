@@ -26,7 +26,7 @@ export function middleware(request) {
         }
     }
 
-    if (pathname.startsWith('/organizer') && role !== 'organizer') {
+    if (pathname.startsWith('/organizer') && role !== 'organizer' && role !== 'user') {
         return NextResponse.redirect(new URL('/auth/org/login', request.url));
     }
 

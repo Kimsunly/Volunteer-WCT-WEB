@@ -1,12 +1,8 @@
-﻿"use client";
+"use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { PageHeader, RoleGuard } from "../components";
-import {
-  deactivateUser,
-  listUsers,
-  changeUserRole,
-} from "@/services/admin";
+import { RoleGuard } from "../components";
+import { deactivateUser, listUsers, changeUserRole } from "@/services/admin";
 import { useAuth } from "@/context/AuthContext";
 
 export default function AdminUsersPage() {
@@ -22,34 +18,40 @@ export default function AdminUsersPage() {
   const [editing, setEditing] = useState(null);
   const [actionLoading, setActionLoading] = useState(null);
   const [error, setError] = useState(null);
-
-  // Add missing mounted state
   const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Helper functions
   const formatDate = (d) => {
-    if (!d) return "N/A";
+    if (!d) return "—";
     return new Date(d).toLocaleDateString();
   };
 
   const roleClass = (r) => {
     switch (r) {
-      case "admin": return "danger";
-      case "organizer": return "primary";
-      default: return "secondary";
+      case "admin":
+        return "rejected";
+      case "organizer":
+        return "pending";
+      default:
+        return "active";
     }
   };
 
   const statusClass = (s) => {
     switch (s) {
-      case "active": return "success";
-      case "inactive": return "secondary";
-      case "suspended": return "danger";
-      case "pending": return "warning";
-      default: return "light";
+      case "active":
+        return "active";
+      case "inactive":
+        return "rejected";
+      case "suspended":
+        return "rejected";
+      case "pending":
+        return "pending";
+      default:
+        return "pending";
     }
   };
 
@@ -69,7 +71,7 @@ export default function AdminUsersPage() {
       setTotal(res?.total ?? items.length ?? 0);
     } catch (err) {
       console.error("Fetch users error:", err);
-      setError("បរាជ័យក្នុងការទាញយកអ្នកប្រើប្រាស់");
+      setError("Failed to load users");
     } finally {
       setLoading(false);
     }
@@ -85,7 +87,7 @@ export default function AdminUsersPage() {
 
   const handleDeactivate = async (u) => {
     if (!u) return;
-    const reason = prompt("មូលហេតុនៃការបិទគណនី (យ៉ាងហោច ១០ តួអក្សរ):");
+    const reason = prompt("Reason for deactivating (at least 10 characters):");
     if (!reason || reason.length < 10) return;
     setActionLoading(u.id);
     try {
@@ -93,7 +95,7 @@ export default function AdminUsersPage() {
       await fetchUsers();
     } catch (err) {
       console.error("Deactivate error:", err);
-      setError("បរាជ័យក្នុងការបិទគណនី");
+      setError("Failed to deactivate user");
     } finally {
       setActionLoading(null);
     }
@@ -108,146 +110,164 @@ export default function AdminUsersPage() {
       setEditing(null);
     } catch (err) {
       console.error("Change role error:", err);
-      setError("បរាជ័យក្នុងការផ្លាស់ប្តូរតួនាទី");
+      setError("Failed to change user role");
     } finally {
       setActionLoading(null);
     }
   };
 
-  const SkeletonRow = ({ cols = 7 }) => (
-    <tr>
-      {Array.from({ length: cols }).map((_, i) => (
-        <td key={i}>
-          <div className="placeholder-glow">
-            <span
-              className="placeholder col-12"
-              style={{ minHeight: 12 }}
-            ></span>
-          </div>
-        </td>
-      ))}
-    </tr>
-  );
-
   if (!mounted) return null;
 
   return (
-    <>
+    <div className="space-y-6">
       <RoleGuard />
 
-      <PageHeader
-        title="ការគ្រប់គ្រងអ្នកប្រើប្រាស់"
-        subtitle="View, edit and manage all users"
-        actions={
-          <div className="d-flex gap-2">
-            <input
-              type="search"
-              className="form-control pill"
-              placeholder="ស្វែងរក..."
-              value={search}
-              onChange={(e) => {
-                setOffset(0);
-                setSearch(e.target.value);
-              }}
-              style={{ width: 250 }}
-            />
-            <select
-              className="form-select pill"
-              value={roleFilter}
-              onChange={(e) => {
-                setOffset(0);
-                setRoleFilter(e.target.value);
-              }}
-              style={{ width: 150 }}
-            >
-              <option value="all">All Roles</option>
-              <option value="user">User</option>
-              <option value="organizer">Organizer</option>
-              <option value="admin">Admin</option>
-            </select>
-            <select
-              className="form-select pill"
-              value={statusFilter}
-              onChange={(e) => {
-                setOffset(0);
-                setStatusFilter(e.target.value);
-              }}
-              style={{ width: 150 }}
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="suspended">Suspended</option>
-              <option value="pending">Pending</option>
-            </select>
-          </div>
-        }
-      />
+      {/* Page Header */}
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Users Management</h1>
+          <p
+            style={{
+              color: "var(--color-text-secondary)",
+              fontSize: "0.875rem",
+              marginTop: "4px",
+            }}
+          >
+            View, edit and manage all users
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <input
+            type="search"
+            className="search-bar"
+            placeholder="Search users..."
+            value={search}
+            onChange={(e) => {
+              setOffset(0);
+              setSearch(e.target.value);
+            }}
+            style={{ maxWidth: "250px" }}
+          />
+          <select
+            className="btn-secondary"
+            value={roleFilter}
+            onChange={(e) => {
+              setOffset(0);
+              setRoleFilter(e.target.value);
+            }}
+            style={{ padding: "8px 16px" }}
+          >
+            <option value="all">All Roles</option>
+            <option value="user">User</option>
+            <option value="organizer">Organizer</option>
+            <option value="admin">Admin</option>
+          </select>
+          <select
+            className="btn-secondary"
+            value={statusFilter}
+            onChange={(e) => {
+              setOffset(0);
+              setStatusFilter(e.target.value);
+            }}
+            style={{ padding: "8px 16px" }}
+          >
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="suspended">Suspended</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+      </div>
 
-      <div className={user?.role !== "admin" ? "opacity-50 pe-none" : ""}>
-        <div className="admin-card p-3">
-          {loading && (
-            <div className="d-flex align-items-center gap-2 mb-3 text-muted small">
-              <div
-                className="spinner-border spinner-border-sm"
-                role="status"
-                aria-label="Loading users"
-              ></div>
-              កំពុងផ្ទុកទិន្នន័យអ្នកប្រើប្រាស់...
-            </div>
-          )}
-          <div className="table-responsive">
-            <table className="table align-middle mb-0">
+      <div
+        className={
+          user?.role !== "admin" ? "opacity-50 pointer-events-none" : ""
+        }
+      >
+        {error && (
+          <div className="card" style={{ color: "var(--color-negative)" }}>
+            {error}
+          </div>
+        )}
+
+        {/* Data Table */}
+        <div className="card" style={{ padding: "0" }}>
+          <div className="table-wrapper">
+            <table className="data-table" style={{ width: "100%" }}>
               <thead>
                 <tr>
-                  <th>អ្នកប្រើប្រាស់</th>
-                  <th>អ៊ីមែល</th>
-                  <th>តួនាទី</th>
-                  <th>ថ្ងៃចុះឈ្មោះ</th>
-                  <th>ចុងក្រោយចូល</th>
-                  <th>ស្ថានភាព</th>
-                  <th>សកម្មភាព</th>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Joined</th>
+                  <th>Last Login</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
-              <tbody id="usersTable">
+              <tbody>
                 {loading ? (
                   Array.from({ length: 5 }).map((_, i) => (
-                    <SkeletonRow key={i} />
+                    <tr key={i}>
+                      <td colSpan={7} className="text-center py-4">
+                        <div
+                          className="flex items-center justify-center gap-2"
+                          style={{ color: "var(--color-text-muted)" }}
+                        >
+                          <i
+                            className="bi bi-arrow-repeat"
+                            style={{ animation: "spin 1s linear infinite" }}
+                          ></i>
+                          Loading...
+                        </div>
+                      </td>
+                    </tr>
                   ))
                 ) : !users.length ? (
                   <tr>
                     <td
                       colSpan={7}
-                      className="text-center text-muted py-4"
+                      className="text-center py-8"
+                      style={{ color: "var(--color-text-muted)" }}
                     >
-                      គ្មានទិន្នន័យ
+                      No users found
                     </td>
                   </tr>
                 ) : (
                   users.map((u) => {
-                    const initial =
-                      u.name?.charAt(0)?.toUpperCase() || "?";
+                    const initial = u.name?.charAt(0)?.toUpperCase() || "?";
                     return (
                       <tr key={u.id}>
                         <td>
-                          <div className="d-flex align-items-center gap-2">
+                          <div className="flex items-center gap-3">
                             <div className="avatar">{initial}</div>
                             <div>
-                              <div className="fw-bold">{u.name}</div>
+                              <div
+                                style={{
+                                  color: "var(--color-text-primary)",
+                                  fontWeight: "500",
+                                }}
+                              >
+                                {u.name}
+                              </div>
                               {u.verified && (
-                                <small className="text-success">
+                                <div
+                                  style={{
+                                    color: "var(--color-positive)",
+                                    fontSize: "0.75rem",
+                                  }}
+                                >
                                   <i className="bi bi-patch-check-fill"></i>{" "}
                                   Verified
-                                </small>
+                                </div>
                               )}
                             </div>
                           </div>
                         </td>
                         <td>{u.email}</td>
                         <td>
-                          <span
-                            className={`status-badge bg-${roleClass(u.role)} text-white`}
-                          >
+                          <span className={`status-badge ${roleClass(u.role)}`}>
                             {u.role}
                           </span>
                         </td>
@@ -255,15 +275,19 @@ export default function AdminUsersPage() {
                         <td>—</td>
                         <td>
                           <span
-                            className={`status-badge bg-${statusClass(u.status)} text-white`}
+                            className={`status-badge ${statusClass(u.status)}`}
                           >
                             {u.status}
                           </span>
                         </td>
                         <td>
-                          <div className="d-flex gap-1">
+                          <div className="flex items-center gap-2">
                             <button
-                              className="btn btn-sm btn-outline-primary pill"
+                              className="btn-secondary"
+                              style={{
+                                padding: "6px 12px",
+                                fontSize: "0.8125rem",
+                              }}
                               onClick={() => viewUser(u)}
                               title="View / change role"
                               disabled={loading || actionLoading === u.id}
@@ -272,12 +296,14 @@ export default function AdminUsersPage() {
                             </button>
                             {u.status !== "inactive" && (
                               <button
-                                className="btn btn-sm btn-warning pill"
+                                className="btn-reject"
+                                style={{
+                                  padding: "6px 12px",
+                                  fontSize: "0.8125rem",
+                                }}
                                 onClick={() => handleDeactivate(u)}
                                 title="Deactivate"
-                                disabled={
-                                  loading || actionLoading === u.id
-                                }
+                                disabled={loading || actionLoading === u.id}
                               >
                                 <i className="bi bi-pause-circle"></i>
                               </button>
@@ -293,194 +319,290 @@ export default function AdminUsersPage() {
           </div>
         </div>
 
-        {/* Edit modal */}
+        {/* Edit Modal */}
         {editing && (
           <>
             <div
-              className="modal-backdrop fade show"
+              className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
               onClick={() => setEditing(null)}
             ></div>
             <div
-              className="modal fade show"
-              style={{ display: "block" }}
-              aria-modal="true"
-              role="dialog"
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                minHeight: "100vh",
+              }}
             >
-              <div className="modal-dialog modal-lg">
+              <div
+                className="card"
+                style={{
+                  width: "100%",
+                  maxWidth: "550px",
+                  borderRadius: "12px",
+                  boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+                  animation: "modalIn 0.3s ease-out",
+                }}
+              >
+                <style>{`
+                  @keyframes modalIn {
+                    from {
+                      opacity: 0;
+                      transform: translateY(-20px) scale(0.95);
+                    }
+                    to {
+                      opacity: 1;
+                      transform: translateY(0) scale(1);
+                    }
+                  }
+                `}</style>
                 <div
-                  className="modal-content"
+                  className="card-header"
                   style={{
-                    background: "var(--bg-card)",
-                    color: "var(--text-main)",
+                    background:
+                      "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    borderRadius: "12px 12px 0 0",
+                    padding: "1.25rem 1.5rem",
+                    margin: "-1px",
                   }}
                 >
-                  <div
-                    className="modal-header border-bottom"
-                    style={{ borderColor: "var(--border)" }}
+                  <h3 className="card-title" style={{ color: "white" }}>
+                    <i className="bi bi-person-fill me-2"></i>
+                    User Details
+                  </h3>
+                  <button
+                    className="card-menu-btn"
+                    onClick={() => setEditing(null)}
+                    style={{ color: "white" }}
                   >
-                    <h5 className="modal-title">ព័ត៌មានអ្នកប្រើប្រាស់</h5>
-                    <button
-                      type="button"
-                      className="btn-close"
-                      onClick={() => setEditing(null)}
-                    ></button>
-                  </div>
-                  <div className="modal-body" id="userDetail">
-                    <div className="row g-3">
-                      <div className="col-md-6">
-                        <label className="fw-bold small text-muted">
-                          Full Name
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          value={editing.name || ""}
-                          disabled
-                        />
-                      </div>
-                      <div className="col-md-6">
-                        <label className="fw-bold small text-muted">
-                          Email
-                        </label>
-                        <input
-                          type="email"
-                          className="form-control"
-                          value={editing.email || ""}
-                          disabled
-                        />
-                      </div>
-                      <div className="col-md-6">
-                        <label className="fw-bold small text-muted">
-                          Phone
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          value={editing.phone || ""}
-                          disabled
-                        />
-                      </div>
-                      <div className="col-md-6">
-                        <label className="fw-bold small text-muted">
-                          Role (can change)
-                        </label>
-                        <select
-                          className="form-select"
-                          value={editing.role}
-                          onChange={(e) =>
-                            setEditing({ ...editing, role: e.target.value })
-                          }
-                        >
-                          <option value="user">User</option>
-                          <option value="organizer">Organizer</option>
-                          <option value="admin">Admin</option>
-                        </select>
-                      </div>
-                      <div className="col-md-6">
-                        <label className="fw-bold small text-muted">
-                          Status
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          value={editing.status}
-                          disabled
-                        />
-                      </div>
-                      <div className="col-md-6">
-                        <label className="fw-bold small text-muted">
-                          Joined Date
-                        </label>
-                        <p className="mb-0 form-control-plaintext">
-                          {formatDate(editing.created_at)}
-                        </p>
-                      </div>
-                      <div className="col-md-6">
-                        <label className="fw-bold small text-muted">
-                          Last Login
-                        </label>
-                        <p className="mb-0 form-control-plaintext">—</p>
-                      </div>
-                      <div className="col-md-6">
-                        <small className="text-muted">
-                          Only role changes are saved.
-                        </small>
-                      </div>
+                    <i className="bi bi-x-lg"></i>
+                  </button>
+                </div>
+                <div className="space-y-4" style={{ padding: "1.5rem" }}>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        className="block mb-1"
+                        style={{
+                          fontSize: "0.75rem",
+                          color: "var(--color-text-muted)",
+                          fontWeight: "500",
+                        }}
+                      >
+                        Full Name
+                      </label>
+                      <input
+                        type="text"
+                        className="input"
+                        value={editing.name || ""}
+                        disabled
+                        style={{ borderRadius: "8px" }}
+                      />
+                    </div>
+                    <div>
+                      <label
+                        className="block mb-1"
+                        style={{
+                          fontSize: "0.75rem",
+                          color: "var(--color-text-muted)",
+                          fontWeight: "500",
+                        }}
+                      >
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        className="input"
+                        value={editing.email || ""}
+                        disabled
+                        style={{ borderRadius: "8px" }}
+                      />
                     </div>
                   </div>
-                  <div
-                    className="modal-footer border-top"
-                    style={{ borderColor: "var(--border)" }}
-                  >
-                    <button
-                      type="button"
-                      className="btn btn-secondary pill"
-                      onClick={() => setEditing(null)}
-                    >
-                      បិត
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-primary pill"
-                      onClick={commitEdit}
-                    >
-                      រក្សាទុក
-                    </button>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        className="block mb-1"
+                        style={{
+                          fontSize: "0.75rem",
+                          color: "var(--color-text-muted)",
+                          fontWeight: "500",
+                        }}
+                      >
+                        Phone
+                      </label>
+                      <input
+                        type="text"
+                        className="input"
+                        value={editing.phone || ""}
+                        disabled
+                        style={{ borderRadius: "8px" }}
+                      />
+                    </div>
+                    <div>
+                      <label
+                        className="block mb-1"
+                        style={{
+                          fontSize: "0.75rem",
+                          color: "var(--color-text-muted)",
+                          fontWeight: "500",
+                        }}
+                      >
+                        Role (can change)
+                      </label>
+                      <select
+                        className="input"
+                        value={editing.role}
+                        onChange={(e) =>
+                          setEditing({ ...editing, role: e.target.value })
+                        }
+                        style={{ borderRadius: "8px" }}
+                      >
+                        <option value="user">User</option>
+                        <option value="organizer">Organizer</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </div>
                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        className="block mb-1"
+                        style={{
+                          fontSize: "0.75rem",
+                          color: "var(--color-text-muted)",
+                          fontWeight: "500",
+                        }}
+                      >
+                        Status
+                      </label>
+                      <input
+                        type="text"
+                        className="input"
+                        value={editing.status}
+                        disabled
+                        style={{ borderRadius: "8px" }}
+                      />
+                    </div>
+                    <div>
+                      <label
+                        className="block mb-1"
+                        style={{
+                          fontSize: "0.75rem",
+                          color: "var(--color-text-muted)",
+                          fontWeight: "500",
+                        }}
+                      >
+                        Joined Date
+                      </label>
+                      <p className="form-control-plaintext">
+                        {formatDate(editing.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        className="block mb-1"
+                        style={{
+                          fontSize: "0.75rem",
+                          color: "var(--color-text-muted)",
+                          fontWeight: "500",
+                        }}
+                      >
+                        Last Login
+                      </label>
+                      <p className="form-control-plaintext">—</p>
+                    </div>
+                    <div>
+                      <small style={{ color: "var(--color-text-muted)" }}>
+                        Only role changes are saved.
+                      </small>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  className="flex items-center justify-end gap-3 mt-4 pt-4"
+                  style={{
+                    borderTop: "1px solid var(--color-border)",
+                    padding: "0 1.5rem 1.5rem",
+                  }}
+                >
+                  <button
+                    className="btn-secondary"
+                    onClick={() => setEditing(null)}
+                    style={{ borderRadius: "8px" }}
+                  >
+                    Close
+                  </button>
+                  <button
+                    className="btn-primary"
+                    onClick={commitEdit}
+                    disabled={actionLoading === editing.id}
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                      border: "none",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    <i className="bi bi-check-lg me-2"></i> Save
+                  </button>
                 </div>
               </div>
             </div>
           </>
         )}
 
-        <div className="d-flex align-items-center justify-content-between mt-3">
-          <small className="text-muted d-flex align-items-center gap-2">
-            <span>
-              ទិន្នន័យសរុប: <strong>{total}</strong>
-            </span>
+        {/* Pagination */}
+        <div className="flex items-center justify-between mt-4">
+          <small style={{ color: "var(--color-text-secondary)" }}>
+            Total:{" "}
+            <strong style={{ color: "var(--color-text-primary)" }}>
+              {total}
+            </strong>
             {loading && (
-              <span
-                className="spinner-border spinner-border-sm"
-                role="status"
-                aria-label="Loading"
-              ></span>
+              <span className="ms-2">
+                <i
+                  className="bi bi-arrow-repeat"
+                  style={{ animation: "spin 1s linear infinite" }}
+                ></i>
+              </span>
             )}
-            {error && <span className="text-danger">{error}</span>}
+            {error && <span className="text-red-500">{error}</span>}
           </small>
-          <nav>
-            <ul className="pagination pagination-sm mb-0">
-              <li
-                className={`page-item ${offset === 0 || loading ? "disabled" : ""}`}
-              >
-                <button
-                  className="page-link"
-                  onClick={() => setOffset(Math.max(0, offset - limit))}
-                  disabled={offset === 0 || loading}
-                >
-                  Previous
-                </button>
-              </li>
-              <li className="page-item disabled">
-                <span className="page-link">
-                  {Math.floor(offset / limit) + 1}
-                </span>
-              </li>
-              <li
-                className={`page-item ${offset + limit >= total || loading ? "disabled" : ""
-                  }`}
-              >
-                <button
-                  className="page-link"
-                  onClick={() => setOffset(offset + limit)}
-                  disabled={offset + limit >= total || loading}
-                >
-                  Next
-                </button>
-              </li>
-            </ul>
-          </nav>
+          <div className="flex items-center gap-2">
+            <button
+              className="btn-secondary"
+              style={{ padding: "8px 16px" }}
+              onClick={() => setOffset(Math.max(0, offset - limit))}
+              disabled={offset === 0 || loading}
+            >
+              Previous
+            </button>
+            <span
+              className="status-badge active"
+              style={{
+                background: "var(--color-bg-input)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-text-primary)",
+              }}
+            >
+              {Math.floor(offset / limit) + 1}
+            </span>
+            <button
+              className="btn-secondary"
+              style={{ padding: "8px 16px" }}
+              onClick={() => setOffset(offset + limit)}
+              disabled={offset + limit >= total || loading}
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

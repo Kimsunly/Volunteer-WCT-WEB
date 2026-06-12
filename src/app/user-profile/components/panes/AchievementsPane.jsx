@@ -11,7 +11,18 @@ export default function AchievementsPane() {
   });
 
   useEffect(() => {
-    getUserStats().then(setStats).catch(console.error);
+    getUserStats()
+      .then(data => {
+        if (data) {
+          setStats({
+            total_hours: Number(data.total_hours || 0),
+            completed_projects: Number(data.completed_projects || 0),
+            upcoming_events: Number(data.upcoming_events || 0),
+            points: Number(data.points || 0)
+          });
+        }
+      })
+      .catch(console.error);
   }, []);
 
   return (

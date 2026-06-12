@@ -1,9 +1,16 @@
 import React from "react";
 import Image from "next/image";
+import StarRating from "@/components/common/StarRating";
 
 export default function OverviewPane({ stats, recentApps }) {
   // Default values if props are missing
-  const { activeOpps = 0, totalVolunteers = 0, eventsThisMonth = 0, rating = 0 } = stats || {};
+  const {
+    activeOpps = 0,
+    totalVolunteers = 0,
+    eventsThisMonth = 0,
+    rating = 0,
+    rating_count: ratingCount = 0,
+  } = stats || {};
   const apps = recentApps || [];
 
   return (
@@ -61,9 +68,10 @@ export default function OverviewPane({ stats, recentApps }) {
               <div className="d-flex justify-content-between">
                 <div>
                   <h6>ការវាយតម្លៃ</h6>
-                  <h3>{rating}</h3>
-                  <small className="text-warning">
-                    <i className="bi bi-star-fill me-1"></i>
+                  <h3>{Number(rating).toFixed(1)}</h3>
+                  <StarRating value={rating} readOnly size="sm" />
+                  <small className="text-muted d-block">
+                    {ratingCount > 0 ? `${ratingCount} វាយតម្លៃ` : "មិនទាន់មានវាយតម្លៃ"}
                   </small>
                 </div>
                 <div className="icon-box bg-warning text-white d-flex align-items-center justify-content-center">
