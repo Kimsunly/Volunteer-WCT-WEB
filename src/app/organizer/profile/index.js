@@ -8,5 +8,6 @@ export { default as OpportunitiesPane } from "./panes/OpportunitiesPane";
 export { default as ApplicationsPane } from "./panes/ApplicationsPane";
 export { default as AnalyticsPane } from "./panes/AnalyticsPane";
 export { default as SettingsPane } from "./panes/SettingsPane";
+export { default as ReportedCommentsPane } from "./panes/ReportedCommentsPane";
 
 

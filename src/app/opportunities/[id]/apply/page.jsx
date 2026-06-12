@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { getOpportunityById } from "@/services/opportunities";
+import { getOpportunityById, verifyOpportunityAccessKey } from "@/services/opportunities";
 import { applyToOpportunity, getMyApplications } from "@/services/applications";
 import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
 import LoadingButton from "@/components/common/LoadingButton";
+
+import { parseApiError } from "@/lib/utils/apiError";
 
 export default function VolunteerApplyPage() {
   const params = useParams();
@@ -40,13 +42,38 @@ export default function VolunteerApplyPage() {
     async function fetchOpp() {
       if (!params?.id) return;
       try {
-        const data = await getOpportunityById(params.id);
+        const res = await getOpportunityById(params.id);
+        const data = res.data || res;
         const transformedOpp = {
           ...data,
-          heroImage: data.images ? (typeof data.images === 'string' ? data.images.split(',')[0] : data.images[0]) : "/placeholder.png",
-          date: data.date_range ? new Date(data.date_range).toLocaleDateString() : "TBD",
+          is_private: data.is_private || data.visibility === 'private',
+          heroImage: data.images ? (typeof data.images === 'string' ? data.images.split(',')[0] : data.images[0]) : (data.heroImage || "/placeholder.png"),
+          date: data.date_range ? new Date(data.date_range).toLocaleDateString() : (data.date || "TBD"),
         };
-        setOpportunity(transformedOpp);
+        
+        // If it's a private opportunity, verify the key
+        if (transformedOpp.is_private) {
+          const savedKey = sessionStorage.getItem('private_access_key');
+          if (!savedKey) {
+            toast.error("សូមបញ្ចូលកូដសម្ងាត់សម្រាប់កម្មវិធីឯកជននេះជាមុនសិន។");
+            router.replace(`/opportunities/${params.id}`);
+            return;
+          }
+          try {
+            await verifyOpportunityAccessKey(params.id, savedKey);
+            // Valid key! Set it in form data and keep it in opportunity state
+            setFormData(prev => ({ ...prev, accessKey: savedKey }));
+            setOpportunity(transformedOpp);
+          } catch (err) {
+            console.error("Verification failed on apply load:", err);
+            sessionStorage.removeItem('private_access_key');
+            toast.error("កូដសម្ងាត់មិនត្រឹមត្រូវទេ");
+            router.replace(`/opportunities/${params.id}`);
+            return;
+          }
+        } else {
+          setOpportunity(transformedOpp);
+        }
       } catch (err) {
         console.error("Error fetching opportunity:", err);
         setError("មិនអាចស្វែងរកកម្មវិធីបានទេ។");
@@ -55,7 +82,7 @@ export default function VolunteerApplyPage() {
       }
     }
     fetchOpp();
-  }, [params?.id]);
+  }, [params?.id, router]);
 
   // Check if user already applied
   useEffect(() => {
@@ -163,6 +190,7 @@ export default function VolunteerApplyPage() {
       }
       toast.success("បានដាក់ពាក្យដោយជោគជ័យ!");
       setShowSuccess(true);
+      sessionStorage.removeItem('private_access_key');
       window.scrollTo({ top: 0, behavior: "smooth" });
 
       // Navigate back to opportunity detail page after delay
@@ -172,15 +200,15 @@ export default function VolunteerApplyPage() {
 
     } catch (err) {
       console.error("Submission error:", err);
-      const detail = err.response?.data?.detail;
-      setError(typeof detail === 'string' ? detail : "មានបញ្ហាក្នុងការដាក់ពាក្យ។ សូមព្យាយាមម្តងទៀត។");
+      const errMsg = parseApiError(err) || "មានបញ្ហាក្នុងការដាក់ពាក្យ។ សូមព្យាយាមម្តងទៀត។";
+      setError(errMsg);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading || authLoading) {
+  if (loading || authLoading || (!opportunity && !error)) {
     return (
       <div className="container py-5 text-center my-5">
         <div className="spinner-border text-primary" role="status">
@@ -214,15 +242,47 @@ export default function VolunteerApplyPage() {
 
   if (!user) {
     return (
-      <div className="container py-5 text-center my-5 bg-white rounded shadow-sm">
-        <i className="bi bi-person-lock fs-1 text-warning"></i>
-        <h3 className="mt-3 fw-bold">សូមចូលក្នុងគណនីរបស់អ្នក</h3>
-        <p className="text-muted">អ្នកត្រូវការចូលក្នុងគណនីដើម្បីដាក់ពាក្យស្ម័គ្រចិត្ត។</p>
-        <div className="mt-4 d-flex justify-content-center gap-2">
-          <Link href="/auth/login" className="btn btn-primary px-4">ចូលគណនី</Link>
-          <Link href="/auth/register" className="btn btn-outline-primary px-4">ចុះឈ្មោះ</Link>
+      <main className="py-5 bg-light min-vh-100 d-flex align-items-center" style={{ marginTop: '40px' }}>
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-12 col-md-8 col-lg-6">
+              <div className="card border-0 shadow-sm rounded-4 overflow-hidden text-center p-5">
+                <div className="mb-4">
+                  <div className="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style={{ width: '80px', height: '80px' }}>
+                    <i className="bi bi-person-lock text-primary fs-1"></i>
+                  </div>
+                </div>
+                
+                <h2 className="fw-bold mb-3">សូមចូលក្នុងគណនីរបស់អ្នក</h2>
+                <p className="text-muted mb-4 px-lg-5">
+                  អ្នកត្រូវការចូលក្នុងគណនីជាមុនសិន ដើម្បីអាចបន្តទៅកាន់ការដាក់ពាក្យស្ម័គ្រចិត្តក្នុងកម្មវិធី 
+                  <span className="text-primary fw-semibold"> "{opportunity?.title}"</span> ។
+                </p>
+
+                <div className="d-grid gap-3">
+                  <Link href={`/auth/login?redirect=/opportunities/${params.id}/apply`} className="btn btn-primary btn-lg rounded-pill py-3 fw-bold">
+                    ចូលក្នុងគណនី
+                  </Link>
+                  <div className="d-flex align-items-center justify-content-center my-2">
+                    <hr className="flex-grow-1" />
+                    <span className="mx-3 text-muted small">ឬ</span>
+                    <hr className="flex-grow-1" />
+                  </div>
+                  <Link href="/auth/register" className="btn btn-outline-primary btn-lg rounded-pill py-3 fw-bold">
+                    ចុះឈ្មោះគណនីថ្មី
+                  </Link>
+                </div>
+
+                <div className="mt-5">
+                  <Link href={`/opportunities/${params.id}`} className="text-decoration-none text-muted small hover-primary">
+                    <i className="bi bi-arrow-left me-2"></i>ត្រឡប់ទៅកាន់ព័ត៌មានលម្អិតវិញ
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </main>
     );
   }
 

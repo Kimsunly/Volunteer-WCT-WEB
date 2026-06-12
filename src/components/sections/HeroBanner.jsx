@@ -1,10 +1,14 @@
 "use client";
+import Link from "next/link";
 
 export default function HeroBanner() {
   return (
     <section className="hero-banner position-relative overflow-hidden">
       {/* Content stays on top of slides */}
-      <div className="hero-content position-absolute top-50 start-50 translate-middle text-center w-100" style={{ zIndex: 5 }}>
+      <div
+        className="hero-content position-absolute top-50 start-50 translate-middle text-center w-100"
+        style={{ zIndex: 5 }}
+      >
         <div className="container d-flex justify-content-center">
           <div className="hero-content-inner text-center position-relative">
             <div className="hero-badge mb-3 animate__animated animate__bounceIn animate__delay-1s">
@@ -19,20 +23,27 @@ export default function HeroBanner() {
             </h1>
 
             <p className="hero-decript lead mt-3 line-3 text-white mb-5">
-              ការស្ម័គ្រចិត្តធ្វើឱ្យសង្គមប្រមូលផ្តុំជាធ្លុងមួយ ដើម្បីរួមគ្នាអភិវឌ្ឍសហគមន៍
+              ការស្ម័គ្រចិត្តធ្វើឱ្យសង្គមប្រមូលផ្តុំជាធ្លុងមួយ
+              ដើម្បីរួមគ្នាអភិវឌ្ឍសហគមន៍
               និងថែមទាំងផ្តល់ជាមធ្យោបាយសម្រាប់ឱ្យប្រជាជន បង្ហាញពីតម្លៃរបស់ពួកគេ
               និងបញ្ជាក់សាជាថ្មីថាពួកគេមានចំណែកដ៏មានសារៈសំខាន់សម្រាប់សង្គម។
             </p>
 
             <div className="hero-action d-flex gap-3 justify-content-center mb-5">
-              <button type="button" className="btn hero-contact btn-lg shadow-sm">
+              <Link
+                href="/contact"
+                className="btn hero-contact btn-lg shadow-sm"
+              >
                 <i className="bi bi-envelope-fill me-2" />
                 ទាក់ទងមកយើង
-              </button>
-              <button type="button" className="btn as-volunteer btn-lg shadow-sm">
+              </Link>
+              <Link
+                href="/opportunities"
+                className="btn as-volunteer btn-lg shadow-sm"
+              >
                 <i className="bi bi-people-fill me-2" />
                 ក្លាយជាអ្នកស្ម័គ្រចិត្ត
-              </button>
+              </Link>
             </div>
 
             <div className="hero-stats animate__animated animate__fadeInUp animate__delay-2s">
@@ -70,20 +81,48 @@ export default function HeroBanner() {
           style={{ zIndex: 2 }}
         >
           <div className="carousel-indicators">
-            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" className="active" aria-label="Slide 1"></button>
-            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
-            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            <button
+              type="button"
+              data-bs-target="#heroCarousel"
+              data-bs-slide-to="0"
+              className="active"
+              aria-label="Slide 1"
+            ></button>
+            <button
+              type="button"
+              data-bs-target="#heroCarousel"
+              data-bs-slide-to="1"
+              aria-label="Slide 2"
+            ></button>
+            <button
+              type="button"
+              data-bs-target="#heroCarousel"
+              data-bs-slide-to="2"
+              aria-label="Slide 3"
+            ></button>
           </div>
 
           <div className="carousel-inner h-100">
             <div className="carousel-item active h-100" data-bs-interval="3500">
-              <img src="/images/homepage/3.Banner.jpg" className="d-block w-100 h-100 object-fit-cover" alt="Banner 1" />
+              <img
+                src="/images/homepage/3.Banner.jpg"
+                className="d-block w-100 h-100 object-fit-cover"
+                alt="Banner 1"
+              />
             </div>
             <div className="carousel-item h-100" data-bs-interval="3500">
-              <img src="/images/homepage/2.Banner.jpg" className="d-block w-100 h-100 object-fit-cover" alt="Banner 2" />
+              <img
+                src="/images/homepage/2.Banner.jpg"
+                className="d-block w-100 h-100 object-fit-cover"
+                alt="Banner 2"
+              />
             </div>
             <div className="carousel-item h-100" data-bs-interval="3500">
-              <img src="/images/homepage/4.banner.jpg" className="d-block w-100 h-100 object-fit-cover" alt="Banner 3" />
+              <img
+                src="/images/homepage/4.banner.jpg"
+                className="d-block w-100 h-100 object-fit-cover"
+                alt="Banner 3"
+              />
             </div>
           </div>
 
@@ -111,7 +150,8 @@ export default function HeroBanner() {
         <div
           className="position-absolute top-0 start-0 w-100 h-100"
           style={{
-            background: "linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.55))",
+            background:
+              "linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.55))",
             zIndex: 3,
             pointerEvents: "none",
           }}

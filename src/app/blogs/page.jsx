@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useMemo, useState, useEffect } from "react";
 import { BlogHero, BlogFilter, FeaturedPost, BlogGrid } from "./components";
@@ -18,20 +18,31 @@ export default function BlogsPage() {
     async function fetchBlogs() {
       try {
         setLoading(true);
-        const data = await listBlogs({ published_only: true });
-
-        // Map backend blogs to UI expectation
-        const mapped = (data || []).map(b => ({
+        const blogList = await listBlogs({ published_only: true });
+        const mapped = blogList.map((b) => ({
           id: b.id,
           category: {
-            id: b.category?.toLowerCase().replace(/\s+/g, '-') || 'other',
-            label: b.category || 'ផ្សេងៗ'
+            id: b.category?.toLowerCase().replace(/\s+/g, "-") || "other",
+            label: b.category || "ផ្សេងៗ",
           },
-          badgeClass: b.category === "Education" ? "bg-primary" :
-            b.category === "Environment" ? "bg-success" :
-              b.category === "Health" ? "bg-danger" : "bg-warning",
+          badgeClass:
+            b.category === "Education"
+              ? "bg-primary"
+              : b.category === "Environment"
+                ? "bg-success"
+                : b.category === "Health"
+                  ? "bg-danger"
+                  : b.category === "Childcare"
+                    ? "bg-warning"
+                    : b.category === "Community"
+                      ? "bg-info"
+                      : "bg-secondary",
           image: b.image || "/images/opportunities/Education/card-8/img-2.png",
-          date: new Date(b.created_at).toLocaleDateString('km-KH', { day: '2-digit', month: 'long', year: 'numeric' }),
+          date: new Date(b.created_at).toLocaleDateString("km-KH", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+          }),
           readTime: b.read_time || "5 នាទី",
           title: b.title,
           excerpt: b.content?.substring(0, 120) + "..." || "",
@@ -64,7 +75,7 @@ export default function BlogsPage() {
   // Slice for load-more
   const visiblePosts = useMemo(
     () => filtered.slice(0, visibleCount),
-    [filtered, visibleCount]
+    [filtered, visibleCount],
   );
 
   const onLoadMore = () => {
@@ -75,22 +86,23 @@ export default function BlogsPage() {
     setVisibleCount((n) => n + 3);
   };
 
-  if (loading) return (
-    <main className="blog-page">
-      <div className="container py-5 mt-5">
-        <div className="row g-4 mt-5">
-          <div className="col-12 mb-4">
-            <Skeleton variant="card" />
-          </div>
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div className="col-md-6 col-lg-4" key={i}>
+  if (loading)
+    return (
+      <main className="blog-page">
+        <div className="container py-5 mt-5">
+          <div className="row g-4 mt-5">
+            <div className="col-12 mb-4">
               <Skeleton variant="card" />
             </div>
-          ))}
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div className="col-md-6 col-lg-4" key={i}>
+                <Skeleton variant="card" />
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
-    </main>
-  );
+      </main>
+    );
 
   return (
     <main className="blog-page">
@@ -110,20 +122,18 @@ export default function BlogsPage() {
       )}
 
       {/* Featured - Use first filtered post if available */}
-      {filtered.length > 0 && (
-        <FeaturedPost post={filtered[0]} />
-      )}
+      {filtered.length > 0 && <FeaturedPost post={filtered[0]} />}
 
       {/* Grid - excluding the featured if needed, but for now just show all visible */}
       <BlogGrid posts={visiblePosts} />
 
       {/* Load more */}
       {filtered.length > visibleCount && (
-        <section>
+        <section style={{ paddingBottom: "80px" }}>
           <div className="container">
             <div className="text-center mt-5" data-aos="fade-up">
               <button
-                className="btn btn-primary btn-lg px-5"
+                className="btn btn-primary btn-lg px-5 py-3"
                 onClick={onLoadMore}
               >
                 <i className="bi bi-arrow-down-circle me-2"></i>ដាក់បន្ថែម

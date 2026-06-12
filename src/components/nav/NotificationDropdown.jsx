@@ -1,52 +1,200 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { getMyOrganizerApplication } from "@/services/organizer";
+import { getMyApplications } from "@/services/applications";
 import Link from "next/link";
 
-export default function NotificationDropdown() {
-  const { user } = useAuth();
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: "success",
-      icon: "/images/Icon/facebook.png",
-      title: "Facebook",
-      message: "អ្នកបានភ្ជាប់គណនីជាមួយ Facebook",
-      time: "ឥឡូវនេះ",
-      read: false,
-    },
-    {
-      id: 2,
-      type: "info",
-      icon: "/images/Icon/setting.png",
-      title: "ការកំណត់",
-      message: "អ្នកបានផ្លាស់ប្តូរពាក្យសម្ងាត់បានជោគជ័យ",
-      time: "៣០នាទីមុន",
-      read: false,
-    },
-    {
-      id: 3,
+function formatNotificationDate(val) {
+  if (!val) return "";
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("km-KH", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function buildOrganizerAppNotification(app, userId, refreshUser) {
+  const isRead =
+    localStorage.getItem(`org-app-read-${app.status}-${userId}`) === "true";
+
+  if (app.status === "verified") {
+    if (typeof refreshUser === "function") {
+      refreshUser();
+    }
+    return {
+      id: "org-app-approved",
+      kind: "org-app",
+      orgStatus: "verified",
       type: "success",
       icon: "/images/Icon/mark.png",
-      title: "ការដាក់ពាក្យ",
-      message: "ការដាក់ពាក្យរបស់អ្នកបានជោគជ័យ",
-      time: "២ម៉ោងមុន",
-      read: false,
-    },
-  ]);
+      title: "ការស្នើសុំជាអ្នករៀបចំកម្មវិធី",
+      message:
+        "ការស្នើសុំក្លាយជាអ្នករៀបចំកម្មវិធីរបស់អ្នកត្រូវបានអនុម័តរួចហើយ!",
+      time: formatNotificationDate(app.updated_at || app.created_at),
+      read: isRead,
+      href: "/organizer",
+    };
+  }
+
+  if (app.status === "rejected") {
+    return {
+      id: "org-app-rejected",
+      kind: "org-app",
+      orgStatus: "rejected",
+      type: "danger",
+      icon: "/images/Icon/setting.png",
+      title: "ការស្នើសុំជាអ្នករៀបចំកម្មវិធី",
+      message: `ការស្នើសុំត្រូវបានបដិសេធ៖ ${app.rejection_reason || "ព័ត៌មានមិនគ្រប់គ្រាន់"}`,
+      time: formatNotificationDate(app.updated_at || app.created_at),
+      read: isRead,
+      href: "/organizer",
+    };
+  }
+
+  if (app.status === "pending") {
+    return {
+      id: "org-app-pending",
+      kind: "org-app",
+      orgStatus: "pending",
+      type: "info",
+      icon: "/images/Icon/setting.png",
+      title: "ការស្នើសុំជាអ្នករៀបចំកម្មវិធី",
+      message: "ការស្នើសុំរបស់អ្នកកំពុងស្ថិតក្នុងការពិនិត្យមើលពី Admin...",
+      time: formatNotificationDate(app.created_at),
+      read: isRead,
+      href: "/organizer",
+    };
+  }
+
+  return null;
+}
+
+function buildOpportunityAppNotifications(apps, userId) {
+  return apps
+    .filter((app) => app.status === "approved" || app.status === "rejected")
+    .map((app) => {
+      const isApproved = app.status === "approved";
+      const oppTitle =
+        app.opportunity_title ||
+        app.opportunity?.title ||
+        `ឱកាស #${app.opportunity_id}`;
+      const isRead =
+        localStorage.getItem(
+          `opp-app-read-${app.id}-${app.status}-${userId}`,
+        ) === "true";
+
+      return {
+        id: `opp-app-${app.id}-${app.status}`,
+        kind: "opp-app",
+        appId: app.id,
+        appStatus: app.status,
+        type: isApproved ? "success" : "danger",
+        icon: isApproved
+          ? "/images/Icon/mark.png"
+          : "/images/Icon/setting.png",
+        title: "ការដាក់ពាក្យឱកាស",
+        message: isApproved
+          ? `ការដាក់ពាក្យរបស់អ្នកសម្រាប់ "${oppTitle}" ត្រូវបានអនុម័តរួចហើយ!`
+          : `ការដាក់ពាក្យរបស់អ្នកសម្រាប់ "${oppTitle}" ត្រូវបានបដិសេធ។`,
+        time: formatNotificationDate(app.reviewed_at || app.updated_at),
+        read: isRead,
+        href: "/user-profile",
+        sortAt: new Date(app.reviewed_at || app.updated_at || 0).getTime(),
+      };
+    })
+    .sort((a, b) => b.sortAt - a.sortAt);
+}
+
+export default function NotificationDropdown() {
+  const { user, refreshUser } = useAuth();
+  const [notifications, setNotifications] = useState([]);
+
+  const fetchNotifications = useCallback(async () => {
+    if (!user) return;
+
+    const next = [];
+
+    try {
+      const orgRes = await getMyOrganizerApplication();
+      const orgApp = orgRes?.data;
+      if (orgApp) {
+        const orgNotification = buildOrganizerAppNotification(
+          orgApp,
+          user.id,
+          refreshUser,
+        );
+        if (orgNotification) {
+          next.push(orgNotification);
+        }
+      }
+    } catch {
+      // No organizer application — expected for most volunteers
+    }
+
+    try {
+      const appsRes = await getMyApplications({ limit: 50, offset: 0 });
+      const oppNotifications = buildOpportunityAppNotifications(
+        appsRes?.data || [],
+        user.id,
+      );
+      next.push(...oppNotifications);
+    } catch (err) {
+      console.error("Error fetching application notifications:", err);
+    }
+
+    setNotifications(next);
+  }, [user, refreshUser]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 10000);
+    return () => clearInterval(interval);
+  }, [user, fetchNotifications]);
 
   if (!user) return null;
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const markAsRead = (id) => {
-    setNotifications(
-      notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
+  const markAsRead = (notification) => {
+    if (notification.kind === "org-app") {
+      localStorage.setItem(
+        `org-app-read-${notification.orgStatus}-${user.id}`,
+        "true",
+      );
+    } else if (notification.kind === "opp-app") {
+      localStorage.setItem(
+        `opp-app-read-${notification.appId}-${notification.appStatus}-${user.id}`,
+        "true",
+      );
+    }
+
+    setNotifications((prev) =>
+      prev.map((n) =>
+        n.id === notification.id ? { ...n, read: true } : n,
+      ),
     );
   };
 
   const markAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })));
+    notifications.forEach((notification) => {
+      if (notification.kind === "org-app") {
+        localStorage.setItem(
+          `org-app-read-${notification.orgStatus}-${user.id}`,
+          "true",
+        );
+      } else if (notification.kind === "opp-app") {
+        localStorage.setItem(
+          `opp-app-read-${notification.appId}-${notification.appStatus}-${user.id}`,
+          "true",
+        );
+      }
+    });
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
   return (
@@ -91,14 +239,12 @@ export default function NotificationDropdown() {
           ) : (
             notifications.map((notification) => (
               <li key={notification.id}>
-                <a
-                  className={`dropdown-item d-flex align-items-start py-3 ${!notification.read ? "bg-light" : ""
-                    }`}
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    markAsRead(notification.id);
-                  }}
+                <Link
+                  className={`dropdown-item d-flex align-items-start py-3 ${
+                    !notification.read ? "bg-light" : ""
+                  }`}
+                  href={notification.href || "#"}
+                  onClick={() => markAsRead(notification)}
                 >
                   <img
                     src={notification.icon}
@@ -124,13 +270,13 @@ export default function NotificationDropdown() {
                       style={{ width: "8px", height: "8px", padding: 0 }}
                     ></span>
                   )}
-                </a>
+                </Link>
               </li>
             ))
           )}
         </div>
         <li className="my-3 d-flex justify-content-center border-top pt-3">
-          <Link href="/notifications" className="text-primary">
+          <Link href="/user-profile" className="text-primary">
             មើលការជូនដំណឹងទាំងអស់
           </Link>
         </li>

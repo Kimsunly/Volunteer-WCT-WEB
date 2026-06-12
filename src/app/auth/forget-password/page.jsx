@@ -1,15 +1,37 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AuthShell } from "../components";
+import { forgotPassword } from "@/lib/services/auth";
+import toast from "react-hot-toast";
 
 export default function ForgetPasswordPage() {
-  const onSubmit = (e) => {
+  const router = useRouter();
+  const [submitting, setSubmitting] = useState(false);
+
+  const onSubmit = async (e) => {
     e.preventDefault();
     const email = document.getElementById("email")?.value;
-    if (!email) return;
-    alert("តំណស្តារពាក្យសម្ងាត់ត្រូវបានផ្ញើទៅអ៊ីមែល (Mock)");
+    if (!email) {
+      toast.error("សូមបញ្ចូលអ៊ីមែល");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      await forgotPassword({ email });
+      toast.success("កូដកំណត់ពាក្យសម្ងាត់ថ្មីត្រូវបានផ្ញើទៅអ៊ីមែលរបស់អ្នកហើយ!");
+      router.push(`/auth/reset-password?email=${encodeURIComponent(email)}`);
+    } catch (err) {
+      console.error(err);
+      toast.error(
+        err.response?.data?.message || "បរាជ័យក្នុងការផ្ញើកូដកំណត់ឡើងវិញ",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -18,11 +40,13 @@ export default function ForgetPasswordPage() {
         <section>
           <div className="container">
             <div className="row justify-content-center">
-              <div className="col-12 col-xl-10">
+              <div className="col-12">
                 <AuthShell
-                  imageSrc="/images/homepage/forget-img.jpg"
-                  title="ភ្លេចពាក្យសម្ងាត់"
-                  subtitle="យើងនឹងផ្ញើតំណភ្ជាប់សម្រាប់កំណត់ពាក្យសម្ងាត់ថ្មីទៅអ៊ីមែលរបស់អ្នក។"
+                  imageSrc="/images/svg_login/Volunteering-bro.svg"
+                  title="Forgot Password"
+                  switchText="Remember your password?"
+                  switchLink="/auth/login"
+                  switchAction="Login"
                 >
                   <form
                     id="forgetForm"
@@ -31,14 +55,11 @@ export default function ForgetPasswordPage() {
                     onSubmit={onSubmit}
                   >
                     <div className="col-12">
-                      <label htmlFor="email" className="form-label">
-                        អ៊ីមែល
-                      </label>
                       <input
                         type="email"
-                        className="form-control"
+                        className="auth-modern-input w-100"
                         id="email"
-                        placeholder="បញ្ចូលអ៊ីមែល"
+                        placeholder="Email Address"
                         defaultValue="VolunteerCambo@gmail.com"
                         required
                       />
@@ -48,15 +69,24 @@ export default function ForgetPasswordPage() {
                     </div>
 
                     <div className="col-12">
-                      <button type="submit" className="btn btn-primary">
-                        ផ្ទៀងផ្ទាត់គណនី
+                      <button
+                        type="submit"
+                        className="auth-modern-btn"
+                        disabled={submitting}
+                      >
+                        {submitting ? (
+                          <>
+                            <span
+                              className="spinner-border spinner-border-sm me-2"
+                              role="status"
+                              aria-hidden="true"
+                            ></span>
+                            កំពុងផ្ទៀងផ្ទាត់...
+                          </>
+                        ) : (
+                          "Send Reset Link"
+                        )}
                       </button>
-                    </div>
-
-                    <div className="col-12">
-                      <p className="text-center">
-                        ចូលគណនីផ្សេងទៀត? <Link href="/auth/login">ចូលគណនី</Link>
-                      </p>
                     </div>
                   </form>
                 </AuthShell>

@@ -2,54 +2,130 @@
 
 import React from "react";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
-/**
- * AdminSidebar: left navigation for admin pages.
- * - Highlights active link via prop 'active'
- */
 export default function AdminSidebar({ active }) {
-  const link = (href, icon, label, id) => (
-    <Link
-      className={`sidebar-link ${active === id ? "active" : ""}`}
-      href={href}
-      prefetch={true}
-    >
-      <i className={icon}></i> {label}
-    </Link>
-  );
+  const { user } = useAuth();
+  const userName = user?.name || "Guy Hawkins";
+  const userInitial = userName.charAt(0).toUpperCase();
 
   return (
-    <aside className="col-lg-3 col-xl-2">
-      <div className="admin-card p-3">
-        <div className="mb-3 fw-semibold text-uppercase small text-muted">
-          Navigation
+    <aside className="sidebar">
+      {/* User Profile */}
+      <div className="sidebar-user">
+        <div className="avatar">{userInitial}</div>
+        <div
+          style={{
+            color: "var(--color-text-primary)",
+            fontWeight: "500",
+            fontSize: "0.875rem",
+          }}
+        >
+          {userName}
         </div>
-        <nav className="d-flex flex-column gap-2">
-          {link(
-            "/admin/dashboard",
-            "bi bi-speedometer2",
-            "ទិដ្ឋភាពទូទៅ",
-            "dashboard"
-          )}
-          {link(
-            "/admin/organizers",
-            "bi bi-patch-check",
-            "ផ្ទៀងផ្ទាត់ Organizer",
-            "organizers"
-          )}
-          {link(
-            "/admin/opportunities",
-            "bi bi-briefcase",
-            "ឱកាស (CRUD)",
-            "opportunities"
-          )}
-          {link("/admin/categories", "bi bi-tags", "ប្រភេទ", "categories")}
-          {link("/admin/blogs", "bi bi-lightbulb", "គន្លឹះ / ប្លុក", "blogs")}
-          {link("/admin/community", "bi bi-people-fill", "សហគមន៍", "community")}
-          {link("/admin/comments", "bi bi-chat-dots", "មតិយោបល់", "comments")}
-          {link("/admin/users", "bi bi-people", "អ្នកប្រើប្រាស់", "users")}
-          {link("/admin/donations", "bi bi-heart", "បរិច្ចាគ", "donations")}
-        </nav>
+      </div>
+
+      {/* Search Bar */}
+      <div className="search-bar">
+        <i className="bi bi-search"></i>
+        <input type="text" placeholder="Search..." />
+      </div>
+
+      {/* Navigation Groups */}
+      <nav className="flex-1">
+        {/* Dashboards Group */}
+        <div className="nav-group">
+          <div className="nav-group-label">Dashboards</div>
+          <Link
+            href="/admin/dashboard"
+            className={`nav-item ${active === "dashboard" ? "active" : ""}`}
+          >
+            <i className="bi bi-grid-3x3-gap-fill"></i>
+            Overview
+          </Link>
+          <Link
+            href="/admin/organizers"
+            className={`nav-item ${active === "organizers" ? "active" : ""}`}
+          >
+            <i className="bi bi-people-fill"></i>
+            Organizer Applications
+          </Link>
+          <Link
+            href="/admin/opportunities"
+            className={`nav-item ${active === "opportunities" ? "active" : ""}`}
+          >
+            <i className="bi bi-briefcase-fill"></i>
+            Opportunities
+          </Link>
+        </div>
+
+        {/* Settings Group */}
+        <div className="nav-group">
+          <div className="nav-group-label">Settings</div>
+          <Link
+            href="/admin/settings"
+            className={`nav-item ${active === "settings" ? "active" : ""}`}
+          >
+            <i className="bi bi-gear-fill"></i>
+            Appearance
+          </Link>
+        </div>
+
+        {/* Management Group */}
+        <div className="nav-group">
+          <div className="nav-group-label">Management</div>
+          <Link
+            href="/admin/categories"
+            className={`nav-item ${active === "categories" ? "active" : ""}`}
+          >
+            <i className="bi bi-tags-fill"></i>
+            Categories
+          </Link>
+          <Link
+            href="/admin/blogs"
+            className={`nav-item ${active === "blogs" ? "active" : ""}`}
+          >
+            <i className="bi bi-lightbulb-fill"></i>
+            Blogs & Tips
+          </Link>
+          <Link
+            href="/admin/community"
+            className={`nav-item ${active === "community" ? "active" : ""}`}
+          >
+            <i className="bi bi-people-fill"></i>
+            Community
+          </Link>
+          <Link
+            href="/admin/comments"
+            className={`nav-item ${active === "comments" ? "active" : ""}`}
+          >
+            <i className="bi bi-chat-dots-fill"></i>
+            Comments
+          </Link>
+          <Link
+            href="/admin/users"
+            className={`nav-item ${active === "users" ? "active" : ""}`}
+          >
+            <i className="bi bi-person-gear"></i>
+            Users
+          </Link>
+          <Link
+            href="/admin/donations"
+            className={`nav-item ${active === "donations" ? "active" : ""}`}
+          >
+            <i className="bi bi-heart-fill"></i>
+            Donations
+          </Link>
+        </div>
+      </nav>
+
+      {/* Footer */}
+      <div className="sidebar-footer">
+        <div className="flex items-center gap-1">
+          <i className="bi bi-123"></i>
+          SMAKJIT
+        </div>
+        <i className="bi bi-app-indicator"></i>
       </div>
     </aside>
   );

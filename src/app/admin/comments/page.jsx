@@ -1,86 +1,66 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import { PageHeader, RoleGuard, storage } from "../components";
+import React, { useEffect, useState, useMemo } from "react";
+import { RoleGuard } from "../components";
+import { listComments, approveComment, hideComment } from "@/services/admin";
+import { deleteComment } from "@/services/comments";
+import { showToast } from "@/components/common/CustomToaster";
+import DeleteCommentModal from "@/components/modals/DeleteCommentModal";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { Doughnut } from "react-chartjs-2";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+);
 
 export default function AdminCommentsPage() {
   const [mounted, setMounted] = useState(false);
   const [roleAllowed, setRoleAllowed] = useState(true);
   const [comments, setComments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showFlaggedOnly, setShowFlaggedOnly] = useState(false);
   const [oppFilter, setOppFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  // Delete modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletingCommentId, setDeletingCommentId] = useState(null);
+  const [deletingCommentIndex, setDeletingCommentIndex] = useState(null);
+
+  const fetchComments = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await listComments();
+      setComments(res.data || []);
+    } catch (err) {
+      console.error("Error loading comments:", err);
+      setError("Failed to load comments");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
     const role = localStorage.getItem("role") || "admin";
     setRoleAllowed(role === "admin");
-    let data = storage.read("comments", []);
-    if (!data.length) {
-      data = [
-        {
-          id: 1,
-          userName: "Sok Dara",
-          userEmail: "dara@example.com",
-          opportunityId: 1,
-          opportunityTitle: "Teach English to Rural Students",
-          comment:
-            "This looks like a great opportunity! I would love to participate.",
-          createdAt: "2025-01-03 14:30",
-          status: "approved",
-          flagged: false,
-        },
-        {
-          id: 2,
-          userName: "Chan Sophea",
-          userEmail: "sophea@example.com",
-          opportunityId: 2,
-          opportunityTitle: "Community Clean-up Drive",
-          comment: "When exactly does this event start? I need more details.",
-          createdAt: "2025-01-03 10:15",
-          status: "approved",
-          flagged: false,
-        },
-        {
-          id: 3,
-          userName: "Lim Kosal",
-          userEmail: "kosal@example.com",
-          opportunityId: 1,
-          opportunityTitle: "Teach English to Rural Students",
-          comment:
-            "This is spam content and not appropriate for this platform!!!",
-          createdAt: "2025-01-04 09:00",
-          status: "flagged",
-          flagged: true,
-          flagReason: "Spam/Inappropriate content",
-        },
-        {
-          id: 4,
-          userName: "Pov Sreymom",
-          userEmail: "sreymom@example.com",
-          opportunityId: 3,
-          opportunityTitle: "Medical Camp Support",
-          comment: "I have medical training and would be happy to help!",
-          createdAt: "2025-01-03 16:45",
-          status: "approved",
-          flagged: false,
-        },
-        {
-          id: 5,
-          userName: "Noun Rithy",
-          userEmail: "rithy@example.com",
-          opportunityId: 2,
-          opportunityTitle: "Community Clean-up Drive",
-          comment: "Contact me for fake certificates and fraudulent services.",
-          createdAt: "2025-01-04 11:20",
-          status: "flagged",
-          flagged: true,
-          flagReason: "Suspicious/Fraudulent",
-        },
-      ];
-      storage.write("comments", data);
+    if (role === "admin") {
+      fetchComments();
     }
-    queueMicrotask(() => setComments(data));
   }, []);
 
   const stats = useMemo(
@@ -90,14 +70,14 @@ export default function AdminCommentsPage() {
       approved: comments.filter((c) => c.status === "approved").length,
       hidden: comments.filter((c) => c.status === "hidden").length,
     }),
-    [comments]
+    [comments],
   );
 
   const filtered = useMemo(() => {
     let list = showFlaggedOnly ? comments.filter((c) => c.flagged) : comments;
 
     if (oppFilter !== "all") {
-      list = list.filter((c) => c.opportunityId === Number(oppFilter));
+      list = list.filter((c) => String(c.opportunityId) === oppFilter);
     }
     if (statusFilter !== "all") {
       list = list.filter((c) => c.status === statusFilter);
@@ -105,265 +85,520 @@ export default function AdminCommentsPage() {
     return list;
   }, [comments, showFlaggedOnly, oppFilter, statusFilter]);
 
-  const save = (next) => {
-    setComments(next);
-    storage.write("comments", next);
-  };
+  const uniqueOpportunities = useMemo(() => {
+    const map = new Map();
+    comments.forEach((c) => {
+      if (c.opportunityId && c.opportunityTitle) {
+        map.set(String(c.opportunityId), c.opportunityTitle);
+      }
+    });
+    return Array.from(map.entries()).map(([id, title]) => ({ id, title }));
+  }, [comments]);
 
-  const approve = (idx) => {
+  const handleApprove = async (idx) => {
     const item = filtered[idx];
-    const next = comments.map((c) =>
-      c.id === item.id ? { ...c, status: "approved", flagged: false } : c
-    );
-    save(next);
+    try {
+      await approveComment(item.id);
+      showToast.success("Comment approved successfully", "Success");
+      setComments(
+        comments.map((c) =>
+          c.id === item.id ? { ...c, status: "approved", flagged: false } : c,
+        ),
+      );
+    } catch (err) {
+      console.error("Error approving comment:", err);
+      showToast.error("Failed to approve comment", "Error");
+    }
   };
 
-  const hide = (idx) => {
+  const handleHide = async (idx) => {
     const item = filtered[idx];
-    const next = comments.map((c) =>
-      c.id === item.id ? { ...c, status: "hidden" } : c
-    );
-    save(next);
+    try {
+      await hideComment(item.id);
+      showToast.success("Comment hidden successfully", "Success");
+      setComments(
+        comments.map((c) =>
+          c.id === item.id ? { ...c, status: "hidden" } : c,
+        ),
+      );
+    } catch (err) {
+      console.error("Error hiding comment:", err);
+      showToast.error("Failed to hide comment", "Error");
+    }
   };
 
-  const unhide = (idx) => {
+  const handleUnhide = async (idx) => {
     const item = filtered[idx];
-    const next = comments.map((c) =>
-      c.id === item.id ? { ...c, status: "approved" } : c
-    );
-    save(next);
+    try {
+      await approveComment(item.id);
+      showToast.success("Comment shown again", "Success");
+      setComments(
+        comments.map((c) =>
+          c.id === item.id ? { ...c, status: "approved" } : c,
+        ),
+      );
+    } catch (err) {
+      console.error("Error unhiding comment:", err);
+      showToast.error("Failed to show comment", "Error");
+    }
   };
 
-  const remove = (idx) => {
-    if (!confirm("លុបមតិយោបល់នេះជាអចិន្ត្រៃយ៍?")) return;
+  const handleRemove = (idx) => {
     const item = filtered[idx];
-    const next = comments.filter((c) => c.id !== item.id);
-    save(next);
+    setDeletingCommentId(item.id);
+    setDeletingCommentIndex(idx);
+    setDeleteModalOpen(true);
   };
 
-  const statusChip = (s) => {
-    const map = {
-      approved: "success",
-      flagged: "danger",
-      hidden: "warning",
-      pending: "secondary",
-    };
-    return (
-      <span className={`status-badge bg-${map[s] || "secondary"} text-white`}>
-        {s}
-      </span>
-    );
+  const confirmDeleteComment = async () => {
+    const item = filtered[deletingCommentIndex];
+    try {
+      await deleteComment(item.id);
+      showToast.success("Comment deleted permanently", "Success");
+      setComments(comments.filter((c) => c.id !== item.id));
+      setDeleteModalOpen(false);
+      setDeletingCommentId(null);
+      setDeletingCommentIndex(null);
+    } catch (err) {
+      console.error("Error deleting comment:", err);
+      showToast.error("Failed to delete comment", "Error");
+    }
   };
 
   if (!mounted) return null;
 
+  const statusChartData = {
+    labels: ["Approved", "Pending", "Flagged", "Hidden"],
+    datasets: [
+      {
+        label: "Count",
+        data: [
+          stats.approved,
+          comments.filter((c) => c.status === "pending").length,
+          stats.flagged,
+          stats.hidden,
+        ],
+        backgroundColor: ["#10b981", "#f59e0b", "#ef4444", "#6b7280"],
+      },
+    ],
+  };
+
   return (
-    <>
+    <div className="space-y-6">
       <RoleGuard enabled={roleAllowed} />
 
-      <PageHeader
-        title="គ្រប់គ្រងមតិយោបល់"
-        subtitle="Review and moderate user comments on opportunities"
-        actions={
-          <div className="d-flex gap-2">
-            <button
-              className="btn btn-outline-danger pill"
-              onClick={() => setShowFlaggedOnly(true)}
-            >
-              <i className="bi bi-flag-fill me-1"></i> Flagged (
-              <span>{stats.flagged}</span>)
-            </button>
-            <button
-              className="btn btn-outline-secondary pill"
-              onClick={() => setShowFlaggedOnly(false)}
-            >
-              <i className="bi bi-list me-1"></i> All Comments
-            </button>
+      {/* Page Header */}
+      <div
+        className="page-header"
+        style={{
+          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          padding: "2rem",
+          borderRadius: "12px",
+          color: "white",
+        }}
+      >
+        <div>
+          <h1 className="page-title" style={{ color: "white" }}>
+            <i className="bi bi-chat-dots-fill me-3"></i>
+            Comments Moderation
+          </h1>
+          <p
+            style={{
+              color: "rgba(255, 255, 255, 0.8)",
+              fontSize: "0.875rem",
+              marginTop: "4px",
+            }}
+          >
+            Review and moderate user comments on opportunities
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            className={showFlaggedOnly ? "btn-primary" : "btn-secondary"}
+            onClick={() => setShowFlaggedOnly(true)}
+            style={{
+              background: showFlaggedOnly ? "rgba(255,255,255,0.2)" : "white",
+              color: showFlaggedOnly ? "white" : "#333",
+            }}
+          >
+            <i className="bi bi-flag-fill me-2"></i> Flagged ({stats.flagged})
+          </button>
+          <button
+            className={showFlaggedOnly ? "btn-secondary" : "btn-primary"}
+            onClick={() => setShowFlaggedOnly(false)}
+            style={{
+              background: !showFlaggedOnly ? "rgba(255,255,255,0.2)" : "white",
+              color: !showFlaggedOnly ? "white" : "#333",
+            }}
+          >
+            <i className="bi bi-list me-2"></i> All Comments
+          </button>
+        </div>
+      </div>
+
+      <div className={!roleAllowed ? "opacity-50 pointer-events-none" : ""}>
+        {error && (
+          <div className="card" style={{ color: "var(--color-negative)" }}>
+            {error}
           </div>
-        }
-      />
+        )}
 
-      <div className={!roleAllowed ? "opacity-50 pe-none" : ""}>
-        <div className="row g-3">
-          {/* Comments list */}
-          <div className="col-lg-9">
-            <div id="commentsContainer">
-              {!filtered.length ? (
-                <div className="text-center text-muted py-5">
-                  គ្មានមតិយោបល់
-                </div>
-              ) : (
-                filtered.map((c, idx) => {
-                  const initial =
-                    c.userName?.charAt(0)?.toUpperCase() || "?";
-                  const statusClass =
-                    c.status === "approved"
-                      ? "success"
-                      : c.status === "flagged"
-                        ? "danger"
-                        : c.status === "hidden"
-                          ? "warning"
-                          : "secondary";
+        {/* Filters */}
+        <div className="flex flex-wrap items-center gap-3 mb-6">
+          <select
+            className="btn-secondary"
+            value={oppFilter}
+            onChange={(e) => setOppFilter(e.target.value)}
+            style={{ padding: "10px 16px", borderRadius: "8px" }}
+          >
+            <option value="all">All Opportunities</option>
+            {uniqueOpportunities.map((op) => (
+              <option key={op.id} value={op.id}>
+                {op.title}
+              </option>
+            ))}
+          </select>
+          <select
+            className="btn-secondary"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            style={{ padding: "10px 16px", borderRadius: "8px" }}
+          >
+            <option value="all">All Status</option>
+            <option value="approved">Approved</option>
+            <option value="pending">Pending</option>
+            <option value="flagged">Flagged</option>
+            <option value="hidden">Hidden</option>
+          </select>
+        </div>
 
-                  return (
-                    <div
-                      className={`comment-item ${c.flagged ? "flagged" : ""}`}
-                      key={c.id}
-                    >
-                      <div className="d-flex gap-3">
-                        <div className="avatar">{initial}</div>
-                        <div className="flex-fill">
-                          <div className="d-flex align-items-start justify-content-between mb-2">
-                            <div>
-                              <div className="fw-bold">{c.userName}</div>
-                              <small className="text-muted">
-                                {c.userEmail} • {c.createdAt}
-                              </small>
-                            </div>
-                            <span
-                              className={`status-badge bg-${statusClass} text-white`}
-                            >
-                              {c.status}
-                            </span>
-                          </div>
-
-                          <div className="mb-2">
-                            <small className="text-muted">
-                              នៅលើ:{" "}
-                              <a
-                                href="#"
-                                className="text-decoration-none"
-                              >
-                                {c.opportunityTitle}
-                              </a>
-                            </small>
-                          </div>
-
-                          <p className="mb-2">{c.comment}</p>
-
-                          {c.flagged && (
-                            <div className="alert alert-danger mb-2 py-2">
-                              <i className="bi bi-flag-fill"></i> Flagged:{" "}
-                              {c.flagReason}
-                            </div>
-                          )}
-
-                          <div className="d-flex gap-2">
-                            {c.status !== "approved" && (
-                              <button
-                                className="btn btn-sm btn-success pill"
-                                onClick={() => approve(idx)}
-                              >
-                                <i className="bi bi-check-circle"></i>{" "}
-                                Approve
-                              </button>
-                            )}
-                            {c.status !== "hidden" ? (
-                              <button
-                                className="btn btn-sm btn-warning pill"
-                                onClick={() => hide(idx)}
-                              >
-                                <i className="bi bi-eye-slash"></i> Hide
-                              </button>
-                            ) : (
-                              <button
-                                className="btn btn-sm btn-info pill"
-                                onClick={() => unhide(idx)}
-                              >
-                                <i className="bi bi-eye"></i> Unhide
-                              </button>
-                            )}
-                            <button
-                              className="btn btn-sm btn-danger pill"
-                              onClick={() => remove(idx)}
-                            >
-                              <i className="bi bi-trash"></i> Delete
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div
+            className="card"
+            style={{
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              color: "white",
+              border: "none",
+              borderRadius: "12px",
+              padding: "1.5rem",
+            }}
+          >
+            <div className="kpi-label" style={{ opacity: 0.9 }}>
+              Total Comments
             </div>
-
-            {/* Pagination placeholder */}
-            <nav className="mt-3">
-              <ul className="pagination justify-content-center mb-0">
-                <li className="page-item disabled">
-                  <a className="page-link">Previous</a>
-                </li>
-                <li className="page-item active">
-                  <a className="page-link">1</a>
-                </li>
-                <li className="page-item">
-                  <a className="page-link">2</a>
-                </li>
-                <li className="page-item">
-                  <a className="page-link">Next</a>
-                </li>
-              </ul>
-            </nav>
+            <div
+              className="kpi-value"
+              style={{ color: "white", fontSize: "2rem" }}
+            >
+              {stats.total}
+            </div>
           </div>
-
-          {/* Sidebar stats & filters */}
-          <div className="col-lg-3">
-            <div className="admin-card p-3">
-              <h6 className="mb-3">ស្ថិតិ</h6>
-              <div className="d-flex justify-content-between mb-2">
-                <span className="text-muted">សរុប:</span>
-                <strong>{stats.total}</strong>
-              </div>
-              <div className="d-flex justify-content-between mb-2">
-                <span className="text-muted">Flagged:</span>
-                <strong className="text-danger">{stats.flagged}</strong>
-              </div>
-              <div className="d-flex justify-content-between mb-2">
-                <span className="text-muted">Approved:</span>
-                <strong className="text-success">{stats.approved}</strong>
-              </div>
-              <div className="d-flex justify-content-between">
-                <span className="text-muted">Hidden:</span>
-                <strong className="text-warning">{stats.hidden}</strong>
-              </div>
+          <div
+            className="card"
+            style={{
+              background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+              color: "white",
+              border: "none",
+              borderRadius: "12px",
+              padding: "1.5rem",
+            }}
+          >
+            <div className="kpi-label" style={{ opacity: 0.9 }}>
+              Flagged
             </div>
-
-            <div className="admin-card p-3 mt-3">
-              <h6 className="mb-3">តម្រង</h6>
-              <select
-                className="form-select mb-2"
-                value={oppFilter}
-                onChange={(e) => setOppFilter(e.target.value)}
-              >
-                <option value="all">All Opportunities</option>
-                <option value="1">Teach English to Rural Students</option>
-                <option value="2">Community Clean-up Drive</option>
-                <option value="3">Medical Camp Support</option>
-              </select>
-              <select
-                className="form-select mb-2"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="all">All Status</option>
-                <option value="approved">Approved</option>
-                <option value="pending">Pending</option>
-                <option value="flagged">Flagged</option>
-                <option value="hidden">Hidden</option>
-              </select>
-              <button
-                className="btn btn-sm btn-outline-secondary w-100 pill"
-                onClick={() => {
-                  /* no-op: filters already reactive */
-                }}
-              >
-                អនុវត្តតម្រង
-              </button>
+            <div
+              className="kpi-value"
+              style={{ color: "white", fontSize: "2rem" }}
+            >
+              {stats.flagged}
+            </div>
+          </div>
+          <div
+            className="card"
+            style={{
+              background: "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)",
+              color: "white",
+              border: "none",
+              borderRadius: "12px",
+              padding: "1.5rem",
+            }}
+          >
+            <div className="kpi-label" style={{ opacity: 0.9 }}>
+              Approved
+            </div>
+            <div
+              className="kpi-value"
+              style={{ color: "white", fontSize: "2rem" }}
+            >
+              {stats.approved}
+            </div>
+          </div>
+          <div
+            className="card"
+            style={{
+              background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+              color: "white",
+              border: "none",
+              borderRadius: "12px",
+              padding: "1.5rem",
+            }}
+          >
+            <div className="kpi-label" style={{ opacity: 0.9 }}>
+              Hidden
+            </div>
+            <div
+              className="kpi-value"
+              style={{ color: "white", fontSize: "2rem" }}
+            >
+              {stats.hidden}
             </div>
           </div>
         </div>
+
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Comments List */}
+          <div className="lg:col-span-2 space-y-4">
+            {!filtered.length ? (
+              <div
+                className="card"
+                style={{
+                  textAlign: "center",
+                  padding: "4rem",
+                  borderRadius: "12px",
+                }}
+              >
+                <i
+                  className="bi bi-chat-dots"
+                  style={{
+                    fontSize: "4rem",
+                    color: "var(--color-text-muted)",
+                    opacity: 0.5,
+                  }}
+                ></i>
+                <p
+                  style={{
+                    color: "var(--color-text-muted)",
+                    marginTop: "1rem",
+                    fontSize: "1.125rem",
+                  }}
+                >
+                  No comments found
+                </p>
+              </div>
+            ) : (
+              filtered.map((c, idx) => {
+                const initial = c.userName?.charAt(0)?.toUpperCase() || "?";
+                const statusClass =
+                  c.status === "approved"
+                    ? "active"
+                    : c.status === "flagged"
+                      ? "rejected"
+                      : c.status === "hidden"
+                        ? "pending"
+                        : "pending";
+
+                return (
+                  <div
+                    key={c.id}
+                    className="card"
+                    style={{
+                      borderRadius: "12px",
+                      transition: "all 0.2s",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.boxShadow =
+                        "0 8px 24px rgba(0,0,0,0.1)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.boxShadow =
+                        "0 2px 8px rgba(0,0,0,0.05)";
+                    }}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div
+                        className="avatar"
+                        style={{
+                          width: "48px",
+                          height: "48px",
+                          borderRadius: "50%",
+                          background:
+                            "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                        }}
+                      >
+                        {initial}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <div
+                              style={{
+                                color: "var(--color-text-primary)",
+                                fontWeight: "600",
+                              }}
+                            >
+                              {c.userName}
+                            </div>
+                            <small style={{ color: "var(--color-text-muted)" }}>
+                              {c.userEmail}
+                            </small>
+                          </div>
+                          <span
+                            className={`status-badge ${statusClass}`}
+                            style={{
+                              padding: "6px 12px",
+                              borderRadius: "20px",
+                              fontSize: "0.75rem",
+                            }}
+                          >
+                            {c.status}
+                          </span>
+                        </div>
+
+                        <div className="mb-3">
+                          <small style={{ color: "var(--color-text-muted)" }}>
+                            On:{" "}
+                            <a
+                              href="#"
+                              style={{ color: "var(--color-accent)" }}
+                            >
+                              {c.opportunityTitle}
+                            </a>
+                          </small>
+                        </div>
+
+                        <p
+                          style={{
+                            color: "var(--color-text-primary)",
+                            marginBottom: "1.25rem",
+                            lineHeight: "1.6",
+                          }}
+                        >
+                          {c.comment}
+                        </p>
+
+                        {c.flagged && (
+                          <div
+                            className="card"
+                            style={{
+                              background: "rgba(239,68,68,0.1)",
+                              borderColor: "#ef4444",
+                              borderRadius: "8px",
+                              padding: "0.75rem 1rem",
+                            }}
+                          >
+                            <i
+                              className="bi bi-flag-fill"
+                              style={{
+                                color: "#ef4444",
+                                marginRight: "0.5rem",
+                              }}
+                            ></i>
+                            Flagged: {c.flagReason}
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-2 mt-4">
+                          {c.status !== "approved" && (
+                            <button
+                              className="btn-primary"
+                              style={{
+                                padding: "8px 16px",
+                                borderRadius: "8px",
+                              }}
+                              onClick={() => handleApprove(idx)}
+                            >
+                              <i className="bi bi-check-circle me-1"></i>
+                              Approve
+                            </button>
+                          )}
+                          {c.status !== "hidden" ? (
+                            <button
+                              className="btn-secondary"
+                              style={{
+                                padding: "8px 16px",
+                                borderRadius: "8px",
+                              }}
+                              onClick={() => handleHide(idx)}
+                            >
+                              <i className="bi bi-eye-slash me-1"></i> Hide
+                            </button>
+                          ) : (
+                            <button
+                              className="btn-primary"
+                              style={{
+                                padding: "8px 16px",
+                                borderRadius: "8px",
+                              }}
+                              onClick={() => handleUnhide(idx)}
+                            >
+                              <i className="bi bi-eye me-1"></i> Unhide
+                            </button>
+                          )}
+                          <button
+                            className="btn-reject"
+                            style={{
+                              padding: "8px 16px",
+                              borderRadius: "8px",
+                            }}
+                            onClick={() => handleRemove(idx)}
+                          >
+                            <i className="bi bi-trash me-1"></i> Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-4">
+            <div className="card" style={{ borderRadius: "12px" }}>
+              <h3 className="card-title">
+                <i
+                  className="bi bi-pie-chart-fill me-2"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                ></i>
+                Statistics
+              </h3>
+              <div style={{ height: "240px", marginTop: "1rem" }}>
+                <Doughnut
+                  data={statusChartData}
+                  options={{
+                    responsive: true,
+                    plugins: {
+                      legend: { position: "bottom" },
+                    },
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Delete Modal */}
+        <DeleteCommentModal
+          open={deleteModalOpen}
+          onClose={() => {
+            setDeleteModalOpen(false);
+            setDeletingCommentId(null);
+            setDeletingCommentIndex(null);
+          }}
+          commentId={deletingCommentId}
+          onDeleteSuccess={confirmDeleteComment}
+          message="Delete this comment permanently?"
+        />
       </div>
-    </>
+    </div>
   );
 }

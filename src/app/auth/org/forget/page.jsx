@@ -16,11 +16,13 @@ export default function OrgForgetPage() {
         <section>
           <div className="container">
             <div className="row justify-content-center">
-              <div className="col-12 col-xl-7 d-flex">
+              <div className="col-12">
                 <AuthShell
-                  imageSrc="/images/homepage/forget-img.jpg"
-                  title="ភ្លេចពាក្យសម្ងាត់អង្គការ"
-                  subtitle="យើងនឹងផ្ញើតំណភ្ជាប់សម្រាប់កំណត់ពាក្យសម្ងាត់ថ្មីទៅអ៊ីមែលរបស់អ្នក។"
+                  imageSrc="/images/svg_login/Volunteering-bro.svg"
+                  title="Forgot Password"
+                  switchText="Remember your password?"
+                  switchLink="/auth/org/login"
+                  switchAction="Login"
                 >
                   <form
                     id="orgforgetForm"
@@ -29,14 +31,11 @@ export default function OrgForgetPage() {
                     onSubmit={onSubmit}
                   >
                     <div className="col-xl-12">
-                      <label htmlFor="email" className="form-label">
-                        អ៊ីមែល ៖
-                      </label>
                       <input
                         type="email"
-                        className="form-control"
+                        className="auth-modern-input w-100"
                         id="email"
-                        placeholder="បញ្ចូលអ៊ីមែល"
+                        placeholder="Email Address"
                         defaultValue="VolunteerCambo@gmail.com"
                         required
                       />
@@ -46,18 +45,9 @@ export default function OrgForgetPage() {
                     </div>
 
                     <div className="col-xl-12">
-                      <button
-                        type="submit"
-                        className="btn btn-primary w-100 text-white"
-                      >
-                        ផ្ទៀងផ្ទាត់គណនី
+                      <button type="submit" className="auth-modern-btn">
+                        Send Reset Link
                       </button>
-                    </div>
-
-                    <div className="col-xl-12">
-                      <p className="text-center">
-                        ចូលគណនីផ្សេងទៀត? <Link href="/auth/login">ចូលគណនី</Link>
-                      </p>
                     </div>
                   </form>
                 </AuthShell>

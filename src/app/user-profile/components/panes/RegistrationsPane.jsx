@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { getMyApplications, withdrawApplication } from "@/services/applications";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
+import { showToast } from "@/components/common/CustomToaster";
+import ConfirmModal from "@/components/modals/ConfirmModal";
 
 export default function RegistrationsPane() {
   const { user } = useAuth();
@@ -10,6 +12,10 @@ export default function RegistrationsPane() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(null);
+
+  // Confirmation modal state
+  const [withdrawConfirmOpen, setWithdrawConfirmOpen] = useState(false);
+  const [withdrawingAppId, setWithdrawingAppId] = useState(null);
 
   const fetchApplications = async () => {
     setLoading(true);
@@ -30,19 +36,24 @@ export default function RegistrationsPane() {
     }
   }, [user]);
 
-  const handleWithdraw = async (id) => {
-    if (!window.confirm("តើអ្នកពិតជាចង់បោះបង់ការចុះឈ្មោះនេះមែនទេ?")) return;
+  const handleWithdraw = (id) => {
+    setWithdrawingAppId(id);
+    setWithdrawConfirmOpen(true);
+  };
 
-    setActionLoading(id);
+  const confirmWithdraw = async () => {
+    setActionLoading(withdrawingAppId);
     try {
-      await withdrawApplication(id);
+      await withdrawApplication(withdrawingAppId);
       await fetchApplications(); // Refresh list
-      alert("បោះបង់ការចុះឈ្មោះដោយជោគជ័យ។");
+      showToast.success("បានបោះបង់ការចុះឈ្មោះដោយជោគជ័យ។", "ជោគជ័យ");
     } catch (err) {
       console.error("Error withdrawing application:", err);
-      alert(err.response?.data?.detail || "មានបញ្ហាក្នុងការបោះបង់។");
+      showToast.error(err.response?.data?.detail || "មានបញ្ហាក្នុងការបោះបង់។", "កំហុស");
     } finally {
       setActionLoading(null);
+      setWithdrawConfirmOpen(false);
+      setWithdrawingAppId(null);
     }
   };
 
@@ -190,6 +201,20 @@ export default function RegistrationsPane() {
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        open={withdrawConfirmOpen}
+        onClose={() => {
+          setWithdrawConfirmOpen(false);
+          setWithdrawingAppId(null);
+        }}
+        onConfirm={confirmWithdraw}
+        title="បោះបង់ការចុះឈ្មោះ"
+        message="តើអ្នកពិតជាចង់បោះបង់ការចុះឈ្មោះសម្រាប់ឱកាសនេះមែនទេ?"
+        confirmText="បោះបង់ការចុះឈ្មោះ"
+        cancelText="បោះបង់"
+        type="danger"
+      />
     </div>
   );
 }

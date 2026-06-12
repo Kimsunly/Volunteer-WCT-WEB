@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { toggleFavoriteOpportunity, verifyOpportunityAccessKey } from "@/services/opportunities";
+import { showToast } from "@/components/common/CustomToaster";
+import { useRouter } from "next/navigation";
 
 /**
  * OpportunityCard - Flexible component that handles both data shapes
@@ -31,8 +35,18 @@ export default function OpportunityCard({
   className = "",
   onToggleFavorite,
 }) {
-  const [isFav, setIsFav] = useState(data?.isFavorite ?? false);
+  const { user } = useAuth();
+  const router = useRouter();
+  const [isFav, setIsFav] = useState(data?.is_favorite ?? data?.isFavorite ?? false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [accessKeyModalOpen, setAccessKeyModalOpen] = useState(false);
+  const [accessKey, setAccessKey] = useState("");
+  const [accessKeyError, setAccessKeyError] = useState("");
+  const [verifyingKey, setVerifyingKey] = useState(false);
+
+  useEffect(() => {
+    setIsFav(data?.is_favorite ?? data?.isFavorite ?? false);
+  }, [data]);
 
   // Handle both old & new data shapes
   const isNewShape = Array.isArray(data?.images);
@@ -65,9 +79,24 @@ export default function OpportunityCard({
 
   // Benefits handling
   const benefitsArray = [];
-  if (data?.transport && data.transport.toLowerCase() !== "not provided" && data.transport.toLowerCase() !== "none") benefitsArray.push("transport");
-  if (data?.housing && data.housing.toLowerCase() !== "not provided" && data.housing.toLowerCase() !== "none") benefitsArray.push("housing");
-  if (data?.meals && data.meals.toLowerCase() !== "not provided" && data.meals.toLowerCase() !== "none") benefitsArray.push("meals");
+  if (
+    data?.transport &&
+    data.transport.toLowerCase() !== "not provided" &&
+    data.transport.toLowerCase() !== "none"
+  )
+    benefitsArray.push("transport");
+  if (
+    data?.housing &&
+    data.housing.toLowerCase() !== "not provided" &&
+    data.housing.toLowerCase() !== "none"
+  )
+    benefitsArray.push("housing");
+  if (
+    data?.meals &&
+    data.meals.toLowerCase() !== "not provided" &&
+    data.meals.toLowerCase() !== "none"
+  )
+    benefitsArray.push("meals");
 
   // Links
   const detailHref = data?.detailHref;
@@ -82,11 +111,71 @@ export default function OpportunityCard({
   };
 
   // Handle favorite toggle
-  const handleToggleFav = () => {
+  const handleToggleFav = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (!user) {
+      showToast.error("សូមចូលគណនីជាមុនសិន ដើម្បីរក្សាទុកឱកាសនេះ។", "တម្រូវឱ្យចូលគណនី");
+      return;
+    }
     const newFav = !isFav;
     setIsFav(newFav);
-    if (onToggleFavorite) {
-      onToggleFavorite(id, newFav);
+    try {
+      const response = await toggleFavoriteOpportunity(id);
+      const isNowFav = response?.data?.is_favorite;
+      if (isNowFav) {
+        showToast.success("បានបន្ថែមទៅក្នុងបញ្ជីពេញចិត្ត", "ជោគជ័យ");
+      } else {
+        showToast.success("បានលុបចេញពីបញ្ជីពេញចិត្ត", "ជោគជ័យ");
+      }
+      if (onToggleFavorite) {
+        onToggleFavorite(id, isNowFav ?? newFav);
+      }
+    } catch (err) {
+      console.error("Failed to toggle favorite:", err);
+      setIsFav(isFav); // revert state
+      showToast.error("មានបញ្ហាក្នុងការរក្សាទុក។ សូមព្យាយាមម្តងទៀត។", "កំហុស");
+    }
+  };
+
+  // Handle detail click for private opportunities
+  const handleDetailClick = (e) => {
+    if (data?.is_private) {
+      e.preventDefault();
+      setAccessKeyModalOpen(true);
+    }
+  };
+
+  // Handle access key submission
+  const handleAccessKeySubmit = async () => {
+    if (!user) {
+      showToast.error("សូមចូលគណនីជាមុនសិន ដើម្បីបន្ត។", "តម្រូវឱ្យចូលគណនី");
+      router.push(`/auth/login?redirect=${encodeURIComponent(detailHref)}`);
+      return;
+    }
+    if (!accessKey.trim()) {
+      setAccessKeyError("សូមបញ្ចូលកូដសម្ងាត់");
+      return;
+    }
+    setVerifyingKey(true);
+    setAccessKeyError("");
+    try {
+      await verifyOpportunityAccessKey(id, accessKey);
+      // Key is valid! Store access key in sessionStorage and navigate to detail page
+      sessionStorage.setItem('private_access_key', accessKey);
+      showToast.success("កូដសម្ងាត់ត្រឹមត្រូវ!");
+      setAccessKeyModalOpen(false);
+      setAccessKey("");
+      setAccessKeyError("");
+      router.push(detailHref);
+    } catch (err) {
+      console.error("Access key verification failed:", err);
+      const errMsg = err.response?.data?.message || "កូដសម្ងាត់មិនត្រឹមត្រូវទេ";
+      setAccessKeyError(errMsg);
+    } finally {
+      setVerifyingKey(false);
     }
   };
 
@@ -114,22 +203,78 @@ export default function OpportunityCard({
     >
       <div className="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
         {/* Image Section */}
-        <div className="position-relative overflow-hidden" style={{ height: "220px" }}>
+        <div
+          className="position-relative overflow-hidden group"
+          style={{ height: "220px" }}
+        >
           <img
             src={currentImage}
             alt={title}
             className="w-100 h-100 object-fit-cover transition-scale"
             onError={(e) => {
+              e.target.onerror = null;
               e.target.src = "/images/placeholder.png";
             }}
           />
 
+          {/* Carousel Controls */}
+          {images.length > 1 && (
+            <div className="carousel-controls opacity-0 group-hover-opacity-100 transition-opacity">
+              <button
+                className="btn btn-dark btn-sm position-absolute top-50 start-0 translate-middle-y m-2 rounded-circle d-flex align-items-center justify-content-center p-0"
+                style={{
+                  width: "28px",
+                  height: "28px",
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  border: "none",
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  prevImage();
+                }}
+              >
+                <i className="bi bi-chevron-left text-white"></i>
+              </button>
+              <button
+                className="btn btn-dark btn-sm position-absolute top-50 end-0 translate-middle-y m-2 rounded-circle d-flex align-items-center justify-content-center p-0"
+                style={{
+                  width: "28px",
+                  height: "28px",
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  border: "none",
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  nextImage();
+                }}
+              >
+                <i className="bi bi-chevron-right text-white"></i>
+              </button>
+
+              {/* Dots */}
+              <div className="position-absolute bottom-0 start-50 translate-middle-x mb-2 d-flex gap-1">
+                {images.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`rounded-circle ${i === currentImageIndex ? "bg-white" : "bg-white-50"}`}
+                    style={{ width: "6px", height: "6px" }}
+                  ></div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Category badge - Top Left */}
           {categoryLabel && (
-            <div className="position-absolute top-0 start-0 m-3">
+            <div className="position-absolute top-0 start-0 m-3 d-flex gap-2">
               <span className="badge rounded-pill bg-primary px-3 py-2 shadow-sm fw-normal">
                 {categoryLabel}
               </span>
+              {data.is_private && (
+                <span className="badge rounded-pill bg-warning text-dark px-3 py-2 shadow-sm fw-normal">
+                  ឯកជន
+                </span>
+              )}
             </div>
           )}
 
@@ -138,7 +283,11 @@ export default function OpportunityCard({
             <button
               type="button"
               className="btn btn-white rounded-circle shadow-sm d-flex align-items-center justify-content-center p-0"
-              style={{ width: "38px", height: "38px", backgroundColor: "white" }}
+              style={{
+                width: "38px",
+                height: "38px",
+                backgroundColor: "white",
+              }}
               onClick={handleToggleFav}
             >
               <i
@@ -185,17 +334,26 @@ export default function OpportunityCard({
             {/* Benefit Icons */}
             <div className="d-flex gap-2 mb-3 text-secondary">
               {benefitsArray.includes("transport") && (
-                <div className="bg-light rounded-3 d-flex align-items-center justify-content-center" style={{ width: "36px", height: "36px" }}>
+                <div
+                  className="bg-light rounded-3 d-flex align-items-center justify-content-center"
+                  style={{ width: "36px", height: "36px" }}
+                >
                   <i className="bi bi-car-front-fill fs-6" title="Transport" />
                 </div>
               )}
               {benefitsArray.includes("meals") && (
-                <div className="bg-light rounded-3 d-flex align-items-center justify-content-center" style={{ width: "36px", height: "36px" }}>
+                <div
+                  className="bg-light rounded-3 d-flex align-items-center justify-content-center"
+                  style={{ width: "36px", height: "36px" }}
+                >
                   <i className="bi bi-utensils fs-6" title="Meals" />
                 </div>
               )}
               {benefitsArray.includes("housing") && (
-                <div className="bg-light rounded-3 d-flex align-items-center justify-content-center" style={{ width: "36px", height: "36px" }}>
+                <div
+                  className="bg-light rounded-3 d-flex align-items-center justify-content-center"
+                  style={{ width: "36px", height: "36px" }}
+                >
                   <i className="bi bi-house-door-fill fs-6" title="Housing" />
                 </div>
               )}
@@ -203,14 +361,25 @@ export default function OpportunityCard({
 
             {/* Action button */}
             {detailHref ? (
-              <Link
-                href={detailHref}
-                className="btn btn-primary w-100 rounded-3 py-2 d-flex align-items-center justify-content-center gap-2"
-                style={{ backgroundColor: "#007bff", borderColor: "#007bff" }}
-              >
-                <i className="bi bi-info-circle fs-5" />
-                <span>ព័ត៌មានលម្អិត</span>
-              </Link>
+              data?.is_private ? (
+                <button
+                  onClick={handleDetailClick}
+                  className="btn btn-primary w-100 rounded-3 py-2 d-flex align-items-center justify-content-center gap-2"
+                  style={{ backgroundColor: "#007bff", borderColor: "#007bff" }}
+                >
+                  <i className="bi bi-info-circle fs-5" />
+                  <span>ព័ត៌មានលម្អិត</span>
+                </button>
+              ) : (
+                <Link
+                  href={detailHref}
+                  className="btn btn-primary w-100 rounded-3 py-2 d-flex align-items-center justify-content-center gap-2"
+                  style={{ backgroundColor: "#007bff", borderColor: "#007bff" }}
+                >
+                  <i className="bi bi-info-circle fs-5" />
+                  <span>ព័ត៌មានលម្អិត</span>
+                </Link>
+              )
             ) : (
               <button
                 className="btn btn-primary w-100 rounded-3 py-2 d-flex align-items-center justify-content-center gap-2"
@@ -224,6 +393,66 @@ export default function OpportunityCard({
         </div>
       </div>
 
+      {/* Private Opportunity Access Key Modal */}
+      {accessKeyModalOpen && (
+        <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
+          <div className="modal-backdrop fade show" style={{ zIndex: 1050 }} onClick={() => setAccessKeyModalOpen(false)}></div>
+          <div className="modal-dialog modal-dialog-centered" style={{ zIndex: 1060 }}>
+            <div className="modal-content border-0 shadow-lg rounded-4">
+              <div className="modal-header p-4 border-0">
+                <h5 className="modal-title fw-bold">
+                  <i className="bi bi-lock-fill me-2 text-warning"></i>
+                  កូដសម្ងាត់សម្រាប់កម្មវិធីឯកជន
+                </h5>
+                <button type="button" className="btn-close" onClick={() => setAccessKeyModalOpen(false)}></button>
+              </div>
+              <div className="modal-body p-4">
+                <div className="alert alert-warning border-0 bg-warning bg-opacity-10">
+                  <i className="bi bi-info-circle me-2"></i>
+                  កម្មវិធីនេះជាកម្មវិធីឯកជន។ សូមបញ្ចូលកូដសម្ងាត់ដែលបានពីអ្នករៀបចំកម្មវិធីដើម្បីបន្ត។
+                </div>
+                <div className="mb-3">
+                  <label className="form-label fw-bold">កូដសម្ងាត់ <span className="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    className={`form-control form-control-lg ${accessKeyError ? 'is-invalid' : ''}`}
+                    value={accessKey}
+                    onChange={(e) => {
+                      setAccessKey(e.target.value);
+                      setAccessKeyError("");
+                    }}
+                    placeholder="បញ្ចូលកូដសម្ងាត់របស់អ្នករៀបចំកម្មវិធី"
+                  />
+                  {accessKeyError && (
+                    <div className="invalid-feedback">{accessKeyError}</div>
+                  )}
+                </div>
+              </div>
+              <div className="modal-footer p-4 border-0">
+                <button type="button" className="btn btn-light rounded-pill px-4" onClick={() => setAccessKeyModalOpen(false)}>
+                  បោះបង់
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary rounded-pill px-4 d-flex align-items-center gap-2"
+                  disabled={verifyingKey}
+                  onClick={handleAccessKeySubmit}
+                >
+                  {verifyingKey ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
+                      កំពុងផ្ទៀងផ្ទាត់...
+                    </>
+                  ) : (
+                    "បន្ត"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style jsx>{`
         .transition-scale {
           transition: transform 0.5s ease;
@@ -232,11 +461,19 @@ export default function OpportunityCard({
           transform: scale(1.05);
         }
         .card {
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          transition:
+            transform 0.3s ease,
+            box-shadow 0.3s ease;
         }
         .card:hover {
           transform: translateY(-5px);
           box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+        }
+        .group:hover .group-hover-opacity-100 {
+          opacity: 1 !important;
+        }
+        .bg-white-50 {
+          background-color: rgba(255, 255, 255, 0.5);
         }
       `}</style>
     </div>

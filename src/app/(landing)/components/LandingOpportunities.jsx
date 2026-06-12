@@ -1,21 +1,41 @@
 "use client";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import OpportunityCard from "@/components/cards/OpportunityCard";
-
-const filters = [
-  { key: "all", label: "ទាំងអស់", icon: "bi-stars" },
-  { key: "education", label: "អប់រំ", icon: "bi-book" },
-  { key: "environment", label: "បរិស្ថាន", icon: "bi-tree" },
-  { key: "community", label: "សហគមន៍", icon: "bi-people" },
-  { key: "event", label: "ព្រឹត្តិការណ៍", icon: "bi-calendar-event" },
-];
+import { listCategories } from "@/services/categories";
 
 export default function LandingOpportunities({ items = [] }) {
   const [active, setActive] = useState("all");
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const data = await listCategories(true);
+        setCategories(data || []);
+      } catch (e) {
+        console.error("Failed to fetch categories", e);
+      }
+    }
+    fetchCategories();
+  }, []);
+
+  const filters = useMemo(() => {
+    const baseFilters = [{ key: "all", label: "ទាំងអស់", icon: "bi-stars" }];
+    const dynamicFilters = Array.isArray(categories) ? categories.map(cat => ({
+      key: cat.name.toLowerCase(),
+      label: cat.name,
+      icon: cat.icon || "bi-tag"
+    })) : [];
+    return [...baseFilters, ...dynamicFilters];
+  }, [categories]);
+
   const filtered = useMemo(
     () =>
-      active === "all" ? items : items.filter((i) => i.category === active),
+      active === "all" ? items : items.filter((i) => {
+        const catName = i.category?.label || i.category?.name || i.category;
+        return catName?.toLowerCase() === active;
+      }),
     [active, items]
   );
 

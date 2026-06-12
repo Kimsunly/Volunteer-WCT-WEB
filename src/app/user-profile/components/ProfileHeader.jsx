@@ -4,12 +4,25 @@ import React from "react";
 import Image from "next/image";
 
 export default function ProfileHeader({ user, onOpenSettings }) {
-  const { name, avatar, tierLabel, ratingText, notifCount } = user;
+  const { name, avatar, tierLabel, notifCount, providers = [] } = user;
+
+  const getProviderIcon = (provider) => {
+    switch (provider.toLowerCase()) {
+      case "google":
+        return "/images/Icon/search.png";
+      case "github":
+        return "/images/Icon/github.png";
+      case "facebook":
+        return "/images/Icon/facebook.png";
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="d-flex align-items-center gap-3 mb-3">
       <div className="vh-avatar">
-        <Image src={avatar} alt="avatar" width={80} height={80} />
+        <Image src={avatar} alt="avatar" width={80} height={80} unoptimized />
       </div>
 
       <div>
@@ -18,14 +31,6 @@ export default function ProfileHeader({ user, onOpenSettings }) {
           <span className="badge rounded-pill text-bg-warning-subtle text-warning fw-semibold">
             {tierLabel}
           </span>
-          <span className="text-warning" aria-label="rating">
-            <i className="bi bi-star-fill"></i>
-            <i className="bi bi-star-fill"></i>
-            <i className="bi bi-star-fill"></i>
-            <i className="bi bi-star-fill"></i>
-            <i className="bi bi-star-half"></i>
-          </span>
-          <span>{ratingText}</span>
         </div>
       </div>
 

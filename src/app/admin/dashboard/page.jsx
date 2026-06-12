@@ -1,240 +1,338 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { AdminSidebar, PageHeader, RoleGuard } from "../components";
-import AdminNavbar from "../components/AdminNavbar";
-import {
-  getDashboardMetrics,
-  listOrganizers,
-  approveOrganizer,
-  rejectOrganizer
-} from "@/services/admin";
+import { getDashboardMetrics } from "@/services/admin";
 import { useAuth } from "@/context/AuthContext";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+} from "chart.js";
+import { Line, Bar, Pie, Doughnut } from "react-chartjs-2";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+);
 
 export default function AdminDashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const [metrics, setMetrics] = useState(null);
-  const [pendingOrgs, setPendingOrgs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [actionLoading, setActionLoading] = useState(null);
+
+  useEffect(() => {
+    if (!authLoading && user?.role === "admin") {
+      fetchData();
+
+      const interval = setInterval(fetchData, 15000);
+
+      return () => clearInterval(interval);
+    }
+  }, [user, authLoading]);
 
   const fetchData = async () => {
     setLoading(true);
-    setError(null);
     try {
-      const [metricsData, orgsData] = await Promise.all([
-        getDashboardMetrics(),
-        listOrganizers({ status: "pending", limit: 5 })
-      ]);
-      setMetrics(metricsData);
-      setPendingOrgs(orgsData?.data || []);
+      const data = await getDashboardMetrics();
+      setMetrics(data);
     } catch (err) {
-      console.error("Dashboard list error:", err);
-      setError("បរាជ័យក្នុងការទាញយកទិន្នន័យ");
+      console.error("Dashboard fetch error:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (!authLoading && user?.role === "admin") {
-      fetchData();
-    }
-  }, [user, authLoading]);
+  const getChartData = () => {
+    // Donations per month (Line chart
+    const donationsMonths = Object.keys(metrics?.donations_per_month || {});
+    const donationsTotals = Object.values(metrics?.donations_per_month || {});
 
-  const handleApprove = async (id) => {
-    if (!confirm("តើអ្នកចង់អនុម័ត Organizer នេះមែនទេ?")) return;
-    setActionLoading(id);
-    try {
-      await approveOrganizer(id);
-      await fetchData();
-    } catch (err) {
-      console.error("Approve error:", err);
-      alert("បរាជ័យក្នុងការអនុម័ត");
-    } finally {
-      setActionLoading(null);
-    }
+    // Opportunities per category (Pie chart
+    const categories = Object.keys(metrics?.opportunities_per_category || {});
+    const categoryCounts = Object.values(
+      metrics?.opportunities_per_category || {},
+    );
+
+    // Applications status (Doughnut chart
+    const appStatuses = Object.keys(metrics?.applications_status || {});
+    const appCounts = Object.values(metrics?.applications_status || {});
+
+    // Users per month (Bar chart
+    const userMonths = Object.keys(metrics?.users_per_month || {});
+    const userCounts = Object.values(metrics?.users_per_month || {});
+
+    return {
+      donations: {
+        labels: donationsMonths,
+        data: donationsTotals,
+      },
+      opportunities: {
+        labels: categories,
+        data: categoryCounts,
+      },
+      applications: {
+        labels: appStatuses,
+        data: appCounts,
+      },
+      users: {
+        labels: userMonths,
+        data: userCounts,
+      },
+    };
   };
 
-  const handleReject = async (id) => {
-    const reason = prompt("មូលហេតុនៃការបដិសេធ (យ៉ាងហោច ១០ តួអក្សរ):");
-    if (!reason || reason.length < 10) return;
-    setActionLoading(id);
-    try {
-      await rejectOrganizer(id, reason);
-      await fetchData();
-    } catch (err) {
-      console.error("Reject error:", err);
-      alert("បរាជ័យក្នុងការបដិសេធ");
-    } finally {
-      setActionLoading(null);
-    }
+  const chartData = getChartData();
+
+  const lineChartData = {
+    labels: chartData.donations.labels,
+    datasets: [
+      {
+        label: "Donations ($)",
+        data: chartData.donations.data,
+        borderColor: "rgb(75, 192, 192)",
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        fill: true,
+        tension: 0.4,
+      },
+    ],
   };
 
-  const roleAllowed = user?.role === "admin";
+  const pieChartData = {
+    labels: chartData.opportunities.labels,
+    datasets: [
+      {
+        label: "Opportunities",
+        data: chartData.opportunities.data,
+        backgroundColor: [
+          "#FF6384",
+          "#36A2EB",
+          "#FFCE56",
+          "#4BC0C0",
+          "#9966FF",
+          "#FF9F40",
+        ],
+      },
+    ],
+  };
+
+  const doughnutChartData = {
+    labels: chartData.applications.labels,
+    datasets: [
+      {
+        label: "Applications",
+        data: chartData.applications.data,
+        backgroundColor: ["#36A2EB", "#FFCE56", "#FF6384"],
+      },
+    ],
+  };
+
+  const barChartData = {
+    labels: chartData.users.labels,
+    datasets: [
+      {
+        label: "New Users",
+        data: chartData.users.data,
+        backgroundColor: "rgba(54, 162, 235, 0.6)",
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+    },
+  };
 
   return (
-    <>
-      <RoleGuard />
+    <div className="space-y-6">
+      <div className="page-header">
+        <h1 className="page-title">Overview</h1>
+      </div>
 
-      <PageHeader
-        title="ស្ម័គ្រចិត្ត • Admin"
-        subtitle={`Role: ${user?.role || "Guest"}`}
-        actions={
-          <div className="d-flex align-items-center gap-2">
-            <button
-              className="btn btn-sm btn-light pill-btn"
-              aria-label="Theme toggle"
+      <div className="kpi-grid">
+        <div className="kpi-card">
+          <div className="kpi-label">Total Donations</div>
+          <div className="kpi-value">
+            $
+            {loading ? "..." : (metrics?.donations_total || 0).toLocaleString()}
+          </div>
+        </div>
+
+        <div className="kpi-card">
+          <div className="kpi-label">Total Users</div>
+          <div className="kpi-value">
+            {loading ? "..." : (metrics?.users_count || 0).toLocaleString()}
+          </div>
+        </div>
+
+        <div className="kpi-card">
+          <div className="kpi-label">Active Opportunities</div>
+          <div className="kpi-value">
+            {loading
+              ? "..."
+              : (metrics?.opportunities_count?.active || 0).toLocaleString()}
+          </div>
+          <div className="flex items-center justify-between">
+            <span
+              className="status-badge pending"
+              style={{ padding: "2px 8px" }}
             >
-              <i className="bi bi-person-circle me-1"></i> {user?.name || "Admin"}
-            </button>
-          </div>
-        }
-      />
-
-      <div className={!roleAllowed ? "opacity-50 pe-none" : ""}>
-        {/* Overview KPIs */}
-        <section id="section-overview" className="mb-4">
-          {loading && (
-            <div className="d-flex align-items-center gap-2 mb-3 text-muted">
-              <div
-                className="spinner-border spinner-border-sm"
-                role="status"
-              ></div>
-              កំពុងផ្ទុកទិន្នន័យ...
-            </div>
-          )}
-          {error && (
-            <div className="alert alert-danger" role="alert">
-              {error}
-            </div>
-          )}
-          <div className="row g-3">
-            <div className="col-md-3">
-              <div className="admin-card p-3">
-                <div className="text-muted small">អ្នកប្រើប្រាស់សរុប</div>
-                <div className="d-flex align-items-center justify-content-between mt-2">
-                  <div className="fs-3 fw-bold">
-                    {loading ? "..." : metrics?.users_count || 0}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-3">
-              <div className="admin-card p-3">
-                <div className="text-muted small">
-                  Organizer កំពុងរង់ចាំ
-                </div>
-                <div className="d-flex align-items-center justify-content-between mt-2">
-                  <div className="fs-3 fw-bold">
-                    {loading ? "..." : metrics?.organizers_count?.pending || 0}
-                  </div>
-                  <span className="badge bg-warning-subtle text-warning pill-btn">
-                    Pending
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-3">
-              <div className="admin-card p-3">
-                <div className="text-muted small">ឱកាសសកម្ម</div>
-                <div className="d-flex align-items-center justify-content-between mt-2">
-                  <div className="fs-3 fw-bold">
-                    {loading ? "..." : metrics?.opportunities_count?.active || 0}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-3">
-              <div className="admin-card p-3">
-                <div className="text-muted small">បរិច្ចាគសរុប</div>
-                <div className="d-flex align-items-center justify-content-between mt-2">
-                  <div className="fs-3 fw-bold" id="kpiDonations">
-                    {loading ? "..." : `$${(metrics?.donations_total || 0).toLocaleString()}`}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Organizer table sample */}
-        <section id="section-organizers" className="mb-4">
-          <div className="d-flex align-items-center mb-2 gap-2">
-            <h5 className="mb-0">ផ្ទៀងផ្ទាត់ Organizer (រង់ចាំ)</h5>
-            <span className="admin-badge text-warning">
-              <i className="bi bi-shield-check me-1"></i>Admin approve
-              only
+              {loading
+                ? "..."
+                : (
+                    metrics?.opportunities_count?.pending || 0
+                  ).toLocaleString()}{" "}
+              pending
             </span>
           </div>
-          <div className="admin-card p-3">
-            <div className="table-responsive">
-              <table className="table align-middle mb-0">
-                <thead>
-                  <tr>
-                    <th>អង្គការ</th>
-                    <th>ប្រភេទ</th>
-                    <th>ស្ថានភាព</th>
-                    <th className="text-end">សកម្មភាព</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pendingOrgs.length === 0 ? (
-                    <tr>
-                      <td colSpan="4" className="text-center py-4 text-muted">
-                        {!loading ? "មិនមានការស្នើសុំកំពុងរង់ចាំឡើយ" : "កំពុងផ្ទុក..."}
-                      </td>
-                    </tr>
-                  ) : (
-                    pendingOrgs.map((org) => (
-                      <tr key={org.id}>
-                        <td>
-                          <strong>{org.organization_name}</strong>
-                          <br />
-                          <small className="text-muted">{org.email}</small>
-                        </td>
-                        <td>
-                          <span className="badge bg-primary-subtle text-primary text-uppercase">
-                            {org.organizer_type}
-                          </span>
-                        </td>
-                        <td>
-                          <span className="badge bg-warning text-dark">
-                            {org.status}
-                          </span>
-                        </td>
-                        <td className="text-end">
-                          <div className="btn-group btn-group-sm">
-                            <button
-                              className="btn btn-outline-success"
-                              onClick={() => handleApprove(org.id)}
-                              disabled={actionLoading === org.id}
-                            >
-                              <i className="bi bi-check2"></i>
-                            </button>
-                            <button
-                              className="btn btn-outline-danger"
-                              onClick={() => handleReject(org.id)}
-                              disabled={actionLoading === org.id}
-                            >
-                              <i className="bi bi-x"></i>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+        </div>
+
+        <div className="kpi-card">
+          <div className="kpi-label">Verified Organizers</div>
+          <div className="kpi-value">
+            {loading
+              ? "..."
+              : (metrics?.organizers_count?.verified || 0).toLocaleString()}
           </div>
-        </section>
+          <div className="flex items-center justify-between">
+            <span
+              className="status-badge pending"
+              style={{ padding: "2px 8px" }}
+            >
+              {loading
+                ? "..."
+                : (
+                    metrics?.organizers_count?.pending || 0
+                  ).toLocaleString()}{" "}
+              pending
+            </span>
+          </div>
+        </div>
       </div>
-    </>
+
+      <div className="two-col-grid">
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">Opportunities Status</div>
+          </div>
+          <div style={{ height: "250px" }}>
+            <Bar
+              data={{
+                labels: ["Active", "Pending"],
+                datasets: [
+                  {
+                    label: "Count",
+                    data: [
+                      metrics?.opportunities_count?.active || 0,
+                      metrics?.opportunities_count?.pending || 0,
+                    ],
+                    backgroundColor: ["#10b981", "#f59e0b"],
+                  },
+                ],
+              }}
+              options={{
+                ...chartOptions,
+                indexAxis: "y",
+                plugins: {
+                  ...chartOptions.plugins,
+                  legend: { display: false },
+                },
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">Organizers Status</div>
+          </div>
+          <div style={{ height: "250px" }}>
+            <Bar
+              data={{
+                labels: ["Verified", "Pending", "Rejected"],
+                datasets: [
+                  {
+                    label: "Count",
+                    data: [
+                      metrics?.organizers_count?.verified || 0,
+                      metrics?.organizers_count?.pending || 0,
+                      metrics?.organizers_count?.rejected || 0,
+                    ],
+                    backgroundColor: ["#10b981", "#f59e0b", "#ef4444"],
+                  },
+                ],
+              }}
+              options={{
+                ...chartOptions,
+                indexAxis: "y",
+                plugins: {
+                  ...chartOptions.plugins,
+                  legend: { display: false },
+                },
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="two-col-grid">
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">Donations Over Time</div>
+          </div>
+          <div style={{ height: "300px" }}>
+            <Line data={lineChartData} options={chartOptions} />
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">Opportunities by Category</div>
+          </div>
+          <div style={{ height: "300px" }}>
+            <Pie data={pieChartData} options={chartOptions} />
+          </div>
+        </div>
+      </div>
+
+      <div className="two-col-grid">
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">Applications Status</div>
+          </div>
+          <div style={{ height: "300px" }}>
+            <Doughnut data={doughnutChartData} options={chartOptions} />
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">New Users Per Month</div>
+          </div>
+          <div style={{ height: "300px" }}>
+            <Bar data={barChartData} options={chartOptions} />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
-``;

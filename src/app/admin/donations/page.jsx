@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import { PageHeader, RoleGuard, storage } from "../components";
+import { RoleGuard } from "../components";
 import { listDonations } from "@/services/donations";
 import { useAuth } from "@/context/AuthContext";
 
@@ -14,9 +14,8 @@ export default function AdminDonationsPage() {
   const [page, setPage] = useState(1);
   const limit = 10;
   const offset = (page - 1) * limit;
-
-  // Add missing mounted state
   const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -31,7 +30,7 @@ export default function AdminDonationsPage() {
       setTotal(res?.total ?? items.length ?? 0);
     } catch (e) {
       console.error("Fetch donations error:", e);
-      setError("បរាជ័យក្នុងការទាញយកទិន្នន័យ");
+      setError("Failed to load donations");
     } finally {
       setLoading(false);
     }
@@ -77,72 +76,68 @@ export default function AdminDonationsPage() {
     URL.revokeObjectURL(url);
   };
 
-  const clearAll = () => {
-    alert("Clearing all donations is not supported by the API.");
-  };
-
   if (!mounted) return null;
 
   return (
-    <>
+    <div className="space-y-6">
       <RoleGuard />
 
-      <PageHeader
-        title="បញ្ជីបរិច្ចាគ"
-        subtitle="ទិន្នន័យពីទម្រង់បរិច្ចាគ"
-        actions={
-          <div className="d-flex gap-2">
-            <button
-              className="btn btn-outline-secondary pill"
-              onClick={exportCSV}
-            >
-              <i className="bi bi-download me-1"></i> Export CSV
-            </button>
-          </div>
-        }
-      />
+      {/* Page Header */}
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Donations</h1>
+          <p style={{ color: "var(--color-text-secondary)", fontSize: "0.875rem", marginTop: "4px" }}>
+            Donation records from the form
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            className="btn-secondary"
+            onClick={exportCSV}
+          >
+            <i className="bi bi-download me-2"></i> Export CSV
+          </button>
+        </div>
+      </div>
 
-      <div className={user?.role !== "admin" ? "opacity-50 pe-none" : ""}>
+      <div className={user?.role !== "admin" ? "opacity-50 pointer-events-none" : ""}>
         {error && (
-          <div className="alert alert-danger" role="alert">
+          <div className="card" style={{ color: "var(--color-negative)" }}>
             {error}
           </div>
         )}
-        <div className="admin-card p-3">
-          <div className="table-responsive">
-            <table
-              className="table align-middle mb-0"
-              id="donationsTable"
-            >
+
+        {/* Data Table */}
+        <div className="card" style={{ padding: "0" }}>
+          <div className="table-wrapper">
+            <table className="data-table" style={{ width: "100%" }}>
               <thead>
                 <tr>
-                  <th>អ្នកបរិច្ចាគ</th>
-                  <th>អ៊ីមែល</th>
-                  <th>ទូរស័ព្ទ</th>
-                  <th>ចំណែក</th>
-                  <th>ប្រភេទការងារ</th>
-                  <th>វិធីទូទាត់</th>
-                  <th>ថ្ងៃម៉ោង</th>
+                  <th>Donor</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Amount</th>
+                  <th>Cause</th>
+                  <th>Type</th>
+                  <th>Date</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   Array.from({ length: limit }).map((_, i) => (
                     <tr key={i}>
-                      <td colSpan={7}>
-                        <div className="placeholder-glow">
-                          <span
-                            className="placeholder col-12"
-                            style={{ height: 20 }}
-                          ></span>
+                      <td colSpan={7} className="text-center py-4">
+                        <div className="flex items-center justify-center gap-2" style={{ color: "var(--color-text-muted)" }}>
+                          <i className="bi bi-arrow-repeat" style={{ animation: "spin 1s linear infinite" }}></i>
+                          Loading...
                         </div>
                       </td>
                     </tr>
                   ))
                 ) : !donations.length ? (
                   <tr>
-                    <td colSpan={7} className="text-center text-muted">
-                      មិនទាន់មានទិន្នន័យបរិច្ចាគ
+                    <td colSpan={7} className="text-center py-8" style={{ color: "var(--color-text-muted)" }}>
+                      No donations yet
                     </td>
                   </tr>
                 ) : (
@@ -151,11 +146,15 @@ export default function AdminDonationsPage() {
                       <td>
                         <strong>{d.donor_name}</strong>
                       </td>
-                      <td>{d.email || "-"}</td>
-                      <td>{d.phone || "-"}</td>
-                      <td>${Number(d.amount || 0).toLocaleString()}</td>
-                      <td>{d.cause || "-"}</td>
-                      <td>{d.donation_type || "-"}</td>
+                      <td>{d.email || "—"}</td>
+                      <td>{d.phone || "—"}</td>
+                      <td>
+                        <span style={{ color: "var(--color-positive)", fontWeight: "600" }}>
+                          ${Number(d.amount || 0).toLocaleString()}
+                        </span>
+                      </td>
+                      <td>{d.cause || "—"}</td>
+                      <td>{d.donation_type || "—"}</td>
                       <td>{new Date(d.created_at).toLocaleString()}</td>
                     </tr>
                   ))
@@ -165,45 +164,39 @@ export default function AdminDonationsPage() {
           </div>
         </div>
 
-        <div className="d-flex align-items-center justify-content-between mt-3">
-          <small className="text-muted d-flex align-items-center gap-2">
-            <span>
-              ទិន្នន័យសរុប: <strong>{total}</strong>
-            </span>
+        {/* Pagination */}
+        <div className="flex items-center justify-between mt-4">
+          <small style={{ color: "var(--color-text-secondary)" }}>
+            Total: <strong style={{ color: "var(--color-text-primary)" }}>{total}</strong>
             {loading && (
-              <span
-                className="spinner-border spinner-border-sm"
-                role="status"
-              ></span>
+              <span className="ms-2">
+                <i className="bi bi-arrow-repeat" style={{ animation: "spin 1s linear infinite" }}></i>
+              </span>
             )}
           </small>
-          <nav>
-            <ul className="pagination pagination-sm mb-0">
-              <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
-                <button
-                  className="page-link"
-                  onClick={() => setPage(Math.max(1, page - 1))}
-                >
-                  Previous
-                </button>
-              </li>
-              <li className="page-item active">
-                <span className="page-link">{page}</span>
-              </li>
-              <li
-                className={`page-item ${page * limit >= total ? "disabled" : ""}`}
-              >
-                <button
-                  className="page-link"
-                  onClick={() => setPage(page + 1)}
-                >
-                  Next
-                </button>
-              </li>
-            </ul>
-          </nav>
+          <div className="flex items-center gap-2">
+            <button
+              className="btn-secondary"
+              style={{ padding: "8px 16px" }}
+              onClick={() => setPage(Math.max(1, page - 1))}
+              disabled={page === 1 || loading}
+            >
+              Previous
+            </button>
+            <span className="status-badge active" style={{ background: "var(--color-bg-input)", border: "1px solid var(--color-border)", color: "var(--color-text-primary)" }}>
+              {page}
+            </span>
+            <button
+              className="btn-secondary"
+              style={{ padding: "8px 16px" }}
+              onClick={() => setPage(page + 1)}
+              disabled={page * limit >= total || loading}
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

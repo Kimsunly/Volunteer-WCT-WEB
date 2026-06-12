@@ -4,13 +4,14 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { toast } from "react-hot-toast";
 import { login as apiLogin, me as apiMe } from "@/lib/services/auth";
 import { setAuth } from "@/lib/utils/authState";
 import { parseApiError } from "@/lib/utils/apiError";
 import { useAuth } from "@/context/AuthContext";
 import { AuthShell, PasswordField } from "../components";
 import Image from "next/image";
-import toast from "react-hot-toast";
+import { showToast } from "@/components/common/CustomToaster";
 import LoadingButton from "@/components/common/LoadingButton";
 
 export default function LoginPage() {
@@ -30,32 +31,38 @@ export default function LoginPage() {
 
     try {
       setSubmitting(true);
-      const { token } = await apiLogin({ email, password });
+      const { token, refreshToken } = await apiLogin({ email, password });
       if (!token) {
-        toast.error("ការចូលគណនីបានបរាជ័យ៖ មិនមានថូខឹន");
+        showToast.error("ការចូលគណនីបានបរាជ័យ៖ មិនមានថូខឹន", "កំហុសចូលគណនី");
         return;
       }
       const remember = e.target?.querySelector("#rememberMe")?.checked || false;
-      setAuth({ token, remember });
+      setAuth({ token, refreshToken, remember });
 
       // Fetch current user info to get role
       const userInfo = await apiMe();
+
       const role = userInfo?.role || "user";
-      setAuth({ token, role, remember });
+      setAuth({ token, refreshToken, role, remember });
       setUser({
         id: userInfo?.id,
         name: userInfo?.name,
         email: userInfo?.email || email,
         role,
-        profileImage: userInfo?.image || "/images/profile.png",
+        profileImage:
+          userInfo?.avatar_url ||
+          userInfo?.avatar ||
+          userInfo?.image ||
+          "/images/profile.png",
       });
-      toast.success("ចូលគណនីបានជោគជ័យ!");
+      showToast.success("ចូលគណនីបានជោគជ័យ!", "សូមស្វាគមន៍");
       router.push(role === "admin" ? "/admin/dashboard" : "/");
     } catch (err) {
       console.error("Login error", err);
       const msg =
-        parseApiError(err) || "ការចូលគណនីបានបរាជ័យ។ សូមពិនិត្យមើលព័ត៌មានសម្ងាត់របស់អ្នក។";
-      toast.error(msg);
+        parseApiError(err) ||
+        "ការចូលគណនីបានបរាជ័យ។ សូមពិនិត្យមើលព័ត៌មានសម្ងាត់របស់អ្នក។";
+      showToast.error(msg, "បរាជ័យ");
     } finally {
       setSubmitting(false);
     }
@@ -67,11 +74,25 @@ export default function LoginPage() {
         <section>
           <div className="container">
             <div className="row justify-content-center">
-              <div className="col-12 col-xl-10 col-lg-11">
+              <div className="col-12">
                 <AuthShell
-                  imageSrc="/images/homepage/login-img.jpg"
-                  title="ចូលប្រើប្រាស់គណនី"
-                  subtitle="សូមស្វាគមន៍មកកាន់វេទិកាស្ម័គ្រចិត្ត"
+                  imageSrc="/images/svg_login/Volunteering-bro.svg"
+                  title="Login"
+                  switchText="Don't have an account?"
+                  switchLink="/auth/register"
+                  switchAction="Register"
+                  onGoogleClick={() => {
+                    toast.loading("កំពុងភ្ជាប់ទៅ Google...");
+                    signIn("google");
+                  }}
+                  onFacebookClick={() => {
+                    toast.loading("កំពុងភ្ជាប់ទៅ Facebook...");
+                    signIn("facebook");
+                  }}
+                  onGithubClick={() => {
+                    toast.loading("កំពុងភ្ជាប់ទៅ GitHub...");
+                    signIn("github");
+                  }}
                 >
                   <form
                     id="loginForm"
@@ -80,14 +101,11 @@ export default function LoginPage() {
                     onSubmit={onSubmit}
                   >
                     <div className="col-12">
-                      <label htmlFor="email" className="form-label">
-                        អ៊ីមែល
-                      </label>
                       <input
                         type="email"
-                        className="form-control"
+                        className="auth-modern-input w-100"
                         id="email"
-                        placeholder="បញ្ចូលអ៊ីមែល"
+                        placeholder="Username"
                         defaultValue="VolunteerCambo@gmail.com"
                         required
                       />
@@ -98,143 +116,52 @@ export default function LoginPage() {
 
                     <PasswordField
                       id="password"
+                      placeholder="Password"
                       defaultValue="VolunteerCambo"
                     />
 
-                    <div className="col-12 d-flex justify-content-between align-items-center">
-                      <div className="form-check">
-                        <input
-                          type="checkbox"
-                          className="form-check-input"
-                          id="rememberMe"
-                          defaultChecked
-                        />
-                        <label
-                          className="form-check-label"
-                          htmlFor="rememberMe"
-                        >
-                          ចងចាំខ្ញុំ
+                    <div className="col-12">
+                      <div className="auth-modern-checkbox-container">
+                        <input type="checkbox" id="rememberMe" defaultChecked />
+                        <label htmlFor="rememberMe">
+                          Receive news and updates for volunteers
                         </label>
                       </div>
-                      <Link href="/auth/forget-password">
-                        ភ្លេចពាក្យសម្ងាត់?
-                      </Link>
                     </div>
 
                     <div className="col-12">
                       <LoadingButton
                         type="submit"
-                        className="btn btn-primary w-100"
+                        className="auth-modern-btn"
                         loading={submitting}
                         loadingText="កំពុងចូល..."
                       >
-                        ចូលគណនី
+                        Get Started
                       </LoadingButton>
                     </div>
 
-                    <div className="col-12">
-                      <div className="d-flex align-items-start">
-                        <hr />
-                        <span className="mx-2">ឬ</span>
-                        <hr />
-                      </div>
+                    <div className="col-12 text-center">
+                      <Link
+                        href="/auth/forget-password"
+                        style={{
+                          color: "#2d6a4f",
+                          textDecoration: "none",
+                          fontWeight: 600,
+                        }}
+                      >
+                        Forgot Password?
+                      </Link>
                     </div>
 
-                    {/* Social login with NextAuth */}
-                    <div className="col-12">
-                      <ul className="login-list">
-                        <li>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              signIn("facebook", {
-                                callbackUrl: "/",
-                                redirect: true,
-                              })
-                            }
-                            style={{
-                              border: "none",
-                              background: "none",
-                              padding: 0,
-                              cursor: "pointer",
-                            }}
-                          >
-                            <Image
-                              src="/images/Icon/facebook.png"
-                              alt="Facebook"
-                              width={40}
-                              height={40}
-                            />
-                          </button>
-                        </li>
-                        <li>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              signIn("google", {
-                                callbackUrl: "/",
-                                redirect: true,
-                              })
-                            }
-                            style={{
-                              border: "none",
-                              background: "none",
-                              padding: 0,
-                              cursor: "pointer",
-                            }}
-                          >
-                            <Image
-                              src="/images/Icon/search.png"
-                              alt="Google"
-                              width={40}
-                              height={40}
-                            />
-                          </button>
-                        </li>
-                        <li>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              signIn("github", {
-                                callbackUrl: "/",
-                                redirect: true,
-                              })
-                            }
-                            style={{
-                              border: "none",
-                              background: "none",
-                              padding: 0,
-                              cursor: "pointer",
-                            }}
-                          >
-                            <Image
-                              src="/images/Icon/github.png"
-                              alt="GitHub"
-                              width={40}
-                              height={40}
-                            />
-                          </button>
-                        </li>
-                      </ul>
-                    </div>
-
-                    <div className="col-12">
-                      <p className="text-center mb-0">
-                        មិនទាន់មានគណនីទេ?{" "}
-                        <Link href="/auth/register">ចុះឈ្មោះ</Link>
-                      </p>
-                    </div>
-
-                    <div className="col-12">
-                      <div className="d-flex align-items-start">
-                        <hr />
-                      </div>
-                    </div>
-
-                    <div className="col-12">
-                      <p className="text-center mb-0">
-                        គណនីរបស់អង្គការមែនទេ?{" "}
-                        <Link href="/auth/org/login">ចូលគណនី</Link>
+                    <div className="col-12 mt-4">
+                      <p className="text-center mb-0 text-muted">
+                        Are you an organization?{" "}
+                        <Link
+                          href="/auth/org/login"
+                          style={{ color: "#2d6a4f", fontWeight: 700 }}
+                        >
+                          Login as Organizer
+                        </Link>
                       </p>
                     </div>
                   </form>

@@ -22,13 +22,10 @@ export default function PasswordField({
 
   return (
     <div className="col-12">
-      <label htmlFor={id} className="form-label">
-        {label}
-      </label>
-      <div style={{ position: "relative" }}>
+      <div className="password-field-container">
         <input
           type={type}
-          className="form-control"
+          className="auth-modern-input w-100"
           id={id}
           placeholder={placeholder}
           defaultValue={defaultValue}
@@ -36,11 +33,10 @@ export default function PasswordField({
           required={required}
         />
         <i
-          className={`bi ${type === "password" ? "bi-eye" : "bi-eye-slash"} password-toggle`}
+          className={`bi ${type === "password" ? "bi-eye" : "bi-eye-slash"} password-toggle-icon`}
           role="button"
           aria-label="Toggle password visibility"
           onClick={toggle}
-          style={{ cursor: "pointer" }}
         />
       </div>
       {required && (

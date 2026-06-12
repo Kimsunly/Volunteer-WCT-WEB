@@ -1,4 +1,4 @@
-import { localFont } from 'next/font/local';
+import localFont from 'next/font/local';
 import './globals.css';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -11,6 +11,7 @@ import 'swiper/css/autoplay';
 import BootstrapClient from '@/components/common/BootstrapClient';
 import AOSInit from '@/components/common/AOSInit';
 import { AuthProvider } from '@/context/AuthContext';
+import { SettingsProvider } from '@/context/SettingsContext';
 import ConditionalLayout from '@/components/layout/ConditionalLayout';
 import SessionProviderWrapper from '@/components/common/SessionProviderWrapper';
 import { Toaster } from 'react-hot-toast';
@@ -43,10 +44,12 @@ export default function RootLayout({ children }) {
       <body style={{ fontFamily: 'var(--font-kantumruy), sans-serif' }}>
         <SessionProviderWrapper>
           <AuthProvider>
-            <Toaster position="top-center" reverseOrder={false} />
-            <BootstrapClient />
-            <AOSInit />
-            <ConditionalLayout>{children}</ConditionalLayout>
+            <SettingsProvider>
+              <Toaster position="top-center" reverseOrder={false} />
+              <BootstrapClient />
+              <AOSInit />
+              <ConditionalLayout>{children}</ConditionalLayout>
+            </SettingsProvider>
           </AuthProvider>
         </SessionProviderWrapper>
       </body>

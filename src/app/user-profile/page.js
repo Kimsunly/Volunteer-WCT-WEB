@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import {
     ProfileHeader,
@@ -12,17 +13,36 @@ import {
     RegistrationsPane,
     AchievementsPane,
     RecommendationsPane,
+    ConnectionsPane,
+    FavoritesPane,
 } from "./components";
+import SettingsPane from "./components/panes/SettingsPane";
 
 export default function UserProfilePage() {
+    const router = useRouter();
     // Controlled tab (we will NOT use Bootstrap's tab JS)
-    const [activeTab, setActiveTab] = useState("overview"); // overview | activities | registrations | achievements | recs
+    const [activeTab, setActiveTab] = useState("overview"); // overview | activities | registrations | achievements | connections | recs
 
     // Account settings modal state
     const [settingsOpen, setSettingsOpen] = useState(false);
 
     // Authentication and role handling via context (avoids SSR/localStorage issues)
     const { user: authUser, loading } = useAuth();
+
+    // Prevent back-button access after logout or redirect organizers
+    useEffect(() => {
+        if (!loading) {
+            if (!authUser) {
+                router.push("/auth/login");
+            } else if (authUser.role === "organizer") {
+                router.push("/organizer/profile");
+            }
+        }
+    }, [authUser, loading, router]);
+
+    if (loading) return <div className="min-vh-100 d-flex align-items-center justify-content-center">Loading...</div>;
+    if (!authUser || authUser.role === "organizer") return null; // Hide content while redirecting
+
     const roleAllowed = !!authUser && authUser.role === "user";
 
     // User for header: prefer authenticated user, fallback to mock
@@ -32,22 +52,20 @@ export default function UserProfilePage() {
                 ? `${authUser.first_name} ${authUser.last_name}`
                 : (authUser.name ?? "អ្នកប្រើប្រាស់"),
             avatar: authUser.avatar_url ?? authUser.profileImage ?? "/images/profile.png",
-            tierLabel: authUser.volunteer_level ?? authUser.tierLabel ?? "Volunteer",
-            rating: authUser.rating ?? 4.5,
-            ratingText: String(authUser.rating ?? 4.8),
+            tierLabel: authUser.role === "organizer" ? "Organizer" : (authUser.volunteer_level ?? authUser.tierLabel ?? "Volunteer"),
             notifCount: Array.isArray(authUser.notifications) ? authUser.notifications.length : 0,
+            providers: authUser.providers ?? [],
         }
         : {
             name: "ដារា លី",
             avatar: "/images/profile.png",
             tierLabel: "Gold Volunteer",
-            rating: 4.5,
-            ratingText: "4.8",
             notifCount: 2,
+            providers: [],
         };
 
     return (
-        <main className="flex-grow-1" style={{ marginTop: 130 }}>
+        <main className="flex-grow-1" style={{ marginTop: 170 }}>
             <div className="container py-4">
                 {/* Role guard (banner + content disabling) */}
                 <RoleGuard enabled={!loading && !roleAllowed} />
@@ -67,7 +85,10 @@ export default function UserProfilePage() {
                         { id: "activities", icon: "bi bi-calendar2-check", label: "សកម្មភាព" },
                         { id: "registrations", icon: "bi bi-ticket-perforated", label: "ការចុះឈ្មោះរបស់ខ្ញុំ" },
                         { id: "achievements", icon: "bi bi-award", label: "សមិទ្ធិផល" },
+                        { id: "connections", icon: "bi bi-link-45deg", label: "តំណភ្ជាប់" },
                         { id: "recs", icon: "bi bi-heart", label: "ការណែនាំ" },
+                        { id: "favorites", icon: "bi bi-heart-fill text-danger", label: "ឱកាសពេញចិត្ត" },
+                        { id: "settings", icon: "bi bi-gear", label: "ការកំណត់" },
                     ]}
                 />
 
@@ -77,7 +98,10 @@ export default function UserProfilePage() {
                     {activeTab === "activities" && <ActivitiesPane />}
                     {activeTab === "registrations" && <RegistrationsPane />}
                     {activeTab === "achievements" && <AchievementsPane />}
+                    {activeTab === "connections" && <ConnectionsPane providers={profileUser.providers} />}
                     {activeTab === "recs" && <RecommendationsPane />}
+                    {activeTab === "favorites" && <FavoritesPane />}
+                    {activeTab === "settings" && <SettingsPane />}
                 </div>
             </div>
 

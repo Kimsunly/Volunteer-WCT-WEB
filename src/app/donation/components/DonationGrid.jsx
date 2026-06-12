@@ -4,7 +4,42 @@
 import React from "react";
 import DonationCard from "./DonationCard";
 
-export default function DonationGrid({ onInfo, onBloodRegister }) {
+const hospitalDetails = {
+  "koma-angkor": {
+    name: "Koma Angkor Children's Hospital",
+    location: "សមាមកមុមារអង្គរវត្ត • Siem Reap",
+    description:
+      "ជួយគាំទ្រការថែទាំសុខភាពកុមារ ដោយផ្តល់ថ្នាំ វីភាគ និងការថែទាំបន្ទាន់ឥតគិតថ្លៃ។",
+    mission:
+      "បេសកម្មរបស់យើងគឺផ្តល់សេវាពេទ្យឥតគិតថ្លៃដល់កុមារក្រីក្រនៅភាគខាងជើងនៃប្រទេសកម្ពុជា។",
+    services: [
+      "ការថែទាំបន្ទាន់ (Emergency Care)",
+      "ការវះកាត់កុមារ (Pediatric Surgery)",
+      "ការព្យាបាលជំងឺមហារីកកុមារ (Pediatric Oncology)",
+      "ការថែទាំដំបូង (Primary Care)",
+      "កម្មវិធីវ៉ាក់សាំង (Vaccination Programs)",
+    ],
+    founded: 2003,
+  },
+  "kuntha-bopha": {
+    name: "Jayavarman VII – Kantha Bopha",
+    location: "មន្ទីរពេទ្យកុមារ • Phnom Penh & Siem Reap",
+    description:
+      "ជួយថែទាំកុមារក្រីក្រ ជាមួយនឹងសេវាពេទ្យឥតគិតថ្លៃ និងការពិបាលជំងឺធ្ងន់ធ្ងរ។",
+    mission:
+      "ផ្តល់ការថែទាំសុខភាពឥតគិតថ្លៃដល់កុមារទាំងអស់ ដោយមិនគិតពីស្ថានភាពសេដ្ឋកិច្ច។",
+    services: [
+      "ការថែទាំបន្ទាន់ 24 ម៉ោង (24hr Emergency)",
+      "ការវះកាត់បេះដូងកុមារ (Pediatric Cardiac Surgery)",
+      "ការព្យាបាលជំងឺខួរឆ្អឹង (Neonatal Care)",
+      "កម្មវិធីបណ្តុះបណ្តាល (Training Programs)",
+      "មណ្ឌលស្រាវជ្រាវ (Research Center)",
+    ],
+    founded: 1992,
+  },
+};
+
+export default function DonationGrid({ onInfo, onBloodRegister, onQRDonate }) {
   const cards = [
     {
       id: "koma-angkor",
@@ -70,6 +105,60 @@ export default function DonationGrid({ onInfo, onBloodRegister }) {
     },
   ];
 
+  const renderInfoBody = (card) => {
+    const details = hospitalDetails[card.id];
+    if (!details) {
+      return (
+        <div className="card-content">
+          <p className="mb-2">{card.description}</p>
+          <p className="text-secondary small mb-0">ទីតាំង: {card.location}</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="card-content">
+        <div className="mb-3">
+          <p className="text-secondary mb-2 d-flex align-items-center gap-2">
+            <i className="bi bi-geo-alt text-primary"></i> {details.location}
+          </p>
+          <p className="text-secondary mb-2 d-flex align-items-center gap-2">
+            <i className="bi bi-calendar text-primary"></i> បង្កើតនៅ{" "}
+            {details.founded}
+          </p>
+        </div>
+
+        <p className="mb-3" style={{ lineHeight: "1.7" }}>
+          {details.description}
+        </p>
+
+        <p className="mb-3" style={{ lineHeight: "1.7", fontWeight: 500 }}>
+          <i className="bi bi-bullseye me-2 text-primary"></i>
+          {details.mission}
+        </p>
+
+        <div className="mt-3">
+          <h6 className="fw-semibold mb-2" style={{ color: "#374151" }}>
+            សេវាដែលផ្តល់
+          </h6>
+          <div className="row g-2">
+            {details.services.map((service, index) => (
+              <div key={index} className="col-12">
+                <div
+                  className="d-flex align-items-center gap-2 p-2 rounded-3"
+                  style={{ backgroundColor: "#f8f9fa" }}
+                >
+                  <i className="bi bi-check-circle-fill text-success"></i>
+                  <span className="small text-secondary">{service}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="row g-4 mb-5">
       {cards.map((c) => (
@@ -84,17 +173,11 @@ export default function DonationGrid({ onInfo, onBloodRegister }) {
             onInfo={() =>
               onInfo({
                 title: c.title,
-                body: (
-                  <div className="card-content">
-                    <p className="mb-2">{c.description}</p>
-                    <p className="text-secondary small mb-0">
-                      ទីតាំង: {c.location}
-                    </p>
-                  </div>
-                ),
+                body: renderInfoBody(c),
               })
             }
             onRegister={onBloodRegister}
+            onDonate={() => onQRDonate && onQRDonate(c.id)}
           />
         </div>
       ))}

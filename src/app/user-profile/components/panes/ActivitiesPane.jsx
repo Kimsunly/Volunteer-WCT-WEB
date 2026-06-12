@@ -1,48 +1,119 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { getUserActivities } from "@/services/user";
+import React, { useCallback, useEffect, useState } from "react";
+import { getUserActivities, rateApplication } from "@/services/user";
 import { format } from "date-fns";
 import { km } from "date-fns/locale";
+import StarRating from "@/components/common/StarRating";
+import { showToast } from "@/components/common/CustomToaster";
+
+const STATUS_LABELS = {
+  pending: { label: "រង់ចាំអនុម័ត", className: "text-bg-warning-subtle text-warning" },
+  upcoming: { label: "បានអនុម័ត", className: "text-bg-info-subtle text-info" },
+  in_progress: { label: "កំពុងដំណើរការ", className: "text-bg-primary-subtle text-primary" },
+  completed: { label: "បានបញ្ចប់", className: "text-bg-success-subtle text-success" },
+  rejected: { label: "បានបដិសេធ", className: "text-bg-danger-subtle text-danger" },
+  withdrawn: { label: "បានបោះបង់", className: "text-bg-secondary-subtle text-secondary" },
+};
+
+function getStatusBadge(activityStatus) {
+  const config = STATUS_LABELS[activityStatus] || {
+    label: activityStatus,
+    className: "text-bg-secondary-subtle text-secondary",
+  };
+  return (
+    <span className={`badge rounded-pill px-3 ${config.className}`}>
+      {config.label}
+    </span>
+  );
+}
 
 export default function ActivitiesPane() {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [ratingLoadingId, setRatingLoadingId] = useState(null);
 
-  useEffect(() => {
-    getUserActivities()
+  const fetchActivities = useCallback(() => {
+    return getUserActivities()
       .then(setActivities)
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      .catch(console.error);
   }, []);
 
-  const getStatusBadge = (status) => {
-    const s = status?.toLowerCase() || "";
-    if (s === "completed" || s === "approved") {
-      return <span className="badge rounded-pill text-bg-success-subtle text-success px-3">បានបញ្ចប់</span>;
+  useEffect(() => {
+    fetchActivities().finally(() => setLoading(false));
+  }, [fetchActivities]);
+
+  const handleRate = async (activity, stars) => {
+    if (!activity.can_rate || ratingLoadingId) return;
+
+    setRatingLoadingId(activity.id);
+    try {
+      await rateApplication(activity.application_id || activity.id, stars);
+      setActivities((prev) =>
+        prev.map((act) =>
+          act.id === activity.id
+            ? { ...act, rating: stars, can_rate: false }
+            : act,
+        ),
+      );
+      showToast.success("អរគុណសម្រាប់ការវាយតម្លៃ!", "វាយតម្លៃជោគជ័យ");
+    } catch (err) {
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data?.detail ||
+        "មិនអាចវាយតម្លៃបានទេ";
+      showToast.error(msg, "កំហុស");
+    } finally {
+      setRatingLoadingId(null);
     }
-    if (s === "pending") {
-      return <span className="badge rounded-pill text-bg-warning-subtle text-warning px-3">រង់ចាំ</span>;
-    }
-    if (s === "rejected") {
-      return <span className="badge rounded-pill text-bg-danger-subtle text-danger px-3">បដិសេធ</span>;
-    }
-    return <span className="badge rounded-pill text-bg-secondary-subtle text-secondary px-3">{status}</span>;
   };
 
-  const renderStars = (rating) => {
-    const stars = [];
-    const r = Math.min(Math.max(rating || 0, 0), 5); // clamp 0-5
-    for (let i = 1; i <= 5; i++) {
-      if (i <= r) {
-        stars.push(<i key={i} className="bi bi-star-fill"></i>);
-      } else if (i - 0.5 <= r) {
-        stars.push(<i key={i} className="bi bi-star-half"></i>);
-      } else {
-        stars.push(<i key={i} className="bi bi-star"></i>);
-      }
+  const renderRatingCell = (act) => {
+    if (act.rating) {
+      return (
+        <StarRating
+          value={act.rating}
+          readOnly
+          size="sm"
+          title={`${act.rating}/5`}
+        />
+      );
     }
-    return stars;
+
+    if (act.can_rate) {
+      return (
+        <div>
+          <StarRating
+            value={0}
+            onChange={(stars) => handleRate(act, stars)}
+            size="sm"
+            title="ចុចដើម្បីវាយតម្លៃអ្នករៀបចំ"
+          />
+          <small className="d-block text-muted mt-1">ចុចផ្កាយដើម្បីវាយតម្លៃ</small>
+        </div>
+      );
+    }
+
+    if (act.activity_status === "in_progress" || act.activity_status === "upcoming") {
+      return (
+        <small className="text-muted" title="វាយតម្លៃបាននៅពេលឱកាសបញ្ចប់">
+          មិនទាន់បញ្ចប់
+        </small>
+      );
+    }
+
+    if (act.activity_status === "pending") {
+      return <small className="text-muted">—</small>;
+    }
+
+    return (
+      <StarRating
+        value={0}
+        readOnly
+        size="sm"
+        title="មិនអាចវាយតម្លៃ"
+      />
+    );
   };
 
   if (loading) {
@@ -78,17 +149,43 @@ export default function ActivitiesPane() {
                 activities.map((act) => (
                   <tr key={act.id}>
                     <td>
-                      <div className="fw-semibold text-truncate" style={{ maxWidth: '200px' }}>{act.title}</div>
-                      <small className="d-block text-muted text-truncate" style={{ maxWidth: '200px' }}>{act.title_en}</small>
+                      <div
+                        className="fw-semibold text-truncate"
+                        style={{ maxWidth: "220px" }}
+                      >
+                        {act.title}
+                      </div>
+                      {act.organizer?.organization_name && (
+                        <small className="d-block text-muted text-truncate" style={{ maxWidth: "220px" }}>
+                          {act.organizer.organization_name}
+                        </small>
+                      )}
                       <small className="text-primary">{act.location}</small>
                     </td>
                     <td>
-                      {act.date ? format(new Date(act.date), "dd MMMM yyyy", { locale: km }) : "-"}
+                      {act.date
+                        ? format(new Date(act.date), "dd MMMM yyyy", {
+                            locale: km,
+                          })
+                        : "-"}
                     </td>
-                    <td>{act.hours}h</td>
-                    <td>{getStatusBadge(act.status)}</td>
-                    <td className="text-warning vh-stars" title={`${act.rating || 0}/5`}>
-                      {renderStars(act.rating)}
+                    <td>
+                      {act.activity_status === "completed"
+                        ? `${act.hours || act.planned_hours || 0}h`
+                        : act.planned_hours
+                          ? `~${act.planned_hours}h`
+                          : "—"}
+                    </td>
+                    <td>{getStatusBadge(act.activity_status)}</td>
+                    <td className="text-warning">
+                      {ratingLoadingId === act.id ? (
+                        <span
+                          className="spinner-border spinner-border-sm text-warning"
+                          role="status"
+                        />
+                      ) : (
+                        renderRatingCell(act)
+                      )}
                     </td>
                   </tr>
                 ))
@@ -106,4 +203,3 @@ export default function ActivitiesPane() {
     </div>
   );
 }
-``;

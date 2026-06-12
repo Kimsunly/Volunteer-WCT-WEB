@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import HeroBanner from "../(landing)/components/HeroBanner";
 import AboutUs from "../(landing)/components/AboutUs";
 import StatsStripModern from "@/components/base/StatsStripModern";
@@ -8,137 +9,117 @@ import BenefitsGrid from "../(landing)/components/BenefitsGrid";
 import FAQAccordion from "../(landing)/components/FAQAccordion";
 import TestimonialsSlider from "../(landing)/components/TestimonialsSlider";
 
-const mockOpportunities = [
-  {
-    id: "opp-1",
-    title: "ការបង្រៀនភាសាអង់គ្លេស",
-    category: { label: "អប់រំ", colorClass: "bg-primary", icon: "bi bi-book" },
-    imageUrl: "/images/opportunities/Education/card-7/img-1.png",
-    location: "ខេត្តកំពត",
-    date: "២៥ មេសា ២០២៥",
-    time: "ម៉ោង ៧:០០ - ១១:००",
-    capacityLabel: "ចំនួន ២០ នាក់",
-    benefits: ["transport", "housing", "food"],
-    detailHref: "/opportunities/1",
-    isFavorite: false,
-  },
-  {
-    id: "opp-2",
-    title: "យុទ្ធនាការសម្អាតឆ្នេរ",
-    category: {
-      label: "បរិស្ថាន",
-      colorClass: "bg-success",
-      icon: "bi bi-tree",
-    },
-    imageUrl: "/images/opportunities/Environment/card-2/img-6.png",
-    location: "ខេត្តកោះកុង",
-    date: "១៥ កញ្ញា ២០២៥",
-    time: "ម៉ោង ៧:៣០ - ១១:៣០",
-    capacityLabel: "ចំនួន ៥០ នាក់",
-    benefits: ["transport", "housing"],
-    detailHref: "/opportunities/2",
-    isFavorite: false,
-  },
-  {
-    id: "opp-3",
-    title: "សម្អាតសហគមន៍",
-    category: { label: "សហគមន៍", colorClass: "bg-info", icon: "bi bi-people" },
-    imageUrl: "/images/opportunities/Childcare/card-4/img-3.png",
-    location: "ខេត្តកំពត",
-    date: "២៥ មេសា ២០២៥",
-    time: "ម៉ោង ៧:००ー១១:००",
-    capacityLabel: "ចំនួន ២០ នាក់",
-    benefits: ["food"],
-    detailHref: "/opportunities/3",
-    isFavorite: false,
-  },
-  {
-    id: "opp-4",
-    title: "ការបង្រៀនកុមារ",
-    category: { label: "កុមារ", colorClass: "bg-warning", icon: "bi bi-heart" },
-    imageUrl: "/images/opportunities/Childcare/card-10/img-1.png",
-    location: "ភ្នំពេញ",
-    date: "១០ ឧសភា ២០២៥",
-    time: "ម៉ោង ២:០០ - ៥:០០",
-    capacityLabel: "ចំនួន ១៥ នាក់",
-    benefits: ["transport", "food"],
-    detailHref: "/opportunities/4",
-    isFavorite: true,
-  },
-  {
-    id: "opp-5",
-    title: "ការថែទាំសុខភាព",
-    category: {
-      label: "សុខភាព",
-      colorClass: "bg-danger",
-      icon: "bi bi-hospital",
-    },
-    imageUrl: "/images/opportunities/Health/card-14/img-1.png",
-    location: "ខេត្តបាត់ដំបង",
-    date: "២០ មិថុនា ២០២៥",
-    time: "ម៉ោង ៨:០០ - ១២:០០",
-    capacityLabel: "ចំនួន ៣០ នាក់",
-    benefits: ["housing", "food"],
-    detailHref: "/opportunities/1",
-    isFavorite: false,
-  },
-  {
-    id: "opp-6",
-    title: "ការដាំដើមឈើ",
-    category: {
-      label: "បរិស្ថាន",
-      colorClass: "bg-success",
-      icon: "bi bi-tree",
-    },
-    imageUrl: "/images/opportunities/Environment/card-11/img-1.png",
-    location: "ខេត្តសៀមរាប",
-    date: "៥ កក្កដា ២០២៥",
-    time: "ម៉ោង ៦:០០ - ១០:០០",
-    capacityLabel: "ចំនួន ១០០ នាក់",
-    benefits: ["transport", "food"],
-    detailHref: "/opportunities/2",
-    isFavorite: false,
-  },
-];
 
-const mockEvents = [
-  {
-    id: "evt-1",
-    title: "វគ្គបណ្តុះបណ្តាលអ្នកដឹកនាំ",
-    date: "២៥ មីនា ២០២៥",
-    time: "ម៉ោង ៨:០០",
-    location: "ភ្នំពេញ",
-    imageUrl: "/images/even-soon/1.jpg",
-    detailHref: "/event/evt-1",
-  },
-  {
-    id: "evt-2",
-    title: "យុទ្ធនាការសម្អាតឆ្នេរ",
-    date: "១០ មេសា ២០២៥",
-    time: "ម៉ោង ៧:៣០",
-    location: "ខេត្តកោះកុង",
-    imageUrl: "/images/even-soon/2.jpg",
-    detailHref: "/event/evt-2",
-  },
-  {
-    id: "evt-3",
-    title: "ពិព័រណ៍វប្បធម៌",
-    date: "១៥ ឧសភា ២០២៥",
-    time: "ម៉ោង ៩:០០",
-    location: "ខេត្តសៀមរាប",
-    imageUrl: "/images/even-soon/3.jpg",
-    detailHref: "/event/evt-3",
-  },
-];
 
-export default function HomepageContent() {
+async function getUpcomingEvents() {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/events/upcoming`, { cache: 'no-store' });
+    if (res.ok) {
+      const json = await res.json();
+      if (json.success && json.data) {
+        return json.data;
+      }
+    }
+  } catch (e) {
+    console.error("Failed to fetch upcoming events:", e);
+  }
+  return [];
+}
+
+async function getOpportunities() {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("authToken")?.value || cookieStore.get("token")?.value;
+    const headers = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/opportunities?limit=3`, {
+      headers,
+      cache: 'no-store'
+    });
+    if (res.ok) {
+      const json = await res.json();
+      if (json.data) {
+        return json.data;
+      }
+    }
+  } catch (e) {
+    console.error("Failed to fetch opportunities:", e);
+  }
+  return [];
+}
+
+export default async function HomepageContent() {
+  const events = await getUpcomingEvents();
+  const opportunities = await getOpportunities();
+
+  // Map backend opportunities to card structure
+  const mappedOpportunities = opportunities.map(item => {
+    const catName = item.category?.name || item.category_label || (typeof item.category === 'string' ? item.category : '');
+    const locName = item.location_label || item.logistic?.location_label || (typeof item.location === 'string' ? item.location : '');
+    return {
+      ...item,
+      id: String(item.id),
+      category: {
+        slug: catName ? catName.toLowerCase().replace(/\s+/g, '-') : 'all',
+        label: catName || 'ផ្សេងៗ'
+      },
+      location: {
+        slug: locName ? locName.toLowerCase().replace(/\s+/g, '-') : 'all',
+        label: locName || 'TBD'
+      },
+      images: item.details?.images_json || (item.images ? (typeof item.images === 'string' ? item.images.split(',') : item.images) : []),
+      date: item.logistic?.start_date ? new Date(item.logistic.start_date).toLocaleDateString('km-KH', { day: '2-digit', month: 'long', year: 'numeric' }) : 'TBD',
+      time: item.logistic?.time_range || 'TBD',
+      transport: item.logistic?.transport,
+      housing: item.logistic?.housing,
+      meals: item.logistic?.meals || item.logistic?.meal,
+      detailHref: `/opportunities/${item.id}`,
+    };
+  });
+
+  // Map backend events to homepage upcoming events structure
+  const mappedEvents = events.map(evt => {
+    const rawImg = evt.imageUrl || (evt.details?.images_json?.[0]) || (evt.images?.[0]);
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+    const ensureAbsoluteUrl = (path) => {
+      if (!path) return path;
+      if (path.startsWith('http')) return path;
+      const cleanPath = path.startsWith('/') ? path : `/${path}`;
+      if (cleanPath.startsWith('/storage/')) return `${apiBaseUrl}${cleanPath}`;
+      if (cleanPath.startsWith('/uploads/')) return `${apiBaseUrl}${cleanPath}`;
+      if (cleanPath.startsWith('/images/')) return cleanPath;
+      return `${apiBaseUrl}/storage${cleanPath}`;
+    };
+
+    return {
+      id: String(evt.id),
+      title: evt.title,
+      dateDay: evt.dateDay || "TBD",
+      dateMonth: evt.dateMonth || "TBD",
+      timeRange: evt.timeRange || "TBD",
+      location: evt.location || "TBD",
+      imageUrl: ensureAbsoluteUrl(rawImg) || "/images/even-soon/default.jpg",
+      href: evt.href || `/opportunities/${evt.id}`,
+      category: evt.category || {
+        label: "Volunteer",
+        icon: "bi bi-calendar-event",
+        colorClass: "bg-primary"
+      }
+    };
+  });
+
+  const displayOpps = mappedOpportunities.slice(0, 3);
+  const displayEvents = mappedEvents;
+
   return (
     <main className="flex-shrink-0">
       <HeroBanner />
       <AboutUs />
       <StatsStripModern />
-      <LandingOpportunities items={mockOpportunities} />
-      <UpcomingEvents items={mockEvents} />
+      <LandingOpportunities items={displayOpps} />
+      <UpcomingEvents items={displayEvents} />
       <BenefitsGrid />
       <TestimonialsSlider />
       <CTAJoin />

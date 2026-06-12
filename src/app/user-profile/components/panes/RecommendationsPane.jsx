@@ -16,10 +16,12 @@ export default function RecommendationsPane() {
     setLoading(true);
     try {
       const data = await getRecommendedActivities();
-      setRecommendations(data || []);
+      // Ensure we always have an array
+      setRecommendations(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Error fetching recommendations:", err);
       setError("មិនអាចទាញយកការណែនាំបានទេ។");
+      setRecommendations([]);
     } finally {
       setLoading(false);
     }
@@ -80,7 +82,7 @@ export default function RecommendationsPane() {
                         <div className="d-flex align-items-start gap-3">
                           <div className="rounded-4 overflow-hidden shadow-sm" style={{ width: 56, height: 56, flexShrink: 0 }}>
                             <img
-                              src={opp.image || "/images/placeholder-opp.png"}
+                              src={opp.image || "/images/placeholder.png"}
                               alt={opp.title}
                               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />

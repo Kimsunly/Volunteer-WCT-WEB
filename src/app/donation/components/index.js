@@ -4,6 +4,7 @@ export { default as DonationGrid } from "./DonationGrid";
 export { default as DonationCard } from "./DonationCard";
 export { default as InfoModal } from "./InfoModal";
 export { default as BloodDonateModal } from "./BloodDonateModal";
+export { default as QRDonateModal } from "./QRDonateModal";
 export { default as DonationForm } from "./DonationForm";
 export { default as SidebarSecurity } from "./SidebarSecurity";
 export { default as SidebarContact } from "./SidebarContact";

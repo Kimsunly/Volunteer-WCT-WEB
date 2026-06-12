@@ -6,102 +6,66 @@ import StatsStripModern from "@/components/base/StatsStripModern";
 import LandingOpportunities from "./components/LandingOpportunities";
 import UpcomingEvents from "./components/UpcomingEvents";
 import CTAJoin from "./components/CTAJoin";
+import OrganizerCTA from "./components/OrganizerCTA";
 import BenefitsGrid from "./components/BenefitsGrid";
 import FAQAccordion from "./components/FAQAccordion";
 import TestimonialsSlider from "./components/TestimonialsSlider";
 
-const mockOpportunities = [
-    {
-        id: "opp-1",
-        title: "ការបង្រៀនភាសាអង់គ្លេស",
-        category: { label: "អប់រំ", colorClass: "bg-primary", icon: "bi bi-book" },
-        imageUrl: "/images/opportunities/Education/card-7/img-1.png",
-        location: "ខេត្តកំពត",
-        date: "២៥ មេសា ២០២៥",
-        time: "ម៉ោង ៧:០០ - ១១:००",
-        capacityLabel: "ចំនួន ២០ នាក់",
-        benefits: ["transport", "housing", "food"],
-        detailHref: "/opportunities/1",
-        isFavorite: false,
-    },
-    {
-        id: "opp-2",
-        title: "យុទ្ធនាការសម្អាតឆ្នេរ",
-        category: { label: "បរិស្ថាន", colorClass: "bg-success", icon: "bi bi-tree" },
-        imageUrl: "/images/opportunities/Environment/card-2/img-6.png",
-        location: "ខេត្តកោះកុង",
-        date: "១៥ កញ្ញា ២០២៥",
-        time: "ម៉ោង ៧:៣០ - ១១:៣០",
-        capacityLabel: "ចំនួន ៥០ នាក់",
-        benefits: ["transport", "housing"],
-        detailHref: "/opportunities/2",
-        isFavorite: false,
-    },
-    {
-        id: "opp-3",
-        title: "សម្អាតសហគមន៍",
-        category: { label: "សហគមន៍", colorClass: "bg-info", icon: "bi bi-people" },
-        imageUrl: "/images/opportunities/Childcare/card-4/img-3.png",
-        location: "ខេត្តកំពត",
-        date: "២៥ មេសា ២០២៥",
-        time: "ម៉ោង ៧:००ー១១:००",
-        capacityLabel: "ចំនួន ២០ នាក់",
-        benefits: ["food"],
-        detailHref: "/opportunities/3",
-        isFavorite: false,
-    },
-];
 
-const mockEvents = [
-    {
-        id: "ev1",
-        dateDay: "០៥",
-        dateMonth: "តុលា",
-        imageUrl: "/images/opportunities/Environment/card-2/img-6.png",
-        category: { label: "បរិស្ថាន", icon: "bi bi-tree-fill", colorClass: "bg-success" },
-        title: "ការសម្អាតឆ្នេរ",
-        description: "ចូលរួមជាមួយយើងក្នុងការសម្អាតឆ្នេរ...",
-        location: "ខេត្តកោះកុង",
-        timeRange: "៧:៣០ - ១១:៣០",
-        href: "/auth/login",
-    },
-    {
-        id: "ev2",
-        dateDay: "១៦",
-        dateMonth: "តុលា",
-        imageUrl: "/images/opportunities/Childcare/card-4/img-3.png",
-        category: { label: "កុមារ", icon: "bi bi-heart-fill", colorClass: "bg-warning" },
-        title: "ការមើលថែទាំកុមារ",
-        description: "ចូលរួមជួយមើលថែទាំកុមារ...",
-        location: "ភ្នំពេញ",
-        timeRange: "៨:००ー១២:००",
-        href: "/auth/login",
-    },
-    {
-        id: "ev3",
-        dateDay: "២១",
-        dateMonth: "តុលា",
-        imageUrl: "/images/opportunities/Environment/card-11/img-1.png",
-        category: { label: "អប់រំ", icon: "bi bi-book-fill", colorClass: "bg-primary" },
-        title: "វគ្គសិក្សាបរិស្ថាន",
-        description: "រៀនអំពីការថែរក្សាបរិស្ថាន...",
-        location: "ខេត្តសៀមរាប",
-        timeRange: "៩:००ー១६:००",
-        href: "/auth/login",
-    },
-    {
-        id: "ev4",
-        dateDay: "០២",
-        dateMonth: "វិច្ឆកា",
-        imageUrl: "/images/opportunities/Environment/card-11/img-2.png",
-        category: { label: "បរិស្ថាន", icon: "bi bi-tree-fill", colorClass: "bg-success" },
-        title: "ដាំឈើជាសហគមន៍",
-        description: "ចូលរួមដាំដើមឈើជាមួយសហគមន៍...",
-        location: "ខេត្តកំពង់ធំ",
-        timeRange: "៦:៣០ - ១០:៣០",
-        href: "/auth/login",
-    },
-];
+
+async function getUpcomingEvents() {
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/events/upcoming`, { cache: 'no-store' });
+        if (res.ok) {
+            const json = await res.json();
+            if (json.success && json.data) {
+                return json.data;
+            }
+        }
+    } catch (e) {
+        console.error("Failed to fetch upcoming events:", e);
+    }
+    return [];
+}
+
+async function getOpportunities() {
+    try {
+        const cookieStore = await cookies();
+        const token = cookieStore.get("authToken")?.value || cookieStore.get("token")?.value;
+        const headers = {};
+        if (token) {
+            headers["Authorization"] = `Bearer ${token}`;
+        }
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/opportunities?limit=6`, {
+            headers,
+            cache: 'no-store'
+        });
+        if (res.ok) {
+            const json = await res.json();
+            if (json.data) {
+                return json.data;
+            }
+        }
+    } catch (e) {
+        console.error("Failed to fetch opportunities:", e);
+    }
+    return [];
+}
+
+async function getTestimonials() {
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/testimonials`, { cache: 'no-store' });
+        if (res.ok) {
+            const json = await res.json();
+            if (json.success && json.data) {
+                return json.data;
+            }
+        }
+    } catch (e) {
+        console.error("Failed to fetch testimonials:", e);
+    }
+    return [];
+}
 
 export default async function LandingPage() {
     const cookieStore = await cookies();
@@ -110,15 +74,92 @@ export default async function LandingPage() {
         return <HomepageContent />;
     }
 
+    const events = await getUpcomingEvents();
+    const opportunities = await getOpportunities();
+    const testimonials = await getTestimonials();
+
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+    const ensureAbsoluteUrl = (path) => {
+        if (!path) return path;
+        if (path.startsWith('http')) return path;
+        const cleanPath = path.startsWith('/') ? path : `/${path}`;
+        if (cleanPath.startsWith('/storage/')) return `${apiBaseUrl}${cleanPath}`;
+        if (cleanPath.startsWith('/uploads/')) return `${apiBaseUrl}${cleanPath}`;
+        if (cleanPath.startsWith('/images/')) return cleanPath; // local public assets
+        return `${apiBaseUrl}/storage${cleanPath}`;
+    };
+
+    // Map backend opportunities to card structure
+    const mappedOpportunities = Array.isArray(opportunities) ? opportunities.map(item => {
+        const catName = item.category?.name || item.category_label || (typeof item.category === 'string' ? item.category : '');
+        const locName = item.location_label || item.logistic?.location_label || (typeof item.location === 'string' ? item.location : '');
+
+        // Handle images array - ensure absolute URLs
+        let rawImages = [];
+        if (item.details?.images_json) {
+            rawImages = item.details.images_json;
+        } else if (item.images) {
+            rawImages = typeof item.images === 'string' ? item.images.split(',') : item.images;
+        }
+
+        const images = (Array.isArray(rawImages) ? rawImages : []).map(ensureAbsoluteUrl);
+
+        return {
+            ...item,
+            id: String(item.id),
+            category: {
+                slug: catName ? catName.toLowerCase().replace(/\s+/g, '-') : 'all',
+                label: catName || 'ផ្សេងៗ'
+            },
+            location: {
+                slug: locName ? locName.toLowerCase().replace(/\s+/g, '-') : 'all',
+                label: locName || 'TBD'
+            },
+            images: images,
+            imageUrl: images[0] || "/images/placeholder.png",
+            date: item.logistic?.start_date ? new Date(item.logistic.start_date).toLocaleDateString('km-KH', { day: '2-digit', month: 'long', year: 'numeric' }) : 'TBD',
+            time: item.logistic?.time_range || 'TBD',
+            transport: item.logistic?.transport,
+            housing: item.logistic?.housing,
+            meals: item.logistic?.meals || item.logistic?.meal,
+            detailHref: `/opportunities/${item.id}`,
+        };
+    }) : [];
+
+    // Map backend events to homepage upcoming events structure
+    const mappedEvents = Array.isArray(events) ? events.map(evt => {
+        const rawImg = evt.imageUrl || (evt.details?.images_json?.[0]) || (evt.images?.[0]);
+
+        return {
+            id: String(evt.id),
+            title: evt.title,
+            dateDay: evt.dateDay || "TBD",
+            dateMonth: evt.dateMonth || "TBD",
+            timeRange: evt.timeRange || "TBD",
+            location: evt.location || "TBD",
+            imageUrl: ensureAbsoluteUrl(rawImg) || "/images/even-soon/default.jpg",
+            href: evt.href || `/opportunities/${evt.id}`,
+            category: evt.category || {
+                label: "Volunteer",
+                icon: "bi bi-calendar-event",
+                colorClass: "bg-primary"
+            }
+        };
+    }) : [];
+
+    const displayOpps = mappedOpportunities;
+    const displayEvents = mappedEvents;
+
     return (
         <main>
             <HeroBanner />
             <AboutUs />
             <BenefitsGrid />
             <StatsStripModern />
-            <LandingOpportunities items={mockOpportunities} />
-            <UpcomingEvents items={mockEvents} />
-            <TestimonialsSlider />
+            <LandingOpportunities items={displayOpps} />
+            <UpcomingEvents items={displayEvents} />
+            <TestimonialsSlider testimonials={testimonials} />
+            <OrganizerCTA />
             <FAQAccordion />
             <CTAJoin />
         </main>

@@ -51,43 +51,59 @@ export default function DonationStats() {
   const projects = useCountUp(87);
   const beneficiaries = useCountUp(15000);
 
+  const statColors = [
+    { bg: "#f0fdf4", border: "#bbf7d0", text: "#16a34a" },
+    { bg: "#eff6ff", border: "#bfdbfe", text: "#2563eb" },
+    { bg: "#fef3c7", border: "#fcd34d", text: "#d97706" },
+    { bg: "#fdf4ff", border: "#e879f9", text: "#c026d3" }
+  ];
+
+  const stats = [
+    { ...donors, label: "អ្នកបរិច្ចាគសកម្ម", prefix: "", color: statColors[0] },
+    { ...amount, label: "ចំនួនទឹកប្រាក់សរុប", prefix: "$", color: statColors[1] },
+    { ...projects, label: "គម្រោងបានគាំទ្រ", prefix: "", color: statColors[2] },
+    { ...beneficiaries, label: "អ្នកទទួលផលប្រយោជន៍", prefix: "", color: statColors[3] }
+  ];
+
   return (
     <div className="row g-4 mt-5">
-      <div className="col-6 col-md-3" ref={donors.ref}>
-        <div className="donation-stat-card text-center p-4 h-100">
-          <span className="stat-number d-block fs-1 fw-bold text-primary">
-            {donors.value.toLocaleString()}
-          </span>
-          <span className="stat-label d-block mt-2">អ្នកបរិច្ចាគសកម្ម</span>
+      {stats.map((stat, index) => (
+        <div className="col-6 col-md-3" key={index} ref={stat.ref}>
+          <div 
+            className="text-center p-5 h-100"
+            style={{
+              background: stat.color.bg,
+              border: `2px solid ${stat.color.border}`,
+              borderRadius: "24px",
+              transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-8px)";
+              e.currentTarget.style.boxShadow = "0 20px 40px -10px rgba(0,0,0,0.1)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "none";
+            }}
+          >
+            <span 
+              className="d-block fw-bold"
+              style={{ 
+                color: stat.color.text,
+                fontSize: "3rem"
+              }}
+            >
+              {stat.prefix}{stat.value.toLocaleString()}
+            </span>
+            <span 
+              className="d-block mt-2 fw-medium"
+              style={{ color: "#475569", fontSize: "1rem" }}
+            >
+              {stat.label}
+            </span>
+          </div>
         </div>
-      </div>
-
-      <div className="col-6 col-md-3" ref={amount.ref}>
-        <div className="donation-stat-card text-center p-4 h-100">
-          <span className="stat-number d-block fs-1 fw-bold text-primary">
-            ${amount.value.toLocaleString()}
-          </span>
-          <span className="stat-label d-block mt-2">ចំនួនទឹកប្រាក់សរុប</span>
-        </div>
-      </div>
-
-      <div className="col-6 col-md-3" ref={projects.ref}>
-        <div className="donation-stat-card text-center p-4 h-100">
-          <span className="stat-number d-block fs-1 fw-bold text-primary">
-            {projects.value.toLocaleString()}
-          </span>
-          <span className="stat-label d-block mt-2">គម្រោងបានគាំទ្រ</span>
-        </div>
-      </div>
-
-      <div className="col-6 col-md-3" ref={beneficiaries.ref}>
-        <div className="donation-stat-card text-center p-4 h-100">
-          <span className="stat-number d-block fs-1 fw-bold text-primary">
-            {beneficiaries.value.toLocaleString()}
-          </span>
-          <span className="stat-label d-block mt-2">អ្នកទទួលផលប្រយោជន៍</span>
-        </div>
-      </div>
+      ))}
     </div>
   );
 }
