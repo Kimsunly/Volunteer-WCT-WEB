@@ -521,6 +521,22 @@ body {
 }
 
 /* === BUTTONS === */
+.btn-approve,
+.btn-reject,
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  vertical-align: middle !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  transition: background-color 0.15s, border-color 0.15s, opacity 0.15s, box-shadow 0.15s !important;
+}
+
 .btn-approve {
   padding: 5px 12px;
   border-radius: var(--radius-sm);
@@ -529,8 +545,6 @@ body {
   font-size: 0.75rem;
   font-weight: 600;
   border: none;
-  cursor: pointer;
-  transition: opacity 0.15s;
 }
 
 .btn-approve:hover {
@@ -545,8 +559,6 @@ body {
   border: 1px solid var(--color-negative);
   font-size: 0.75rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
 }
 
 .btn-reject:hover {
@@ -560,9 +572,7 @@ body {
   padding: 8px 18px;
   border-radius: var(--radius-btn);
   border: none;
-  cursor: pointer;
   font-size: 0.875rem;
-  transition: opacity 0.15s, box-shadow 0.15s;
 }
 
 .btn-primary:hover {
@@ -576,9 +586,7 @@ body {
   border: 1px solid var(--color-border);
   padding: 8px 18px;
   border-radius: var(--radius-btn);
-  cursor: pointer;
   font-size: 0.875rem;
-  transition: background 0.15s, border-color 0.15s;
 }
 
 .btn-secondary:hover {
@@ -592,7 +600,6 @@ body {
   border: 1px solid rgba(255, 77, 77, 0.3);
   padding: 8px 18px;
   border-radius: var(--radius-btn);
-  cursor: pointer;
   font-size: 0.875rem;
 }
 
@@ -601,25 +608,42 @@ body {
 }
 
 /* === FORM INPUT === */
-.form-input {
-  background: var(--color-bg-input);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  color: var(--color-text-primary);
-  padding: 10px 14px;
-  font-size: 0.875rem;
+.form-input,
+.dashboard-shell select,
+.dashboard-shell textarea,
+.dashboard-shell input[type="text"],
+.dashboard-shell input[type="email"],
+.dashboard-shell input[type="password"] {
+  background: var(--color-bg-input) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-sm) !important;
+  color: var(--color-text-primary) !important;
+  padding: 10px 14px !important;
+  font-size: 0.875rem !important;
   width: 100%;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s !important;
 }
 
-.form-input:focus {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px var(--color-accent-dim);
+.form-input:focus,
+.dashboard-shell select:focus,
+.dashboard-shell textarea:focus,
+.dashboard-shell input[type="text"]:focus,
+.dashboard-shell input[type="email"]:focus,
+.dashboard-shell input[type="password"]:focus {
+  border-color: var(--color-accent) !important;
+  box-shadow: 0 0 0 3px var(--color-accent-dim) !important;
 }
 
-.form-input::placeholder {
-  color: var(--color-text-muted);
+.form-input::placeholder,
+.dashboard-shell input::placeholder,
+.dashboard-shell textarea::placeholder {
+  color: var(--color-text-muted) !important;
+}
+
+.dashboard-shell select option {
+  background-color: var(--color-bg-surface) !important;
+  color: var(--color-text-primary) !important;
 }
 
 /* === PREMIUM CARD === */
@@ -862,4 +886,101 @@ body {
 
 .animate-spin {
   animation: spin 1s linear infinite;
+}
+
+/* === UTILITY CLASSES (Tailwind emulation for alignment) === */
+.flex {
+  display: flex !important;
+}
+.flex-1 {
+  flex: 1 1 0% !important;
+}
+.flex-col {
+  flex-direction: column !important;
+}
+.flex-wrap {
+  flex-wrap: wrap !important;
+}
+.items-center {
+  align-items: center !important;
+}
+.items-start {
+  align-items: flex-start !important;
+}
+.items-end {
+  align-items: flex-end !important;
+}
+.justify-center {
+  justify-content: center !important;
+}
+.justify-between {
+  justify-content: space-between !important;
+}
+.justify-end {
+  justify-content: flex-end !important;
+}
+
+/* Gaps */
+.gap-1 { gap: 0.25rem !important; }
+.gap-2 { gap: 0.5rem !important; }
+.gap-3 { gap: 0.75rem !important; }
+.gap-4 { gap: 1rem !important; }
+.gap-6 { gap: 1.5rem !important; }
+.gap-8 { gap: 2rem !important; }
+
+/* Spacing */
+.space-y-1 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 0.25rem !important;
+  margin-bottom: 0 !important;
+}
+.space-y-2 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 0.5rem !important;
+  margin-bottom: 0 !important;
+}
+.space-y-4 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 1rem !important;
+  margin-bottom: 0 !important;
+}
+.space-y-6 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 1.5rem !important;
+  margin-bottom: 0 !important;
+}
+.space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  margin-left: 0.5rem !important;
+  margin-right: 0 !important;
+}
+.space-x-4 > :not([hidden]) ~ :not([hidden]) {
+  margin-left: 1rem !important;
+  margin-right: 0 !important;
+}
+
+/* Widths/Heights */
+.w-full { width: 100% !important; }
+.h-full { height: 100% !important; }
+.w-4 { width: 1rem !important; }
+.h-4 { height: 1rem !important; }
+
+/* Margin/Padding utilities commonly used */
+.mt-2 { margin-top: 0.5rem !important; }
+.mt-4 { margin-top: 1rem !important; }
+.mb-4 { margin-bottom: 1rem !important; }
+.ms-2 { margin-left: 0.5rem !important; }
+.me-2 { margin-right: 0.5rem !important; }
+.p-0 { padding: 0 !important; }
+
+/* Table Wrapper for Horizontal Scroll Containment */
+.table-wrapper,
+.overflow-x-auto {
+  display: block !important;
+  width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Responsive Grid Collapsing */
+@media (max-width: 991px) {
+  .three-col-grid,
+  .two-col-grid {
+    grid-template-columns: 1fr !important;
+  }
 }

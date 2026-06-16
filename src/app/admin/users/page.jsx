@@ -137,25 +137,25 @@ export default function AdminUsersPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <input
-            type="search"
-            className="search-bar"
-            placeholder="Search users..."
-            value={search}
-            onChange={(e) => {
-              setOffset(0);
-              setSearch(e.target.value);
-            }}
-            style={{ maxWidth: "250px" }}
-          />
+          <div className="search-container">
+            <i className="bi bi-search"></i>
+            <input
+              type="search"
+              placeholder="Search users..."
+              value={search}
+              onChange={(e) => {
+                setOffset(0);
+                setSearch(e.target.value);
+              }}
+            />
+          </div>
           <select
-            className="btn-secondary"
+            className="filter-select"
             value={roleFilter}
             onChange={(e) => {
               setOffset(0);
               setRoleFilter(e.target.value);
             }}
-            style={{ padding: "8px 16px" }}
           >
             <option value="all">All Roles</option>
             <option value="user">User</option>
@@ -163,13 +163,12 @@ export default function AdminUsersPage() {
             <option value="admin">Admin</option>
           </select>
           <select
-            className="btn-secondary"
+            className="filter-select"
             value={statusFilter}
             onChange={(e) => {
               setOffset(0);
               setStatusFilter(e.target.value);
             }}
-            style={{ padding: "8px 16px" }}
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
@@ -267,27 +266,21 @@ export default function AdminUsersPage() {
                         </td>
                         <td>{u.email}</td>
                         <td>
-                          <span className={`status-badge ${roleClass(u.role)}`}>
+                          <span className={`role-badge ${u.role}`}>
                             {u.role}
                           </span>
                         </td>
                         <td>{formatDate(u.created_at)}</td>
                         <td>—</td>
                         <td>
-                          <span
-                            className={`status-badge ${statusClass(u.status)}`}
-                          >
+                          <span className={`status-badge-custom ${u.status}`}>
                             {u.status}
                           </span>
                         </td>
                         <td>
                           <div className="flex items-center gap-2">
                             <button
-                              className="btn-secondary"
-                              style={{
-                                padding: "6px 12px",
-                                fontSize: "0.8125rem",
-                              }}
+                              className="btn-action"
                               onClick={() => viewUser(u)}
                               title="View / change role"
                               disabled={loading || actionLoading === u.id}
@@ -296,11 +289,7 @@ export default function AdminUsersPage() {
                             </button>
                             {u.status !== "inactive" && (
                               <button
-                                className="btn-reject"
-                                style={{
-                                  padding: "6px 12px",
-                                  fontSize: "0.8125rem",
-                                }}
+                                className="btn-action-reject"
                                 onClick={() => handleDeactivate(u)}
                                 title="Deactivate"
                                 disabled={loading || actionLoading === u.id}
@@ -323,26 +312,46 @@ export default function AdminUsersPage() {
         {editing && (
           <>
             <div
-              className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: "rgba(0, 0, 0, 0.6)",
+                backdropFilter: "blur(6px)",
+                zIndex: 1040,
+              }}
               onClick={() => setEditing(null)}
             ></div>
             <div
-              className="fixed inset-0 z-50 flex items-center justify-center p-4"
               style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                minHeight: "100vh",
+                zIndex: 1050,
+                padding: "1rem",
+                pointerEvents: "none",
               }}
             >
               <div
-                className="card"
+                className="card shadow-lg"
                 style={{
                   width: "100%",
-                  maxWidth: "550px",
-                  borderRadius: "12px",
-                  boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+                  maxWidth: "480px",
+                  maxHeight: "90vh",
+                  overflowY: "auto",
+                  background: "var(--color-bg-surface)",
+                  border: "1px solid var(--color-border)",
+                  borderRadius: "var(--radius-card)",
+                  boxShadow: "var(--shadow-card)",
                   animation: "modalIn 0.3s ease-out",
+                  pointerEvents: "auto",
                 }}
               >
                 <style>{`
@@ -360,166 +369,114 @@ export default function AdminUsersPage() {
                 <div
                   className="card-header"
                   style={{
-                    background:
-                      "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                    borderRadius: "12px 12px 0 0",
+                    borderBottom: "1px solid var(--color-border)",
                     padding: "1.25rem 1.5rem",
-                    margin: "-1px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                   }}
                 >
-                  <h3 className="card-title" style={{ color: "white" }}>
-                    <i className="bi bi-person-fill me-2"></i>
+                  <h3 className="card-title" style={{ margin: 0, fontSize: "1.125rem", fontWeight: "600", color: "var(--color-text-primary)" }}>
+                    <i className="bi bi-person-fill me-2" style={{ color: "var(--color-accent)" }}></i>
                     User Details
                   </h3>
                   <button
-                    className="card-menu-btn"
+                    className="icon-btn"
                     onClick={() => setEditing(null)}
-                    style={{ color: "white" }}
                   >
                     <i className="bi bi-x-lg"></i>
                   </button>
                 </div>
                 <div className="space-y-4" style={{ padding: "1.5rem" }}>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label
-                        className="block mb-1"
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "var(--color-text-muted)",
-                          fontWeight: "500",
-                        }}
-                      >
-                        Full Name
-                      </label>
-                      <input
-                        type="text"
-                        className="input"
-                        value={editing.name || ""}
-                        disabled
-                        style={{ borderRadius: "8px" }}
-                      />
+                  {/* User Profile Summary Header */}
+                  <div className="user-profile-header text-center pb-4 mb-3" style={{ borderBottom: "1px solid var(--color-border)" }}>
+                    <div className="d-flex justify-content-center mb-3">
+                      <div className="avatar-large">
+                        {editing.name?.charAt(0)?.toUpperCase() || "?"}
+                        {editing.verified && (
+                          <div className="verified-badge-overlay">
+                            <i className="bi bi-patch-check-fill"></i>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <label
-                        className="block mb-1"
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "var(--color-text-muted)",
-                          fontWeight: "500",
-                        }}
-                      >
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        className="input"
-                        value={editing.email || ""}
-                        disabled
-                        style={{ borderRadius: "8px" }}
-                      />
+                    <h4 style={{ margin: "0 0 4px 0", fontWeight: "700", color: "var(--color-text-primary)", fontSize: "1.25rem" }}>
+                      {editing.name}
+                    </h4>
+                    <p style={{ margin: "0 0 12px 0", fontSize: "0.875rem", color: "var(--color-text-secondary)" }}>
+                      {editing.email}
+                    </p>
+                    <div className="d-flex justify-content-center gap-2">
+                      <span className={`role-badge ${editing.role}`}>{editing.role}</span>
+                      <span className={`status-badge-custom ${editing.status}`}>{editing.status}</span>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label
-                        className="block mb-1"
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "var(--color-text-muted)",
-                          fontWeight: "500",
-                        }}
-                      >
-                        Phone
-                      </label>
-                      <input
-                        type="text"
-                        className="input"
-                        value={editing.phone || ""}
-                        disabled
-                        style={{ borderRadius: "8px" }}
-                      />
+
+                  {/* Profile Metadata */}
+                  <div className="metadata-section d-flex flex-column gap-3 mb-4">
+                    <div className="metadata-item d-flex align-items-center gap-3">
+                      <div className="meta-icon"><i className="bi bi-envelope"></i></div>
+                      <div className="flex-grow-1">
+                        <div className="meta-label">Email Address</div>
+                        <div className="meta-value">{editing.email || "—"}</div>
+                      </div>
                     </div>
-                    <div>
-                      <label
-                        className="block mb-1"
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "var(--color-text-muted)",
-                          fontWeight: "500",
-                        }}
-                      >
-                        Role (can change)
-                      </label>
-                      <select
-                        className="input"
-                        value={editing.role}
-                        onChange={(e) =>
-                          setEditing({ ...editing, role: e.target.value })
-                        }
-                        style={{ borderRadius: "8px" }}
-                      >
-                        <option value="user">User</option>
-                        <option value="organizer">Organizer</option>
-                        <option value="admin">Admin</option>
-                      </select>
+
+                    <div className="metadata-item d-flex align-items-center gap-3">
+                      <div className="meta-icon"><i className="bi bi-telephone"></i></div>
+                      <div className="flex-grow-1">
+                        <div className="meta-label">Phone Number</div>
+                        <div className="meta-value">{editing.phone || "—"}</div>
+                      </div>
+                    </div>
+
+                    <div className="metadata-item d-flex align-items-center gap-3">
+                      <div className="meta-icon"><i className="bi bi-calendar3"></i></div>
+                      <div className="flex-grow-1">
+                        <div className="meta-label">Joined Date</div>
+                        <div className="meta-value">{formatDate(editing.created_at)}</div>
+                      </div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label
-                        className="block mb-1"
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "var(--color-text-muted)",
-                          fontWeight: "500",
-                        }}
-                      >
-                        Status
-                      </label>
-                      <input
-                        type="text"
-                        className="input"
-                        value={editing.status}
-                        disabled
-                        style={{ borderRadius: "8px" }}
-                      />
-                    </div>
-                    <div>
-                      <label
-                        className="block mb-1"
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "var(--color-text-muted)",
-                          fontWeight: "500",
-                        }}
-                      >
-                        Joined Date
-                      </label>
-                      <p className="form-control-plaintext">
-                        {formatDate(editing.created_at)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label
-                        className="block mb-1"
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "var(--color-text-muted)",
-                          fontWeight: "500",
-                        }}
-                      >
-                        Last Login
-                      </label>
-                      <p className="form-control-plaintext">—</p>
-                    </div>
-                    <div>
-                      <small style={{ color: "var(--color-text-muted)" }}>
-                        Only role changes are saved.
-                      </small>
-                    </div>
+
+                  {/* Role Change Editor Section */}
+                  <div className="role-editor-section p-3 rounded-3" style={{ backgroundColor: "var(--color-bg-input)", border: "1px solid var(--color-border)" }}>
+                    <label
+                      className="block mb-2"
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "var(--color-text-secondary)",
+                        fontWeight: "600",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                      }}
+                    >
+                      Modify Role Access
+                    </label>
+                    <select
+                      className="form-input"
+                      value={editing.role}
+                      onChange={(e) =>
+                        setEditing({ ...editing, role: e.target.value })
+                      }
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml;utf8,<svg fill='%239a9a9a' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>")`,
+                        backgroundPosition: "right 12px center",
+                        backgroundRepeat: "no-repeat",
+                        paddingRight: "30px",
+                        WebkitAppearance: "none",
+                        MozAppearance: "none",
+                        appearance: "none",
+                        backgroundColor: "var(--color-bg-surface) !important",
+                      }}
+                    >
+                      <option value="user">User</option>
+                      <option value="organizer">Organizer</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                    <small style={{ color: "var(--color-text-muted)", display: "block", marginTop: "8px", fontSize: "11px" }}>
+                      <i className="bi bi-info-circle me-1"></i> Saving updates the database role permissions instantly.
+                    </small>
                   </div>
                 </div>
 
@@ -533,7 +490,6 @@ export default function AdminUsersPage() {
                   <button
                     className="btn-secondary"
                     onClick={() => setEditing(null)}
-                    style={{ borderRadius: "8px" }}
                   >
                     Close
                   </button>
@@ -541,12 +497,6 @@ export default function AdminUsersPage() {
                     className="btn-primary"
                     onClick={commitEdit}
                     disabled={actionLoading === editing.id}
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                      border: "none",
-                      borderRadius: "8px",
-                    }}
                   >
                     <i className="bi bi-check-lg me-2"></i> Save
                   </button>
@@ -603,6 +553,270 @@ export default function AdminUsersPage() {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .search-container {
+          position: relative;
+          display: flex;
+          align-items: center;
+          width: 100%;
+          max-width: 250px;
+        }
+        .search-container i {
+          position: absolute;
+          left: 12px;
+          color: var(--color-text-secondary);
+          pointer-events: none;
+          font-size: 14px;
+        }
+        .search-container input {
+          width: 100%;
+          padding: 8px 12px 8px 36px !important;
+          background-color: var(--color-bg-input) !important;
+          border: 1px solid var(--color-border) !important;
+          border-radius: var(--radius-btn) !important;
+          color: var(--color-text-primary) !important;
+          font-size: 0.875rem;
+          transition: all 0.2s ease;
+        }
+        .search-container input:focus {
+          border-color: var(--color-accent) !important;
+          outline: none;
+          box-shadow: 0 0 0 3px var(--color-accent-dim) !important;
+        }
+        
+        .filter-select {
+          background-color: var(--color-bg-input) !important;
+          border: 1px solid var(--color-border) !important;
+          border-radius: var(--radius-btn) !important;
+          color: var(--color-text-primary) !important;
+          padding: 8px 32px 8px 16px !important;
+          font-size: 0.875rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.25s ease;
+          appearance: none;
+          background-image: url("data:image/svg+xml;utf8,<svg fill='%239a9a9a' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>") !important;
+          background-position: right 10px center !important;
+          background-repeat: no-repeat !important;
+        }
+        .filter-select:focus {
+          border-color: var(--color-accent) !important;
+          outline: none;
+        }
+
+        .data-table {
+          width: 100%;
+          border-collapse: separate;
+          border-spacing: 0;
+          color: var(--color-text-primary);
+        }
+        .data-table th {
+          background-color: var(--color-bg-card) !important;
+          color: var(--color-text-secondary);
+          font-weight: 600;
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          padding: 16px 20px;
+          border-bottom: 1px solid var(--color-border);
+        }
+        .data-table td {
+          padding: 16px 20px;
+          vertical-align: middle;
+          border-bottom: 1px solid var(--color-border);
+          font-size: 0.875rem;
+        }
+        .data-table tr {
+          transition: background-color 0.2s ease;
+        }
+        .data-table tr:hover {
+          background-color: var(--color-bg-card-hover);
+        }
+        
+        .avatar {
+          width: 38px;
+          height: 38px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 600;
+          font-size: 0.875rem;
+          background: linear-gradient(135deg, var(--color-accent) 0%, rgba(122, 204, 0, 0.6) 100%);
+          color: #000000;
+          border: 1.5px solid var(--color-border);
+        }
+        
+        .btn-action {
+          width: 32px;
+          height: 32px;
+          border-radius: var(--radius-sm);
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid var(--color-border);
+          background-color: var(--color-bg-input);
+          color: var(--color-text-primary);
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .btn-action:hover {
+          border-color: var(--color-accent);
+          color: var(--color-accent);
+          background-color: var(--color-accent-dim);
+        }
+        .btn-action-reject {
+          width: 32px;
+          height: 32px;
+          border-radius: var(--radius-sm);
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid var(--color-border);
+          background-color: var(--color-bg-input);
+          color: var(--color-negative);
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .btn-action-reject:hover {
+          border-color: var(--color-negative);
+          color: white;
+          background-color: var(--color-negative);
+        }
+        
+        .form-input {
+          width: 100%;
+          background-color: var(--color-bg-input) !important;
+          border: 1.5px solid var(--color-border) !important;
+          border-radius: 10px !important;
+          padding: 10px 14px !important;
+          font-size: 0.875rem;
+          color: var(--color-text-primary) !important;
+          transition: all 0.2s ease;
+        }
+        .form-input:focus {
+          border-color: var(--color-accent) !important;
+          outline: none;
+          box-shadow: 0 0 0 3px var(--color-accent-dim) !important;
+        }
+        .form-input:disabled {
+          opacity: 0.65;
+          cursor: not-allowed;
+          background-color: rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        .role-badge {
+          font-size: 11px;
+          font-weight: 600;
+          padding: 4px 10px;
+          border-radius: 100px;
+          text-transform: uppercase;
+        }
+        .role-badge.admin {
+          background-color: rgba(155, 93, 229, 0.12) !important;
+          color: #9b5de5 !important;
+          border: 1px solid rgba(155, 93, 229, 0.2) !important;
+        }
+        .role-badge.organizer {
+          background-color: rgba(13, 110, 253, 0.12) !important;
+          color: #0d6efd !important;
+          border: 1px solid rgba(13, 110, 253, 0.2) !important;
+        }
+        .role-badge.user {
+          background-color: var(--color-accent-dim) !important;
+          color: var(--color-accent) !important;
+          border: 1px solid rgba(170, 255, 0, 0.2) !important;
+        }
+        
+        .status-badge-custom {
+          font-size: 11px;
+          font-weight: 600;
+          padding: 4px 10px;
+          border-radius: 100px;
+          text-transform: uppercase;
+        }
+        .status-badge-custom.active {
+          background-color: rgba(25, 135, 84, 0.12) !important;
+          color: #198754 !important;
+          border: 1px solid rgba(25, 135, 84, 0.2) !important;
+        }
+        .status-badge-custom.inactive {
+          background-color: rgba(108, 117, 125, 0.12) !important;
+          color: #6c757d !important;
+          border: 1px solid rgba(108, 117, 125, 0.2) !important;
+        }
+        .status-badge-custom.suspended {
+          background-color: rgba(220, 53, 69, 0.12) !important;
+          color: #dc3545 !important;
+          border: 1px solid rgba(220, 53, 69, 0.2) !important;
+        }
+        .status-badge-custom.pending {
+          background-color: rgba(255, 193, 7, 0.12) !important;
+          color: #ffc107 !important;
+          border: 1px solid rgba(255, 193, 7, 0.2) !important;
+        }
+        
+        /* Profile Details styling */
+        .avatar-large {
+          width: 72px;
+          height: 72px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 1.75rem;
+          background: linear-gradient(135deg, var(--color-accent) 0%, rgba(122, 204, 0, 0.6) 100%);
+          color: #000000;
+          border: 3px solid var(--color-border);
+          position: relative;
+        }
+        .verified-badge-overlay {
+          position: absolute;
+          bottom: -2px;
+          right: -2px;
+          background-color: var(--color-bg-surface);
+          border-radius: 50%;
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--color-positive);
+          font-size: 14px;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .metadata-item {
+          padding: 6px 0;
+        }
+        .meta-icon {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background-color: var(--color-bg-input);
+          border: 1px solid var(--color-border);
+          color: var(--color-text-secondary);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 16px;
+          flex-shrink: 0;
+        }
+        .meta-label {
+          font-size: 11px;
+          color: var(--color-text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          font-weight: 600;
+        }
+        .meta-value {
+          font-size: 14px;
+          color: var(--color-text-primary);
+          font-weight: 500;
+        }
+      `}</style>
     </div>
   );
 }

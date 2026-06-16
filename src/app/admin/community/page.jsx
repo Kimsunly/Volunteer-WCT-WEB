@@ -315,16 +315,16 @@ export default function AdminCommunityPage() {
           <div className="table-wrapper">
             <table
               className="data-table"
-              style={{ width: "100%", tableLayout: "fixed" }}
+              style={{ width: "100%", minWidth: "1000px", tableLayout: "fixed" }}
             >
               <thead>
                 <tr>
-                  <th style={{ width: "42%", minWidth: "300px" }}>Title</th>
-                  <th style={{ width: "20%", minWidth: "160px" }}>Author</th>
-                  <th style={{ width: "12%", minWidth: "110px" }}>Category</th>
-                  <th style={{ width: "12%", minWidth: "100px" }}>Date</th>
-                  <th style={{ width: "10%", minWidth: "90px" }}>Status</th>
-                  <th style={{ width: "14%", minWidth: "140px" }}>Actions</th>
+                  <th style={{ width: "auto", minWidth: "250px" }}>Title</th>
+                  <th style={{ width: "180px", minWidth: "180px" }}>Author</th>
+                  <th style={{ width: "130px", minWidth: "130px" }}>Category</th>
+                  <th style={{ width: "120px", minWidth: "120px" }}>Date</th>
+                  <th style={{ width: "100px", minWidth: "100px" }}>Status</th>
+                  <th style={{ width: "220px", minWidth: "220px" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -553,7 +553,7 @@ export default function AdminCommunityPage() {
                               : "Pending"}
                         </span>
                       </td>
-                      <td style={{ verticalAlign: "middle" }}>
+                      <td style={{ verticalAlign: "middle", width: "220px", minWidth: "220px" }}>
                         <div
                           style={{
                             display: "flex",
@@ -593,7 +593,7 @@ export default function AdminCommunityPage() {
                           >
                             <i className="bi bi-pencil"></i>
                           </button>
-                          {p.status === "pending" && (
+                          {p.status === "pending" && !p.is_published && (
                             <>
                               <button
                                 className="btn-primary"
@@ -639,9 +639,6 @@ export default function AdminCommunityPage() {
                               alignItems: "center",
                               justifyContent: "center",
                               borderRadius: "var(--radius-sm)",
-                              backgroundColor: "rgba(255, 77, 77, 0.08)",
-                              borderColor: "rgba(255, 77, 77, 0.2)",
-                              color: "var(--color-negative)",
                             }}
                             onClick={() => openDeleteModal(p)}
                             title="Delete"

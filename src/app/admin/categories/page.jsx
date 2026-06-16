@@ -318,7 +318,8 @@ export default function AdminCategoriesPage() {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                backgroundColor: "rgba(0, 0, 0, 0.5)",
+                backgroundColor: "rgba(0, 0, 0, 0.6)",
+                backdropFilter: "blur(6px)",
                 zIndex: 1040,
               }}
               onClick={() => setModalOpen(false)}
@@ -335,23 +336,41 @@ export default function AdminCategoriesPage() {
                 justifyContent: "center",
                 zIndex: 1050,
                 padding: "1rem",
+                pointerEvents: "none",
               }}
             >
               <div
-                className="card shadow-lg border-0"
+                className="card shadow-lg"
                 style={{
                   width: "100%",
-                  maxWidth: "500px",
+                  maxWidth: "750px",
                   maxHeight: "90vh",
                   overflowY: "auto",
                   display: "flex",
                   flexDirection: "column",
-                  background: "var(--bg-card, #ffffff)",
+                  background: "var(--color-bg-surface)",
+                  border: "1px solid var(--color-border)",
                   padding: "28px",
-                  borderRadius: "16px",
-                  boxShadow: "0 20px 40px rgba(0, 0, 0, 0.12)",
+                  borderRadius: "var(--radius-card)",
+                  boxShadow: "var(--shadow-card)",
+                  pointerEvents: "auto",
                 }}
               >
+                <style>{`
+                  @media (max-width: 768px) {
+                    .modal-columns {
+                      grid-template-columns: 1fr !important;
+                    }
+                    .preview-column {
+                      border-left: none !important;
+                      padding-left: 0 !important;
+                      margin-top: 16px !important;
+                      border-top: 1px solid var(--color-border) !important;
+                      padding-top: 20px !important;
+                    }
+                  }
+                `}</style>
+
                 {/* Header */}
                 <div 
                   style={{ 
@@ -360,237 +379,369 @@ export default function AdminCategoriesPage() {
                     alignItems: "center",
                     marginBottom: "20px",
                     paddingBottom: "12px",
-                    borderBottom: "1px solid var(--color-border, #e9ecef)"
+                    borderBottom: "1px solid var(--color-border)"
                   }}
                 >
                   <h3 className="card-title" style={{ margin: 0, fontSize: "1.25rem", fontWeight: "600", color: "var(--color-text-primary)" }}>
                     {editIdx !== null ? "Edit Category" : "Create New Category"}
                   </h3>
                   <button
-                    className="btn-close"
+                    className="icon-btn"
                     onClick={() => setModalOpen(false)}
                     aria-label="Close"
                     style={{ background: "none", border: "none", fontSize: "1.1rem", padding: "4px" }}
                   >
-                    <i className="bi bi-x-lg" style={{ color: "var(--color-text-muted, #888)" }}></i>
+                    <i className="bi bi-x-lg" style={{ color: "var(--color-text-muted)" }}></i>
                   </button>
                 </div>
 
-                {/* Form fields */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                  <div>
-                    <label
-                      style={{
-                        display: "block",
-                        marginBottom: "6px",
-                        fontSize: "0.85rem",
-                        color: "var(--color-text-secondary, #555)",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Name <span style={{ color: "var(--color-negative, #dc3545)" }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={form.name}
-                      onChange={(e) =>
-                        setForm({ ...form, name: e.target.value })
-                      }
-                      placeholder="Category name"
-                      style={{
-                        borderRadius: "8px",
-                        padding: "10px 14px",
-                        fontSize: "0.95rem"
-                      }}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      style={{
-                        display: "block",
-                        marginBottom: "6px",
-                        fontSize: "0.85rem",
-                        color: "var(--color-text-secondary, #555)",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Description
-                    </label>
-                    <textarea
-                      className="form-control"
-                      rows={3}
-                      value={form.description}
-                      onChange={(e) =>
-                        setForm({ ...form, description: e.target.value })
-                      }
-                      placeholder="Describe what this category is about"
-                      style={{
-                        borderRadius: "8px",
-                        padding: "10px 14px",
-                        fontSize: "0.95rem",
-                        resize: "none"
-                      }}
-                    ></textarea>
-                  </div>
-
-                  <div>
-                    <label
-                      style={{
-                        display: "block",
-                        marginBottom: "6px",
-                        fontSize: "0.85rem",
-                        color: "var(--color-text-secondary, #555)",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Icon
-                    </label>
-                    
-                    <div className="input-group mb-3" style={{ borderRadius: "8px", overflow: "hidden" }}>
-                      <span className="input-group-text" style={{ background: "var(--color-bg-input, #f8f9fa)", borderRight: "none" }}>
-                        <i className={form.icon} style={{ color: form.color || "var(--primary-color)" }}></i>
-                      </span>
+                {/* Split Content */}
+                <div 
+                  className="modal-columns"
+                  style={{ 
+                    display: "grid", 
+                    gridTemplateColumns: "1.2fr 1fr", 
+                    gap: "24px" 
+                  }}
+                >
+                  {/* Left Column: Form */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                    <div>
+                      <label
+                        style={{
+                          display: "block",
+                          marginBottom: "6px",
+                          fontSize: "0.85rem",
+                          color: "var(--color-text-secondary)",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Name <span style={{ color: "var(--color-negative)" }}>*</span>
+                      </label>
                       <input
                         type="text"
-                        className="form-control"
+                        className="form-input"
+                        value={form.name}
+                        onChange={(e) =>
+                          setForm({ ...form, name: e.target.value })
+                        }
+                        placeholder="Category name"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        style={{
+                          display: "block",
+                          marginBottom: "6px",
+                          fontSize: "0.85rem",
+                          color: "var(--color-text-secondary)",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Description
+                      </label>
+                      <textarea
+                        className="form-input"
+                        rows={2}
+                        value={form.description}
+                        onChange={(e) =>
+                          setForm({ ...form, description: e.target.value })
+                        }
+                        placeholder="Describe what this category is about"
+                        style={{
+                          resize: "none"
+                        }}
+                      ></textarea>
+                    </div>
+
+                    <div>
+                      <label
+                        style={{
+                          display: "block",
+                          marginBottom: "6px",
+                          fontSize: "0.85rem",
+                          color: "var(--color-text-secondary)",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Select Icon
+                      </label>
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(6, 1fr)",
+                          gap: "8px",
+                          padding: "12px",
+                          border: "1px solid var(--color-border)",
+                          borderRadius: "8px",
+                          background: "var(--color-bg-input)",
+                        }}
+                      >
+                        {[
+                          "bi bi-tag-fill",
+                          "bi bi-heart-fill",
+                          "bi bi-people-fill",
+                          "bi bi-tree-fill",
+                          "bi bi-mortarboard-fill",
+                          "bi bi-briefcase-fill",
+                          "bi bi-laptop",
+                          "bi bi-music-note-beamed",
+                          "bi bi-bicycle",
+                          "bi bi-gift-fill",
+                          "bi bi-globe2",
+                          "bi bi-shield-shaded",
+                        ].map((icon) => {
+                          const isSelected = form.icon === icon;
+                          return (
+                            <button
+                              key={icon}
+                              type="button"
+                              style={{
+                                height: "38px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                borderRadius: "6px",
+                                border: isSelected ? "2px solid var(--color-accent)" : "1px solid var(--color-border)",
+                                background: isSelected ? "var(--color-accent-dim)" : "var(--color-bg-surface)",
+                                color: isSelected ? "var(--color-accent)" : "var(--color-text-secondary)",
+                                transition: "all 0.15s ease",
+                                cursor: "pointer",
+                                fontSize: "1.1rem"
+                              }}
+                              onClick={() => setForm({ ...form, icon })}
+                              title={icon.replace("bi bi-", "").replace("-fill", "")}
+                            >
+                              <i className={icon}></i>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <input
+                        type="text"
+                        className="form-input"
                         value={form.icon}
                         onChange={(e) =>
                           setForm({ ...form, icon: e.target.value })
                         }
-                        placeholder="bi bi-tag"
+                        placeholder="bi bi-tag-fill"
                         style={{
-                          borderLeft: "none",
-                          fontSize: "0.95rem",
-                          padding: "10px"
+                          marginTop: "8px",
+                          fontSize: "0.85rem",
+                          padding: "6px 10px"
                         }}
                       />
                     </div>
 
+                    <div>
+                      <label
+                        style={{
+                          display: "block",
+                          marginBottom: "6px",
+                          fontSize: "0.85rem",
+                          color: "var(--color-text-secondary)",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Theme Color
+                      </label>
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(8, 1fr)",
+                          gap: "8px",
+                          padding: "10px",
+                          border: "1px solid var(--color-border)",
+                          borderRadius: "8px",
+                          background: "var(--color-bg-input)",
+                          marginBottom: "8px",
+                        }}
+                      >
+                        {[
+                          "#AAFF00", // Lime Green
+                          "#10B981", // Emerald
+                          "#3B82F6", // Sky Blue
+                          "#8B5CF6", // Purple
+                          "#EC4899", // Pink
+                          "#F59E0B", // Amber
+                          "#EF4444", // Cherry Red
+                          "#9CA3AF", // Slate Grey
+                        ].map((c) => {
+                          const isSelected = form.color?.toUpperCase() === c.toUpperCase();
+                          return (
+                            <button
+                              key={c}
+                              type="button"
+                              style={{
+                                height: "24px",
+                                borderRadius: "50%",
+                                background: c,
+                                border: isSelected ? "2px solid #FFFFFF" : "none",
+                                boxShadow: isSelected ? "0 0 8px rgba(255,255,255,0.4)" : "none",
+                                cursor: "pointer",
+                                transition: "transform 0.15s ease",
+                                transform: isSelected ? "scale(1.1)" : "scale(1)",
+                              }}
+                              onClick={() => setForm({ ...form, color: c })}
+                              title={c}
+                            />
+                          );
+                        })}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <input
+                          type="color"
+                          value={form.color || "#5BC0DE"}
+                          onChange={(e) =>
+                            setForm({ ...form, color: e.target.value })
+                          }
+                          style={{
+                            width: "42px",
+                            height: "36px",
+                            padding: "4px",
+                            borderRadius: "6px",
+                            background: "var(--color-bg-input)",
+                            border: "1px solid var(--color-border)",
+                            cursor: "pointer"
+                          }}
+                        />
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={form.color}
+                          onChange={(e) =>
+                            setForm({ ...form, color: e.target.value })
+                          }
+                          placeholder="#5BC0DE"
+                          style={{
+                            maxWidth: "120px",
+                            fontSize: "0.85rem",
+                            padding: "6px 10px"
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "4px" }}>
+                      <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "var(--color-text-secondary)" }}>
+                        Active (visible to public)
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setForm({ ...form, active: !form.active })}
+                        style={{
+                          width: "48px",
+                          height: "24px",
+                          borderRadius: "12px",
+                          background: form.active ? "var(--color-accent)" : "var(--color-bg-input)",
+                          border: "1px solid var(--color-border)",
+                          position: "relative",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease",
+                          padding: 0,
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: "18px",
+                            height: "18px",
+                            borderRadius: "50%",
+                            background: form.active ? "#000" : "var(--color-text-secondary)",
+                            position: "absolute",
+                            top: "2px",
+                            left: form.active ? "26px" : "2px",
+                            transition: "all 0.2s ease",
+                          }}
+                        ></div>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Live Preview */}
+                  <div 
+                    style={{ 
+                      display: "flex", 
+                      flexDirection: "column", 
+                      gap: "16px",
+                      borderLeft: "1px solid var(--color-border)",
+                      paddingLeft: "24px",
+                    }}
+                    className="preview-column"
+                  >
                     <div
                       style={{
+                        fontSize: "0.75rem",
+                        color: "var(--color-text-muted)",
+                        fontWeight: "700",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.08em",
+                      }}
+                    >
+                      Live Card Preview
+                    </div>
+                    <div
+                      style={{
+                        background: "var(--color-bg-base)",
+                        border: "1px solid var(--color-border)",
+                        borderRadius: "12px",
+                        padding: "20px",
                         display: "flex",
-                        flexWrap: "wrap",
-                        gap: "10px",
-                        padding: "16px",
-                        border: "1px solid var(--color-border, #e9ecef)",
-                        borderRadius: "10px",
-                        background: "var(--color-bg-input, #f8f9fa)",
+                        flexDirection: "column",
+                        gap: "12px",
+                        boxShadow: "var(--shadow-card)",
                       }}
                     >
-                      {[
-                        "bi bi-tag",
-                        "bi bi-heart",
-                        "bi bi-star",
-                        "bi bi-people",
-                        "bi bi-globe",
-                        "bi bi-briefcase",
-                        "bi bi-book",
-                        "bi bi-laptop",
-                        "bi bi-tree",
-                        "bi bi-music-note",
-                        "bi bi-shop",
-                        "bi bi-bicycle",
-                      ].map((icon) => {
-                        const isSelected = form.icon === icon;
-                        return (
-                          <button
-                            key={icon}
-                            type="button"
-                            style={{
-                              width: "42px",
-                              height: "42px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              borderRadius: "8px",
-                              border: isSelected ? "2px solid var(--primary-color, #4DB8FF)" : "1px solid var(--color-border, #e9ecef)",
-                              background: isSelected ? "rgba(77, 184, 255, 0.1)" : "#ffffff",
-                              color: isSelected ? "var(--primary-color, #4DB8FF)" : "var(--color-text-secondary, #555)",
-                              transition: "all 0.2s ease",
-                              cursor: "pointer",
-                              fontSize: "1.1rem"
-                            }}
-                            onClick={() => setForm({ ...form, icon })}
-                          >
-                            <i className={icon}></i>
-                          </button>
-                        );
-                      })}
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <div
+                          className="metric-icon"
+                          style={{
+                            background: `${form.color}15`,
+                            color: form.color,
+                            border: `1px solid ${form.color}30`,
+                            width: "44px",
+                            height: "44px",
+                            borderRadius: "50%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "1.25rem",
+                          }}
+                        >
+                          <i className={form.icon || "bi bi-tag-fill"}></i>
+                        </div>
+                        <span
+                          className={`status-badge ${form.active ? "active" : "rejected"}`}
+                        >
+                          {form.active ? "Active" : "Inactive"}
+                        </span>
+                      </div>
+                      <div style={{ marginTop: "8px" }}>
+                        <div
+                          style={{
+                            color: "var(--color-text-primary)",
+                            fontWeight: "600",
+                            fontSize: "1.1rem",
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {form.name || "Category Name"}
+                        </div>
+                        <div
+                          style={{
+                            color: "var(--color-text-secondary)",
+                            fontSize: "0.85rem",
+                            marginTop: "6px",
+                            lineHeight: "1.4",
+                            minHeight: "44px",
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {form.description || "Enter description details on the left to see preview..."}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-
-                  <div>
-                    <label
-                      style={{
-                        display: "block",
-                        marginBottom: "6px",
-                        fontSize: "0.85rem",
-                        color: "var(--color-text-secondary, #555)",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Color
-                    </label>
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                      <input
-                        type="color"
-                        className="form-control form-control-color"
-                        value={form.color}
-                        onChange={(e) =>
-                          setForm({ ...form, color: e.target.value })
-                        }
-                        style={{
-                          width: "54px",
-                          height: "42px",
-                          padding: "6px",
-                          borderRadius: "8px",
-                          cursor: "pointer"
-                        }}
-                      />
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={form.color}
-                        onChange={(e) =>
-                          setForm({ ...form, color: e.target.value })
-                        }
-                        placeholder="#5BC0DE"
-                        style={{
-                          maxWidth: "150px",
-                          borderRadius: "8px",
-                          fontSize: "0.95rem",
-                          padding: "10px"
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "4px" }}>
-                    <input
-                      type="checkbox"
-                      className="form-check-input"
-                      id="categoryActive"
-                      checked={form.active}
-                      onChange={(e) =>
-                        setForm({ ...form, active: e.target.checked })
-                      }
-                      style={{ width: "20px", height: "20px", cursor: "pointer", borderRadius: "4px" }}
-                    />
-                    <label
-                      htmlFor="categoryActive"
-                      style={{
-                        color: "var(--color-text-primary)",
-                        margin: 0,
-                        fontSize: "0.95rem",
-                        fontWeight: "500",
-                        cursor: "pointer"
-                      }}
-                    >
-                      Active (visible to public)
-                    </label>
                   </div>
                 </div>
 
@@ -603,33 +754,19 @@ export default function AdminCategoriesPage() {
                     gap: "12px",
                     marginTop: "28px",
                     paddingTop: "16px",
-                    borderTop: "1px solid var(--color-border, #e9ecef)",
+                    borderTop: "1px solid var(--color-border)",
                   }}
                 >
                   <button
-                    className="btn btn-light"
+                    className="btn-secondary"
                     onClick={() => setModalOpen(false)}
-                    style={{
-                      borderRadius: "8px",
-                      padding: "10px 20px",
-                      fontWeight: "500",
-                      fontSize: "0.95rem"
-                    }}
                   >
                     Cancel
                   </button>
                   <button
-                    className="btn btn-primary"
+                    className="btn-primary"
                     onClick={commit}
                     disabled={actionLoading === "commit"}
-                    style={{
-                      borderRadius: "8px",
-                      padding: "10px 24px",
-                      fontWeight: "600",
-                      fontSize: "0.95rem",
-                      background: "var(--primary-color, #4DB8FF)",
-                      border: "none"
-                    }}
                   >
                     <i className="bi bi-check-lg me-2"></i> Save
                   </button>
@@ -649,7 +786,8 @@ export default function AdminCategoriesPage() {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                backgroundColor: "rgba(0, 0, 0, 0.4)",
+                backgroundColor: "rgba(0, 0, 0, 0.6)",
+                backdropFilter: "blur(4px)",
                 zIndex: 1060,
               }}
               onClick={() => setDeleteConfirmOpen(false)}
@@ -669,18 +807,19 @@ export default function AdminCategoriesPage() {
               }}
             >
               <div
-                className="card shadow-lg border-0"
+                className="card shadow-lg"
                 style={{
                   width: "100%",
                   maxWidth: "450px",
-                  background: "var(--bg-card, #ffffff)",
+                  background: "var(--color-bg-surface)",
+                  border: "1px solid var(--color-border)",
                   padding: "32px",
-                  borderRadius: "16px",
-                  boxShadow: "0 20px 40px rgba(0, 0, 0, 0.12)",
+                  borderRadius: "var(--radius-card)",
+                  boxShadow: "var(--shadow-card)",
                   textAlign: "center",
                 }}
               >
-                <div style={{ color: "var(--color-negative, #FF4D4D)", fontSize: "3.5rem", marginBottom: "16px" }}>
+                <div style={{ color: "var(--color-negative)", fontSize: "3.5rem", marginBottom: "16px" }}>
                   <i className="bi bi-exclamation-triangle"></i>
                 </div>
                 <h3 style={{ fontSize: "1.35rem", fontWeight: "700", marginBottom: "12px", color: "var(--color-text-primary)" }}>
@@ -691,24 +830,18 @@ export default function AdminCategoriesPage() {
                 </p>
                 <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
                   <button
-                    className="btn btn-light"
+                    className="btn-secondary"
                     onClick={() => setDeleteConfirmOpen(false)}
-                    style={{ minWidth: "110px", padding: "10px 20px", borderRadius: "8px", fontWeight: "500", fontSize: "0.95rem" }}
+                    style={{ minWidth: "110px" }}
                     disabled={actionLoading === categoryToDelete.id}
                   >
                     Cancel
                   </button>
                   <button
-                    className="btn btn-danger"
+                    className="btn-danger"
                     onClick={confirmDelete}
                     style={{
                       minWidth: "130px",
-                      padding: "10px 20px",
-                      borderRadius: "8px",
-                      fontWeight: "600",
-                      fontSize: "0.95rem",
-                      background: "var(--color-negative, #FF4D4D)",
-                      border: "none",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",

@@ -68,6 +68,9 @@ export default function AdminOrganizersPage() {
       await approveOrganizer(org.id);
       toast.success("Organizer approved successfully!");
       await fetchData();
+      if (detail && detail.id === org.id) {
+        setDetail(null);
+      }
     } catch (err) {
       console.error(err);
       toast.error("Failed to approve organizer");
@@ -85,6 +88,9 @@ export default function AdminOrganizersPage() {
       await rejectOrganizer(org.id, reason);
       toast.success("Organizer rejected successfully!");
       await fetchData();
+      if (detail && detail.id === org.id) {
+        setDetail(null);
+      }
     } catch (err) {
       console.error(err);
       toast.error("Failed to reject organizer");
@@ -102,6 +108,9 @@ export default function AdminOrganizersPage() {
       await suspendOrganizer(org.id, reason);
       toast.success("Organizer suspended successfully!");
       await fetchData();
+      if (detail && detail.id === org.id) {
+        setDetail(null);
+      }
     } catch (err) {
       console.error(err);
       toast.error("Failed to suspend organizer");
@@ -416,27 +425,47 @@ export default function AdminOrganizersPage() {
       {detail && (
         <>
           <div
-            className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.6)",
+              backdropFilter: "blur(6px)",
+              zIndex: 1040,
+            }}
             onClick={() => setDetail(null)}
           ></div>
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
             style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              minHeight: "100vh",
+              zIndex: 1050,
+              padding: "1rem",
+              pointerEvents: "none",
             }}
           >
             {" "}
             <div
-              className="card"
+              className="card shadow-lg"
               style={{
                 width: "100%",
-                maxWidth: "550px",
-                borderRadius: "12px",
-                boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+                maxWidth: "480px",
+                maxHeight: "90vh",
+                overflowY: "auto",
+                background: "var(--color-bg-surface)",
+                border: "1px solid var(--color-border)",
+                borderRadius: "var(--radius-card)",
+                boxShadow: "var(--shadow-card)",
                 animation: "modalIn 0.3s ease-out",
+                pointerEvents: "auto",
               }}
             >
               <style>{`
@@ -454,21 +483,20 @@ export default function AdminOrganizersPage() {
               <div
                 className="card-header"
                 style={{
-                  background:
-                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                  borderRadius: "12px 12px 0 0",
+                  borderBottom: "1px solid var(--color-border)",
                   padding: "1.25rem 1.5rem",
-                  margin: "-1px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
                 }}
               >
-                <div className="card-title" style={{ color: "white" }}>
-                  <i className="bi bi-buildings-fill me-2"></i>
+                <div className="card-title" style={{ margin: 0, fontSize: "1.125rem", fontWeight: "600", color: "var(--color-text-primary)" }}>
+                  <i className="bi bi-buildings-fill me-2" style={{ color: "var(--color-accent)" }}></i>
                   Organizer Details
                 </div>
                 <button
-                  className="card-menu-btn"
+                  className="icon-btn"
                   onClick={() => setDetail(null)}
-                  style={{ color: "white" }}
                 >
                   <i className="bi bi-x-lg"></i>
                 </button>
@@ -480,8 +508,10 @@ export default function AdminOrganizersPage() {
                     className="block mb-1"
                     style={{
                       fontSize: "0.75rem",
-                      color: "var(--color-text-muted)",
-                      fontWeight: "500",
+                      color: "var(--color-text-secondary)",
+                      fontWeight: "600",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
                     }}
                   >
                     Organization Name
@@ -502,8 +532,10 @@ export default function AdminOrganizersPage() {
                       className="block mb-1"
                       style={{
                         fontSize: "0.75rem",
-                        color: "var(--color-text-muted)",
-                        fontWeight: "500",
+                        color: "var(--color-text-secondary)",
+                        fontWeight: "600",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
                       }}
                     >
                       Contact Person
@@ -517,8 +549,10 @@ export default function AdminOrganizersPage() {
                       className="block mb-1"
                       style={{
                         fontSize: "0.75rem",
-                        color: "var(--color-text-muted)",
-                        fontWeight: "500",
+                        color: "var(--color-text-secondary)",
+                        fontWeight: "600",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
                       }}
                     >
                       Email
@@ -534,8 +568,10 @@ export default function AdminOrganizersPage() {
                       className="block mb-1"
                       style={{
                         fontSize: "0.75rem",
-                        color: "var(--color-text-muted)",
-                        fontWeight: "500",
+                        color: "var(--color-text-secondary)",
+                        fontWeight: "600",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
                       }}
                     >
                       Phone
@@ -549,8 +585,10 @@ export default function AdminOrganizersPage() {
                       className="block mb-1"
                       style={{
                         fontSize: "0.75rem",
-                        color: "var(--color-text-muted)",
-                        fontWeight: "500",
+                        color: "var(--color-text-secondary)",
+                        fontWeight: "600",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
                       }}
                     >
                       Submitted
@@ -560,19 +598,71 @@ export default function AdminOrganizersPage() {
                     </div>
                   </div>
                 </div>
-                <div>
-                  <label
-                    className="block mb-1"
-                    style={{
-                      fontSize: "0.75rem",
-                      color: "var(--color-text-muted)",
-                      fontWeight: "500",
-                    }}
-                  >
-                    Status
-                  </label>
-                  <div>{statusBadge(detail.status)}</div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      className="block mb-1"
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "var(--color-text-secondary)",
+                        fontWeight: "600",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                      }}
+                    >
+                      Organizer Type
+                    </label>
+                    <div style={{ color: "var(--color-text-primary)" }}>
+                      {detail.organizer_type || "—"}
+                    </div>
+                  </div>
+                  <div>
+                    <label
+                      className="block mb-1"
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "var(--color-text-secondary)",
+                        fontWeight: "600",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                      }}
+                    >
+                      Status
+                    </label>
+                    <div>{statusBadge(detail.status)}</div>
+                  </div>
                 </div>
+
+                {detail.description && (
+                  <div>
+                    <label
+                      className="block mb-1"
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "var(--color-text-secondary)",
+                        fontWeight: "600",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                      }}
+                    >
+                      Mission / Description (បេសកកម្ម)
+                    </label>
+                    <div
+                      style={{
+                        background: "var(--color-bg-input)",
+                        padding: "12px 16px",
+                        borderRadius: "8px",
+                        border: "1px solid var(--color-border)",
+                        color: "var(--color-text-primary)",
+                        fontSize: "0.9rem",
+                        lineHeight: "1.5",
+                        whiteSpace: "pre-wrap",
+                      }}
+                    >
+                      {detail.description}
+                    </div>
+                  </div>
+                )}
 
                 {detail.document_url && (
                   <div>
@@ -580,26 +670,27 @@ export default function AdminOrganizersPage() {
                       className="block mb-1"
                       style={{
                         fontSize: "0.75rem",
-                        color: "var(--color-text-muted)",
-                        fontWeight: "500",
+                        color: "var(--color-text-secondary)",
+                        fontWeight: "600",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
                       }}
                     >
                       Verification Document (ឯកសារបញ្ជាក់)
                     </label>
-                    <div>
+                    <div style={{ marginTop: "6px" }}>
                       <a
                         href={detail.document_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="btn btn-outline-primary btn-sm rounded-3 d-inline-flex align-items-center gap-2"
+                        className="btn-secondary"
                         style={{
                           fontSize: "0.85rem",
                           padding: "8px 16px",
                           textDecoration: "none",
-                          borderRadius: "8px",
                         }}
                       >
-                        <i className="bi bi-file-earmark-pdf-fill"></i>
+                        <i className="bi bi-file-earmark-pdf-fill" style={{ color: "var(--color-negative)", marginRight: "8px" }}></i>
                         មើលឯកសារ / View Document
                       </a>
                     </div>
@@ -612,8 +703,10 @@ export default function AdminOrganizersPage() {
                       className="block mb-1"
                       style={{
                         fontSize: "0.75rem",
-                        color: "var(--color-text-muted)",
-                        fontWeight: "500",
+                        color: "var(--color-text-secondary)",
+                        fontWeight: "600",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
                       }}
                     >
                       Rejection Reason
@@ -631,16 +724,57 @@ export default function AdminOrganizersPage() {
               </div>
 
               <div
-                className="flex items-center justify-end gap-3 mt-4 pt-4"
+                className="flex items-center justify-between gap-3 mt-4 pt-4"
                 style={{
                   borderTop: "1px solid var(--color-border)",
                   padding: "0 1.5rem 1.5rem",
                 }}
               >
+                <div>
+                  {user?.role?.toLowerCase() === "admin" && (
+                    <div className="flex items-center gap-2">
+                      {detail.status === "pending" && (
+                        <>
+                          <button
+                            className="btn-approve"
+                            style={{ padding: "6px 12px", fontSize: "0.8125rem" }}
+                            onClick={() => handleApprove(detail)}
+                            disabled={actionLoading === detail.id}
+                          >
+                            Approve
+                          </button>
+                          <button
+                            className="btn-reject"
+                            style={{ padding: "6px 12px", fontSize: "0.8125rem" }}
+                            onClick={() => handleReject(detail)}
+                            disabled={actionLoading === detail.id}
+                          >
+                            Reject
+                          </button>
+                        </>
+                      )}
+                      {detail.status === "verified" && (
+                        <button
+                          className="btn-reject"
+                          style={{
+                            borderColor: "var(--color-warning)",
+                            color: "var(--color-warning)",
+                            padding: "6px 12px",
+                            fontSize: "0.8125rem",
+                          }}
+                          onClick={() => handleSuspend(detail)}
+                          disabled={actionLoading === detail.id}
+                        >
+                          Suspend
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
                 <button
                   className="btn-secondary"
+                  style={{ padding: "6px 12px", fontSize: "0.8125rem" }}
                   onClick={() => setDetail(null)}
-                  style={{ borderRadius: "8px" }}
                 >
                   Close
                 </button>

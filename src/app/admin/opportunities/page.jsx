@@ -223,10 +223,20 @@ export default function AdminOpportunitiesPage() {
     }
   };
 
+  const getCategoryClass = (cat) => {
+    if (!cat) return "general";
+    const name = (typeof cat === "string" ? cat : cat.name || "").toLowerCase();
+    if (name.includes("edu")) return "education";
+    if (name.includes("heal")) return "health";
+    if (name.includes("env")) return "environment";
+    if (name.includes("comm")) return "community";
+    return "general";
+  };
+
   const statusBadge = (s) => {
     const map = { active: "active", draft: "pending", closed: "rejected" };
     return (
-      <span className={`status-badge ${map[s] || "pending"}`}>
+      <span className={`status-badge-custom ${map[s] || "pending"}`}>
         {s}
       </span>
     );
@@ -244,27 +254,28 @@ export default function AdminOpportunitiesPage() {
       <RoleGuard />
 
       {/* Page Header */}
-      <div className="page-header">
+      <div className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
         <div>
-          <h1 className="page-title">Opportunities Management</h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "0.875rem", marginTop: "4px" }}>
+          <h1 className="page-title" style={{ margin: 0 }}>Opportunities Management</h1>
+          <p style={{ color: "var(--color-text-secondary)", fontSize: "0.875rem", marginTop: "4px", marginBottom: 0 }}>
             Admin has override power to CRUD all opportunities
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <input
-            type="search"
-            className="search-bar"
-            placeholder="Search..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ maxWidth: "250px" }}
-          />
+          <div className="search-container">
+            <i className="bi bi-search search-icon"></i>
+            <input
+              type="search"
+              className="search-input"
+              placeholder="Search..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
           <select
-            className="btn-secondary"
+            className="filter-select"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            style={{ padding: "8px 16px" }}
           >
             <option value="all">All Categories</option>
             <option value="education">Education</option>
@@ -273,10 +284,9 @@ export default function AdminOpportunitiesPage() {
             <option value="community">Community</option>
           </select>
           <select
-            className="btn-secondary"
+            className="filter-select"
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            style={{ padding: "8px 16px" }}
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
@@ -299,16 +309,16 @@ export default function AdminOpportunitiesPage() {
         {/* Data Table */}
         <div className="card" style={{ padding: "0" }}>
           <div className="table-wrapper">
-            <table className="data-table" style={{ width: "100%" }}>
+            <table className="data-table" style={{ width: "100%", tableLayout: "fixed" }}>
               <thead>
                 <tr>
-                  <th>Title</th>
-                  <th>Organization</th>
-                  <th>Category</th>
-                  <th>Created</th>
-                  <th>Visibility</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <th style={{ width: "25%", minWidth: "200px" }}>Title</th>
+                  <th style={{ width: "18%", minWidth: "130px" }}>Organization</th>
+                  <th style={{ width: "15%", minWidth: "140px" }}>Category</th>
+                  <th style={{ width: "12%", minWidth: "100px" }}>Created</th>
+                  <th style={{ width: "10%", minWidth: "100px" }}>Visibility</th>
+                  <th style={{ width: "10%", minWidth: "90px" }}>Status</th>
+                  <th style={{ width: "10%", minWidth: "160px" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -332,31 +342,42 @@ export default function AdminOpportunitiesPage() {
                 ) : (
                   opps.map((o) => (
                     <tr key={o.id}>
-                      <td>
-                        <strong>{o.title}</strong>
+                      <td style={{ verticalAlign: "middle" }}>
+                        <strong style={{ color: "var(--color-text-primary)" }}>{o.title}</strong>
                       </td>
-                      <td>
+                      <td style={{ verticalAlign: "middle", color: "var(--color-text-secondary)" }}>
                         {o.organization_name || o.organizer_name || "Admin"}
                       </td>
-                      <td>
-                        <span className="status-badge active" style={{ background: "var(--color-bg-input)", color: "var(--color-accent)", border: "1px solid var(--color-accent)" }}>
-                          {o.category?.name || o.category}
+                      <td style={{ verticalAlign: "middle" }}>
+                        <span className={`category-badge ${getCategoryClass(o.category)}`}>
+                          {o.category?.name || o.category || "General"}
                         </span>
                       </td>
-                      <td>
+                      <td style={{ verticalAlign: "middle", color: "var(--color-text-secondary)", whiteSpace: "nowrap" }}>
                         {formatDate(o.created_at)}
                       </td>
-                      <td>
-                        <i className={`bi ${o.visibility === "public" ? "bi-globe" : "bi-lock"}`}></i> {o.visibility}
+                      <td style={{ verticalAlign: "middle" }}>
+                        <span className={`visibility-badge ${o.visibility === "public" ? "public" : "private"}`}>
+                          <i className={`bi ${o.visibility === "public" ? "bi-globe" : "bi-lock-fill"}`}></i>
+                          {o.visibility}
+                        </span>
                       </td>
-                      <td>
+                      <td style={{ verticalAlign: "middle" }}>
                         {statusBadge(o.status)}
                       </td>
-                      <td>
-                        <div className="flex items-center gap-2">
+                      <td style={{ verticalAlign: "middle" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                           <button
                             className="btn-secondary"
-                            style={{ padding: "6px 12px", fontSize: "0.8125rem" }}
+                            style={{
+                              width: "36px",
+                              height: "36px",
+                              padding: 0,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              borderRadius: "var(--radius-sm)",
+                            }}
                             onClick={() => openEditOpp(o)}
                             title="Edit"
                           >
@@ -364,15 +385,32 @@ export default function AdminOpportunitiesPage() {
                           </button>
                           <button
                             className="btn-secondary"
-                            style={{ padding: "6px 12px", fontSize: "0.8125rem" }}
+                            style={{
+                              height: "36px",
+                              padding: "0 12px",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              borderRadius: "var(--radius-sm)",
+                              gap: "6px",
+                            }}
                             onClick={() => viewRegistrations(o)}
                             title="Registrations"
                           >
-                            <i className="bi bi-people"></i> {o.applicants_count || 0}
+                            <i className="bi bi-people"></i>
+                            <span style={{ fontSize: "0.8125rem", fontWeight: "600" }}>{o.applicants_count || 0}</span>
                           </button>
                           <button
-                            className="btn-reject"
-                            style={{ padding: "6px 12px", fontSize: "0.8125rem" }}
+                            className="btn-danger"
+                            style={{
+                              width: "36px",
+                              height: "36px",
+                              padding: 0,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              borderRadius: "var(--radius-sm)",
+                            }}
                             onClick={() => handleDeleteOpp(o.id)}
                             title="Delete"
                           >
@@ -435,6 +473,136 @@ export default function AdminOpportunitiesPage() {
           onSubmit={handleUpdateOpportunity}
         />
       </div>
+
+      <style jsx>{`
+        .search-container {
+          position: relative;
+          max-width: 250px;
+        }
+        .search-icon {
+          position: absolute;
+          left: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: var(--color-text-secondary);
+          pointer-events: none;
+          font-size: 0.875rem;
+        }
+        .search-input {
+          width: 100%;
+          background-color: var(--color-bg-input) !important;
+          border: 1.5px solid var(--color-border) !important;
+          border-radius: var(--radius-btn) !important;
+          padding: 8px 16px 8px 36px !important;
+          font-size: 0.875rem;
+          color: var(--color-text-primary) !important;
+          transition: all 0.2s ease;
+        }
+        .search-input:focus {
+          border-color: var(--color-accent) !important;
+          outline: none;
+        }
+        
+        .filter-select {
+          background-color: var(--color-bg-input) !important;
+          border: 1.5px solid var(--color-border) !important;
+          border-radius: var(--radius-btn) !important;
+          color: var(--color-text-primary) !important;
+          padding: 8px 32px 8px 16px !important;
+          font-size: 0.875rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.25s ease;
+          appearance: none;
+          background-image: url("data:image/svg+xml;utf8,<svg fill='%239a9a9a' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>") !important;
+          background-position: right 10px center !important;
+          background-repeat: no-repeat !important;
+        }
+        .filter-select:focus {
+          border-color: var(--color-accent) !important;
+          outline: none;
+        }
+        
+        .category-badge {
+          font-size: 11px;
+          font-weight: 600;
+          padding: 4px 10px;
+          border-radius: 100px;
+          text-transform: uppercase;
+          background-color: var(--color-bg-input);
+          border: 1px solid var(--color-border);
+          color: var(--color-text-primary);
+          white-space: nowrap;
+          display: inline-block;
+        }
+        .category-badge.education {
+          background-color: rgba(13, 110, 253, 0.12) !important;
+          color: #0d6efd !important;
+          border: 1px solid rgba(13, 110, 253, 0.2) !important;
+        }
+        .category-badge.health {
+          background-color: rgba(220, 53, 69, 0.12) !important;
+          color: #dc3545 !important;
+          border: 1px solid rgba(220, 53, 69, 0.2) !important;
+        }
+        .category-badge.environment {
+          background-color: rgba(25, 135, 84, 0.12) !important;
+          color: #198754 !important;
+          border: 1px solid rgba(25, 135, 84, 0.2) !important;
+        }
+        .category-badge.community {
+          background-color: var(--color-accent-dim) !important;
+          color: var(--color-accent) !important;
+          border: 1px solid rgba(170, 255, 0, 0.2) !important;
+        }
+        
+        .status-badge-custom {
+          font-size: 11px;
+          font-weight: 600;
+          padding: 4px 10px;
+          border-radius: 100px;
+          text-transform: uppercase;
+          white-space: nowrap;
+          display: inline-block;
+        }
+        .status-badge-custom.active {
+          background-color: rgba(25, 135, 84, 0.12) !important;
+          color: #198754 !important;
+          border: 1px solid rgba(25, 135, 84, 0.2) !important;
+        }
+        .status-badge-custom.pending {
+          background-color: rgba(255, 193, 7, 0.12) !important;
+          color: #ffc107 !important;
+          border: 1px solid rgba(255, 193, 7, 0.2) !important;
+        }
+        .status-badge-custom.rejected {
+          background-color: rgba(220, 53, 69, 0.12) !important;
+          color: #dc3545 !important;
+          border: 1px solid rgba(220, 53, 69, 0.2) !important;
+        }
+        
+        .visibility-badge {
+          font-size: 11px;
+          font-weight: 600;
+          padding: 4px 10px;
+          border-radius: 100px;
+          text-transform: uppercase;
+          white-space: nowrap;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+        }
+        .visibility-badge.public {
+          background-color: rgba(13, 110, 253, 0.12) !important;
+          color: #0d6efd !important;
+          border: 1px solid rgba(13, 110, 253, 0.2) !important;
+        }
+        .visibility-badge.private {
+          background-color: rgba(108, 117, 125, 0.12) !important;
+          color: var(--color-text-secondary) !important;
+          border: 1px solid rgba(108, 117, 125, 0.2) !important;
+        }
+      `}</style>
     </div>
   );
 }
