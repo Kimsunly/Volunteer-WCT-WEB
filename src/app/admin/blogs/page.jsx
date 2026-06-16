@@ -237,12 +237,12 @@ export default function AdminTipsPage() {
               <table className="data-table" style={{ width: "100%", tableLayout: "fixed" }}>
                 <thead>
                   <tr>
-                    <th style={{ width: "40%", minWidth: "300px" }}>Title</th>
-                    <th style={{ width: "15%", minWidth: "120px" }}>Category</th>
-                    <th style={{ width: "13%", minWidth: "100px" }}>Status</th>
-                    <th style={{ width: "15%", minWidth: "120px" }}>Author</th>
-                    <th style={{ width: "17%", minWidth: "120px" }}>Created At</th>
-                    <th style={{ width: "20%", minWidth: "200px" }}>Actions</th>
+                    <th style={{ width: "30%", minWidth: "250px" }}>Title</th>
+                    <th style={{ width: "12%", minWidth: "110px" }}>Category</th>
+                    <th style={{ width: "12%", minWidth: "120px" }}>Status</th>
+                    <th style={{ width: "16%", minWidth: "140px" }}>Author</th>
+                    <th style={{ width: "15%", minWidth: "120px" }}>Created At</th>
+                    <th style={{ width: "15%", minWidth: "150px" }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -311,22 +311,12 @@ export default function AdminTipsPage() {
                         </div>
                       </td>
                       <td style={{ verticalAlign: "middle" }}>
-                        <span
-                          className="status-badge"
-                          style={{
-                            background: "var(--color-bg-input)",
-                            border: "1px solid var(--color-border)",
-                            color: "var(--color-text-primary)",
-                            fontSize: "0.75rem",
-                            textTransform: "capitalize",
-                            padding: "4px 10px",
-                          }}
-                        >
+                        <span className={`category-badge ${t.category || "general"}`}>
                           {t.category || "General"}
                         </span>
                       </td>
                       <td style={{ verticalAlign: "middle" }}>
-                        <span className={`status-badge ${t.is_published ? "active" : "pending"}`} style={{ padding: "4px 10px" }}>
+                        <span className={`status-badge-custom ${t.is_published ? "active" : "pending"}`}>
                           {t.is_published ? "Published" : "Draft"}
                         </span>
                       </td>
@@ -340,22 +330,49 @@ export default function AdminTipsPage() {
                         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                           <button
                             className="btn-secondary"
-                            style={{ padding: "6px 12px", fontSize: "0.75rem" }}
+                            style={{
+                              width: "36px",
+                              height: "36px",
+                              padding: 0,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              borderRadius: "var(--radius-sm)",
+                            }}
                             onClick={() => viewDetail(t)}
+                            title="View Details"
                           >
-                            View Details
+                            <i className="bi bi-eye"></i>
                           </button>
                           <button
                             className="btn-secondary"
-                            style={{ padding: "6px 12px", fontSize: "0.75rem" }}
+                            style={{
+                              width: "36px",
+                              height: "36px",
+                              padding: 0,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              borderRadius: "var(--radius-sm)",
+                            }}
                             onClick={() => openEditBlog(t)}
+                            title="Edit"
                           >
-                            Edit
+                            <i className="bi bi-pencil"></i>
                           </button>
                           <button
-                            className="btn-reject"
-                            style={{ padding: "6px 10px" }}
+                            className="btn-danger"
+                            style={{
+                              width: "36px",
+                              height: "36px",
+                              padding: 0,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              borderRadius: "var(--radius-sm)",
+                            }}
                             onClick={() => setDeleteTarget(t)}
+                            title="Delete"
                           >
                             <i className="bi bi-trash"></i>
                           </button>
@@ -429,64 +446,58 @@ export default function AdminTipsPage() {
                 justifyContent: "center",
                 zIndex: 1050,
                 padding: "1rem",
+                pointerEvents: "none",
               }}
             >
               <div
-                className="card shadow-lg"
+                className="card border-0 shadow-lg overflow-hidden"
                 style={{
                   width: "100%",
-                  maxWidth: "600px",
+                  maxWidth: "620px",
                   maxHeight: "90vh",
-                  overflowY: "auto",
                   display: "flex",
                   flexDirection: "column",
-                  background: "var(--color-bg-surface)",
+                  backgroundColor: "var(--color-bg-surface)",
+                  borderColor: "var(--color-border)",
+                  borderRadius: "16px",
                   color: "var(--color-text-primary)",
-                  padding: "24px",
-                  borderRadius: "var(--radius-card)",
-                  border: "1px solid var(--color-border)",
-                  boxShadow: "var(--shadow-card)",
+                  pointerEvents: "auto",
                 }}
               >
                 <div
-                  className="card-header"
+                  className="card-header p-4 text-white d-flex align-items-center justify-content-between"
                   style={{
-                    marginBottom: "20px",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    borderBottom: "1px solid var(--color-border)",
-                    paddingBottom: "12px"
+                    background: "linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%)",
+                    borderBottom: "none",
+                    flexShrink: 0,
                   }}
                 >
-                  <h3 className="card-title" style={{ margin: 0, fontSize: "1.125rem", fontWeight: "600", color: "var(--color-text-primary)" }}>
+                  <h3 className="card-title mb-0 d-flex align-items-center gap-2" style={{ fontSize: "1.1rem", fontWeight: "600", color: "#FFFFFF" }}>
+                    <i className="bi bi-pencil-square fs-5"></i>
                     {editIdx !== null ? "Edit Tip & Blog" : "Create New Tip & Blog"}
                   </h3>
                   <button
-                    className="icon-btn"
+                    className="btn-close-custom"
                     onClick={() => setOpen(false)}
                     style={{ background: "none", border: "none" }}
                   >
                     <i className="bi bi-x-lg"></i>
                   </button>
                 </div>
-                
-                <div className="row g-3" style={{ margin: 0 }}>
+
+                <div 
+                  className="modal-body p-4" 
+                  style={{ 
+                    overflowY: "auto", 
+                    flexGrow: 1, 
+                    display: "flex", 
+                    flexDirection: "column",
+                    gap: "16px" 
+                  }}
+                >
                   {/* Title */}
-                  <div className="col-12" style={{ padding: "0 8px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        marginBottom: "6px",
-                        fontSize: "0.75rem",
-                        color: "var(--color-text-secondary)",
-                        fontWeight: "600",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em"
-                      }}
-                    >
-                      Title *
-                    </label>
+                  <div>
+                    <label className="form-label fw-bold">Title *</label>
                     <input
                       type="text"
                       className="form-input"
@@ -497,81 +508,38 @@ export default function AdminTipsPage() {
                     />
                   </div>
 
-                  {/* Category */}
-                  <div className="col-md-6" style={{ padding: "0 8px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        marginBottom: "6px",
-                        fontSize: "0.75rem",
-                        color: "var(--color-text-secondary)",
-                        fontWeight: "600",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em"
-                      }}
-                    >
-                      Category
-                    </label>
-                    <select
-                      className="form-input"
-                      value={form.category}
-                      onChange={(e) => setForm({ ...form, category: e.target.value })}
-                      style={{
-                        backgroundImage: `url("data:image/svg+xml;utf8,<svg fill='%239a9a9a' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>")`,
-                        backgroundPosition: "right 10px center",
-                        backgroundRepeat: "no-repeat",
-                        paddingRight: "30px",
-                        WebkitAppearance: "none",
-                        MozAppearance: "none",
-                        appearance: "none",
-                      }}
-                    >
-                      <option value="general">General</option>
-                      <option value="volunteer">Volunteer</option>
-                      <option value="safety">Safety</option>
-                      <option value="community">Community</option>
-                    </select>
-                  </div>
+                  <div className="row g-3">
+                    {/* Category */}
+                    <div className="col-md-6">
+                      <label className="form-label fw-bold">Category</label>
+                      <select
+                        className="filter-select w-100"
+                        value={form.category}
+                        onChange={(e) => setForm({ ...form, category: e.target.value })}
+                      >
+                        <option value="general">General</option>
+                        <option value="volunteer">Volunteer</option>
+                        <option value="safety">Safety</option>
+                        <option value="community">Community</option>
+                      </select>
+                    </div>
 
-                  {/* Author */}
-                  <div className="col-md-6" style={{ padding: "0 8px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        marginBottom: "6px",
-                        fontSize: "0.75rem",
-                        color: "var(--color-text-secondary)",
-                        fontWeight: "600",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em"
-                      }}
-                    >
-                      Author
-                    </label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={form.author}
-                      onChange={(e) => setForm({ ...form, author: e.target.value })}
-                      required
-                    />
+                    {/* Author */}
+                    <div className="col-md-6">
+                      <label className="form-label fw-bold">Author</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={form.author}
+                        onChange={(e) => setForm({ ...form, author: e.target.value })}
+                        required
+                      />
+                    </div>
                   </div>
 
                   {/* Image Input Selection */}
-                  <div className="col-12" style={{ padding: "0 8px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        marginBottom: "6px",
-                        fontSize: "0.75rem",
-                        color: "var(--color-text-secondary)",
-                        fontWeight: "600",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em"
-                      }}
-                    >
-                      Featured Image
-                    </label>
+                  <div>
+                    <label className="form-label fw-bold">Featured Image</label>
                     <div style={{ display: "flex", borderBottom: "1px solid var(--color-border)", marginBottom: "12px", gap: "16px" }}>
                       <button
                         type="button"
@@ -632,27 +600,13 @@ export default function AdminTipsPage() {
                         />
                         <label
                           htmlFor="blogImageFile"
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            padding: "20px",
-                            border: "2px dashed var(--color-border)",
-                            borderRadius: "8px",
-                            cursor: "pointer",
-                            background: "var(--color-bg-input)",
-                            transition: "border-color 0.15s",
-                            color: "var(--color-text-secondary)",
-                          }}
-                          onMouseOver={(e) => e.currentTarget.style.borderColor = "var(--color-accent)"}
-                          onMouseOut={(e) => e.currentTarget.style.borderColor = "var(--color-border)"}
+                          className="dropzone-label"
                         >
-                          <i className="bi bi-cloud-arrow-up" style={{ fontSize: "2rem", color: "var(--color-accent)", marginBottom: "8px" }}></i>
-                          <span style={{ fontSize: "0.8125rem", fontWeight: "500", textAlign: "center" }}>
+                          <i className="bi bi-cloud-arrow-up fs-2 mb-2" style={{ color: "var(--color-accent)" }}></i>
+                          <span style={{ fontSize: "0.8125rem", fontWeight: "600", textAlign: "center" }}>
                             {selectedFile ? selectedFile.name : "Click to select or drag image file here"}
                           </span>
-                          <span style={{ fontSize: "0.6875rem", color: "var(--color-text-muted)", marginTop: "4px" }}>
+                          <span style={{ fontSize: "0.6875rem", color: "var(--color-text-secondary)", marginTop: "4px" }}>
                             PNG, JPG, GIF up to 4MB
                           </span>
                         </label>
@@ -661,17 +615,7 @@ export default function AdminTipsPage() {
 
                     {/* Image Preview Block */}
                     {((imageMode === "url" && form.image) || (imageMode === "upload" && (filePreview || selectedFile))) && (
-                      <div
-                        style={{
-                          marginTop: "12px",
-                          borderRadius: "8px",
-                          overflow: "hidden",
-                          border: "1px solid var(--color-border)",
-                          height: "140px",
-                          position: "relative",
-                          background: "var(--color-bg-base)"
-                        }}
-                      >
+                      <div className="img-preview-container">
                         <img
                           src={imageMode === "url" ? resolveImageUrl(form.image) : (selectedFile ? filePreview : resolveImageUrl(filePreview))}
                           alt="Preview"
@@ -686,6 +630,7 @@ export default function AdminTipsPage() {
                         />
                         <button
                           type="button"
+                          className="remove-preview-btn"
                           onClick={() => {
                             if (imageMode === "url") {
                               setForm({ ...form, image: "" });
@@ -694,46 +639,19 @@ export default function AdminTipsPage() {
                               setFilePreview("");
                             }
                           }}
-                          style={{
-                            position: "absolute",
-                            top: "8px",
-                            right: "8px",
-                            background: "rgba(0,0,0,0.6)",
-                            border: "none",
-                            color: "white",
-                            borderRadius: "50%",
-                            width: "28px",
-                            height: "28px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            cursor: "pointer"
-                          }}
                           title="Remove image"
                         >
-                          <i className="bi bi-x"></i>
+                          <i className="bi bi-x-lg"></i>
                         </button>
                       </div>
                     )}
                   </div>
 
                   {/* Content */}
-                  <div className="col-12" style={{ padding: "0 8px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        marginBottom: "6px",
-                        fontSize: "0.75rem",
-                        color: "var(--color-text-secondary)",
-                        fontWeight: "600",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em"
-                      }}
-                    >
-                      Content *
-                    </label>
+                  <div>
+                    <label className="form-label fw-bold">Content *</label>
                     <textarea
-                      className="form-input"
+                      className="form-input text-area-modern"
                       rows={6}
                       value={form.content}
                       onChange={(e) => setForm({ ...form, content: e.target.value })}
@@ -744,7 +662,7 @@ export default function AdminTipsPage() {
                   </div>
 
                   {/* Publish immediately */}
-                  <div className="col-12" style={{ padding: "0 8px", marginTop: "4px" }}>
+                  <div style={{ marginTop: "4px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                       <input
                         type="checkbox"
@@ -775,14 +693,11 @@ export default function AdminTipsPage() {
                 </div>
 
                 <div
+                  className="modal-footer p-4 border-0 d-flex justify-content-end gap-2"
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "flex-end",
-                    gap: "12px",
-                    marginTop: "24px",
-                    paddingTop: "16px",
-                    borderTop: "1px solid var(--color-border)",
+                    flexShrink: 0,
+                    borderTop: "1px solid var(--color-border) !important",
+                    backgroundColor: "var(--color-bg-surface)",
                   }}
                 >
                   <button
@@ -807,144 +722,156 @@ export default function AdminTipsPage() {
 
       {/* Detail Modal */}
       {detailBlog && (
-        <div
-          className="d-flex align-items-center justify-content-center"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            backdropFilter: "blur(4px)",
-            zIndex: 1050,
-            padding: "1rem",
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setDetailBlog(null);
-          }}
-        >
+        <>
           <div
-            className="card shadow-lg"
             style={{
-              width: "100%",
-              maxWidth: "600px",
-              maxHeight: "90vh",
-              overflowY: "auto",
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.6)",
+              backdropFilter: "blur(6px)",
+              zIndex: 1040,
+            }}
+            onClick={() => setDetailBlog(null)}
+          ></div>
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
               display: "flex",
-              flexDirection: "column",
-              background: "var(--bg-card, #ffffff)",
-              padding: "24px",
-              borderRadius: "16px",
-              border: "1px solid var(--border-color, #e9ecef)",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 1050,
+              padding: "1rem",
+              pointerEvents: "none",
             }}
           >
             <div
-              className="card-header d-flex justify-content-between align-items-center"
+              className="card border-0 shadow-lg overflow-hidden"
               style={{
-                marginBottom: "20px",
-                borderBottom: "1px solid var(--color-border)",
-                paddingBottom: "12px",
+                width: "100%",
+                maxWidth: "600px",
+                maxHeight: "90vh",
+                display: "flex",
+                flexDirection: "column",
+                background: "var(--color-bg-surface)",
+                color: "var(--color-text-primary)",
+                borderRadius: "16px",
+                border: "1px solid var(--color-border)",
+                pointerEvents: "auto",
               }}
             >
-              <div className="card-title fw-bold fs-5 text-dark" style={{ margin: 0 }}>
-                Blog Details
-              </div>
-              <button
-                className="btn-close-filter"
-                onClick={() => setDetailBlog(null)}
-                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1.25rem", color: "#9ca3af" }}
+              <div
+                className="card-header p-4 text-white d-flex align-items-center justify-content-between"
+                style={{
+                  background: "linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%)",
+                  borderBottom: "none",
+                  flexShrink: 0,
+                }}
               >
-                <i className="bi bi-x-lg"></i>
-              </button>
-            </div>
-
-            <div className="space-y-4" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              {detailBlog.image && (
-                <div style={{ width: "100%", height: "240px", position: "relative", borderRadius: "12px", overflow: "hidden" }}>
-                  <img
-                    src={resolveImageUrl(detailBlog.image)}
-                    alt=""
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
+                <div className="card-title fw-bold fs-5 mb-0" style={{ color: "#FFFFFF" }}>
+                  Blog Details
                 </div>
-              )}
+                <button
+                  className="btn-close-custom"
+                  onClick={() => setDetailBlog(null)}
+                >
+                  <i className="bi bi-x-lg"></i>
+                </button>
+              </div>
 
-              <div>
-                <span
-                  className="status-badge"
+              <div 
+                className="modal-body p-4" 
+                style={{ 
+                  overflowY: "auto", 
+                  flexGrow: 1, 
+                  display: "flex", 
+                  flexDirection: "column", 
+                  gap: "16px" 
+                }}
+              >
+                {detailBlog.image && (
+                  <div style={{ width: "100%", height: "240px", position: "relative", borderRadius: "12px", overflow: "hidden", flexShrink: 0 }}>
+                    <img
+                      src={resolveImageUrl(detailBlog.image)}
+                      alt=""
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  </div>
+                )}
+
+                <div className="d-flex gap-2">
+                  <span className={`category-badge ${detailBlog.category || "general"}`}>
+                    {detailBlog.category || "General"}
+                  </span>
+                  <span className={`status-badge-custom ${detailBlog.is_published ? "active" : "pending"}`}>
+                    {detailBlog.is_published ? "Published" : "Draft"}
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="fw-bold" style={{ fontSize: "1.35rem", lineHeight: "1.4", margin: "0 0 8px 0", color: "var(--color-text-primary)" }}>
+                    {detailBlog.title}
+                  </h3>
+                  <div className="d-flex align-items-center gap-3" style={{ fontSize: "0.85rem", color: "var(--color-text-secondary)" }}>
+                    <span><i className="bi bi-person me-1"></i> {detailBlog.author || "Admin"}</span>
+                    <span>•</span>
+                    <span><i className="bi bi-calendar3 me-1"></i> {detailBlog.created_at ? new Date(detailBlog.created_at).toLocaleDateString() : new Date().toLocaleDateString()}</span>
+                  </div>
+                </div>
+
+                <div
                   style={{
-                    background: "var(--color-bg-input)",
-                    border: "1px solid var(--color-border)",
-                    color: "var(--color-text-primary)",
-                    fontSize: "0.75rem",
-                    textTransform: "capitalize",
-                    marginRight: "8px",
-                    padding: "4px 10px",
+                    color: "var(--color-text-secondary)",
+                    fontSize: "14.5px",
+                    lineHeight: "1.7",
+                    whiteSpace: "pre-wrap",
+                    borderTop: "1px solid var(--color-border)",
+                    paddingTop: "16px",
                   }}
                 >
-                  {detailBlog.category || "General"}
-                </span>
-                <span className={`status-badge ${detailBlog.is_published ? "active" : "pending"}`} style={{ padding: "4px 10px" }}>
-                  {detailBlog.is_published ? "Published" : "Draft"}
-                </span>
-              </div>
-
-              <div>
-                <h3 className="fw-bold text-dark" style={{ fontSize: "1.5rem", lineHeight: "1.3", margin: "0 0 8px 0" }}>
-                  {detailBlog.title}
-                </h3>
-                <div className="d-flex align-items-center gap-3 text-muted" style={{ fontSize: "0.85rem" }}>
-                  <span><i className="bi bi-person me-1"></i> {detailBlog.author || "Admin"}</span>
-                  <span>•</span>
-                  <span><i className="bi bi-calendar3 me-1"></i> {detailBlog.created_at ? new Date(detailBlog.created_at).toLocaleDateString() : new Date().toLocaleDateString()}</span>
+                  {detailBlog.content}
                 </div>
               </div>
 
               <div
+                className="modal-footer p-4 border-0 d-flex justify-content-end gap-2"
                 style={{
-                  color: "#374151",
-                  fontSize: "15px",
-                  lineHeight: "1.7",
-                  whiteSpace: "pre-wrap",
-                  borderTop: "1px solid #f3f4f6",
-                  paddingTop: "16px",
+                  flexShrink: 0,
+                  borderTop: "1px solid var(--color-border) !important",
+                  backgroundColor: "var(--color-bg-surface)",
                 }}
               >
-                {detailBlog.content}
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setDetailBlog(null)}
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => {
+                    setDetailBlog(null);
+                    openEditBlog(detailBlog);
+                  }}
+                >
+                  <i className="bi bi-pencil-fill me-1"></i> Edit
+                </button>
               </div>
             </div>
-
-            <div
-              className="d-flex justify-content-end gap-2 mt-4 pt-3"
-              style={{ borderTop: "1px solid var(--color-border)" }}
-            >
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => setDetailBlog(null)}
-                style={{ padding: "8px 20px", borderRadius: "8px" }}
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={() => {
-                  setDetailBlog(null);
-                  openEditBlog(detailBlog);
-                }}
-                style={{ padding: "8px 20px", borderRadius: "8px" }}
-              >
-                <i className="bi bi-pencil me-1"></i> Edit
-              </button>
-            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Delete Confirmation Modal */}
@@ -1089,6 +1016,189 @@ export default function AdminTipsPage() {
           </div>
         </>
       )}
+
+      <style jsx>{`
+        .btn-close-custom {
+          background: transparent;
+          border: none;
+          color: white;
+          opacity: 0.8;
+          font-size: 1.15rem;
+          transition: all 0.2s ease;
+          padding: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+        }
+        .btn-close-custom:hover {
+          opacity: 1;
+          transform: rotate(90deg);
+        }
+        
+        .form-label {
+          color: var(--color-text-secondary);
+          font-size: 12.5px;
+          margin-bottom: 6px;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+        .form-input {
+          width: 100%;
+          background-color: var(--color-bg-input) !important;
+          border: 1.5px solid var(--color-border) !important;
+          border-radius: 10px !important;
+          padding: 10px 14px !important;
+          font-size: 0.875rem;
+          color: var(--color-text-primary) !important;
+          transition: all 0.2s ease;
+        }
+        .form-input:focus {
+          border-color: var(--color-accent) !important;
+          outline: none;
+          box-shadow: 0 0 0 3px var(--color-accent-dim) !important;
+        }
+        
+        .filter-select {
+          background-color: var(--color-bg-input) !important;
+          border: 1px solid var(--color-border) !important;
+          border-radius: var(--radius-btn) !important;
+          color: var(--color-text-primary) !important;
+          padding: 8px 32px 8px 16px !important;
+          font-size: 0.875rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.25s ease;
+          appearance: none;
+          background-image: url("data:image/svg+xml;utf8,<svg fill='%239a9a9a' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>") !important;
+          background-position: right 10px center !important;
+          background-repeat: no-repeat !important;
+        }
+        .filter-select:focus {
+          border-color: var(--color-accent) !important;
+          outline: none;
+        }
+        
+        .text-area-modern {
+          resize: vertical;
+          line-height: 1.5;
+        }
+        
+        .dropzone-label {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 24px;
+          border: 2px dashed var(--color-border);
+          border-radius: 10px;
+          cursor: pointer;
+          background: var(--color-bg-input);
+          transition: all 0.2s ease;
+          color: var(--color-text-secondary);
+        }
+        .dropzone-label:hover {
+          border-color: var(--color-accent);
+          background-color: var(--color-bg-card-hover);
+        }
+        
+        .img-preview-container {
+          margin-top: 12px;
+          border-radius: 10px;
+          overflow: hidden;
+          border: 1px solid var(--color-border);
+          height: 140px;
+          position: relative;
+          background: var(--color-bg-base);
+        }
+        
+        .remove-preview-btn {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          background: rgba(0,0,0,0.6);
+          border: none;
+          color: white;
+          border-radius: 50%;
+          width: 28px;
+          height: 28px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .remove-preview-btn:hover {
+          background: var(--color-negative);
+          transform: scale(1.05);
+        }
+        
+
+
+        
+        /* Badges */
+        .category-badge {
+          font-size: 11px;
+          font-weight: 600;
+          padding: 4px 10px;
+          border-radius: 100px;
+          text-transform: uppercase;
+          background-color: var(--color-bg-input);
+          border: 1px solid var(--color-border);
+          color: var(--color-text-primary);
+          white-space: nowrap;
+          display: inline-block;
+        }
+        .category-badge.volunteer {
+          background-color: rgba(13, 110, 253, 0.12) !important;
+          color: #0d6efd !important;
+          border: 1px solid rgba(13, 110, 253, 0.2) !important;
+        }
+        .category-badge.safety {
+          background-color: rgba(220, 53, 69, 0.12) !important;
+          color: #dc3545 !important;
+          border: 1px solid rgba(220, 53, 69, 0.2) !important;
+        }
+        .category-badge.community {
+          background-color: var(--color-accent-dim) !important;
+          color: var(--color-accent) !important;
+          border: 1px solid rgba(170, 255, 0, 0.2) !important;
+        }
+        
+        .status-badge-custom {
+          font-size: 11px;
+          font-weight: 600;
+          padding: 4px 10px;
+          border-radius: 100px;
+          text-transform: uppercase;
+          white-space: nowrap;
+          display: inline-block;
+        }
+        .status-badge-custom.active {
+          background-color: rgba(25, 135, 84, 0.12) !important;
+          color: #198754 !important;
+          border: 1px solid rgba(25, 135, 84, 0.2) !important;
+        }
+        .status-badge-custom.pending {
+          background-color: rgba(255, 193, 7, 0.12) !important;
+          color: #ffc107 !important;
+          border: 1px solid rgba(255, 193, 7, 0.2) !important;
+        }
+        
+        .modal-body::-webkit-scrollbar {
+          width: 8px;
+        }
+        .modal-body::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .modal-body::-webkit-scrollbar-thumb {
+          background: var(--color-border);
+          border-radius: 4px;
+        }
+        .modal-body::-webkit-scrollbar-thumb:hover {
+          background: var(--color-border-hover);
+        }
+      `}</style>
     </div>
   );
 }

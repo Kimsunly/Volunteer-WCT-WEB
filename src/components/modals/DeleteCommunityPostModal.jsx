@@ -32,8 +32,8 @@ export default function DeleteCommunityPostModal({
       style={{
         position: "fixed",
         inset: 0,
-        backgroundColor: "rgba(15, 23, 42, 0.58)",
-        backdropFilter: "blur(10px)",
+        backgroundColor: "rgba(0, 0, 0, 0.6)",
+        backdropFilter: "blur(4px)",
         zIndex: 1060,
         padding: "1rem",
       }}
@@ -42,19 +42,19 @@ export default function DeleteCommunityPostModal({
       }}
     >
       <div
-        className="modal-content-custom bg-white rounded-4 shadow-lg overflow-hidden"
+        className="modal-content-custom rounded-4 shadow-lg overflow-hidden"
         style={{
           width: "100%",
           maxWidth: "560px",
-          border: "1px solid rgba(255, 255, 255, 0.4)",
-          boxShadow: "0 30px 80px rgba(15, 23, 42, 0.28)",
+          background: "var(--color-bg-surface)",
+          border: "1px solid var(--color-border)",
+          boxShadow: "var(--shadow-card)",
         }}
       >
         <div
           className="p-4 p-md-5 text-center"
           style={{
-            background:
-              "linear-gradient(180deg, rgba(255, 77, 77, 0.12) 0%, rgba(255, 255, 255, 1) 85%)",
+            background: "transparent",
           }}
         >
           <div
@@ -72,8 +72,8 @@ export default function DeleteCommunityPostModal({
           <div
             className="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3"
             style={{
-              background: "rgba(220, 53, 69, 0.08)",
-              color: "#dc3545",
+              background: "rgba(255, 77, 77, 0.12)",
+              color: "var(--color-negative)",
               fontSize: "0.8rem",
               fontWeight: 700,
               letterSpacing: "0.04em",
@@ -83,10 +83,10 @@ export default function DeleteCommunityPostModal({
             DESTRUCTIVE ACTION
           </div>
 
-          <h4 className="fw-bold text-dark mb-2">Delete community post?</h4>
-          <p className="text-secondary mb-0">
+          <h4 className="fw-bold mb-2" style={{ color: "var(--color-text-primary)" }}>Delete community post?</h4>
+          <p style={{ color: "var(--color-text-secondary)", marginBottom: 0 }}>
             This will permanently remove the post from the community feed.
-            Comments, reactions, and engagement data linked to this post will no
+            Comments, engagement, and reactions linked to this post will no
             longer be available.
           </p>
         </div>
@@ -95,35 +95,35 @@ export default function DeleteCommunityPostModal({
           <div
             className="rounded-4 p-4"
             style={{
-              background: "#f8fafc",
-              border: "1px solid #e2e8f0",
+              background: "var(--color-bg-input)",
+              border: "1px solid var(--color-border)",
             }}
           >
             <div className="row g-3">
               <div className="col-12 col-md-7">
-                <span className="d-block text-uppercase text-muted fw-semibold small mb-2">
+                <span className="d-block text-uppercase fw-semibold small mb-2" style={{ color: "var(--color-text-muted)" }}>
                   Post title
                 </span>
                 <div
-                  className="fw-semibold text-dark"
-                  style={{ lineHeight: 1.5 }}
+                  className="fw-semibold"
+                  style={{ lineHeight: 1.5, color: "var(--color-text-primary)" }}
                 >
                   {postTitle || "Untitled post"}
                 </div>
               </div>
               <div className="col-6 col-md-2">
-                <span className="d-block text-uppercase text-muted fw-semibold small mb-2">
+                <span className="d-block text-uppercase fw-semibold small mb-2" style={{ color: "var(--color-text-muted)" }}>
                   Author
                 </span>
-                <div className="fw-semibold text-dark small">
+                <div className="fw-semibold small" style={{ color: "var(--color-text-primary)" }}>
                   {postAuthor || "Unknown"}
                 </div>
               </div>
               <div className="col-6 col-md-3">
-                <span className="d-block text-uppercase text-muted fw-semibold small mb-2">
+                <span className="d-block text-uppercase fw-semibold small mb-2" style={{ color: "var(--color-text-muted)" }}>
                   Comments
                 </span>
-                <div className="fw-semibold text-dark small">
+                <div className="fw-semibold small" style={{ color: "var(--color-text-primary)" }}>
                   {commentCount} total
                 </div>
               </div>
@@ -133,22 +133,18 @@ export default function DeleteCommunityPostModal({
           <div className="d-flex gap-3 mt-4">
             <button
               type="button"
-              className="btn btn-light flex-fill rounded-3 fw-semibold py-3"
+              className="btn-secondary flex-fill rounded-3 fw-semibold py-3"
               onClick={onClose}
               disabled={isDeleting}
-              style={{ border: "1px solid #e2e8f0" }}
+              style={{ border: "1px solid var(--color-border)" }}
             >
               Cancel
             </button>
             <button
               type="button"
-              className="btn btn-danger flex-fill rounded-3 fw-bold py-3 shadow-sm"
+              className="btn-danger flex-fill rounded-3 fw-bold py-3 shadow-sm"
               onClick={handleConfirm}
               disabled={isDeleting}
-              style={{
-                background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
-                borderColor: "#dc2626",
-              }}
             >
               {isDeleting ? (
                 <span className="d-inline-flex align-items-center gap-2">

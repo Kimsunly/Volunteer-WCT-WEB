@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { SettingsProvider } from "@/context/SettingsContext";
+import { useSettings } from "@/context/SettingsContext";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminNavbar from "./components/AdminNavbar";
 import RightPanel from "./components/RightPanel";
@@ -13,10 +13,13 @@ export default function AdminLayout({ children }) {
   const router = useRouter();
   const { user, loading } = useAuth();
   const [mounted, setMounted] = useState(false);
+  const { settings, updateSetting } = useSettings();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "admin")) {
@@ -58,15 +61,13 @@ export default function AdminLayout({ children }) {
   if (!user || user.role !== "admin") return null;
 
   return (
-    <SettingsProvider>
-      <div className="dashboard-shell">
-        <AdminSidebar active={getActiveSection()} />
-        <div className="main-area">
-          <AdminNavbar />
-          <div className="main-content">{children}</div>
-        </div>
-        <RightPanel />
+    <div className="dashboard-shell">
+      <AdminSidebar active={getActiveSection()} />
+      <div className="main-area">
+        <AdminNavbar />
+        <div className="main-content">{children}</div>
       </div>
-    </SettingsProvider>
+      <RightPanel />
+    </div>
   );
 }

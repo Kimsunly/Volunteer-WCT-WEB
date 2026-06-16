@@ -190,27 +190,62 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
   if (!open) return null;
 
   return (
-    <div
-      className="modal fade show"
-      style={{ display: "block" }}
-      aria-modal="true"
-      role="dialog"
-    >
+    <>
       <div
-        className="modal-backdrop fade show"
-        style={{ zIndex: 0 }}
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.6)",
+          backdropFilter: "blur(6px)",
+          zIndex: 1040,
+        }}
         onClick={handleClose}
       ></div>
       <div
-        className="modal-dialog modal-lg modal-dialog-centered"
-        style={{ zIndex: 1 }}
-        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1050,
+          padding: "1rem",
+          pointerEvents: "none",
+        }}
       >
-        <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        <div
+          className="card shadow-lg overflow-hidden"
+          style={{
+            width: "100%",
+            maxWidth: "800px",
+            maxHeight: "90vh",
+            display: "flex",
+            flexDirection: "column",
+            backgroundColor: "var(--color-bg-surface)",
+            border: "1px solid var(--color-border)",
+            borderRadius: "16px",
+            color: "var(--color-text-primary)",
+            pointerEvents: "auto",
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
           {/* Header */}
-          <div className="modal-header p-4 text-white d-flex align-items-center justify-content-between">
-            <h5 className="modal-title d-flex align-items-center gap-2 mb-0">
-              <i className="bi bi-briefcase-fill fs-4"></i> ឱកាសការងារថ្មី (New Opportunity)
+          <div
+            className="modal-header p-4 d-flex align-items-center justify-content-between"
+            style={{
+              background: "var(--color-bg-surface)",
+              borderBottom: "1px solid var(--color-border)",
+              flexShrink: 0,
+            }}
+          >
+            <h5 className="modal-title d-flex align-items-center gap-2 mb-0" style={{ color: "var(--color-text-primary)", fontSize: "1.15rem", fontWeight: "600" }}>
+              <i className="bi bi-briefcase-fill fs-4" style={{ color: "var(--color-accent)" }}></i> ឱកាសការងារថ្មី (New Opportunity)
             </h5>
             <button
               type="button"
@@ -222,9 +257,20 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
             </button>
           </div>
 
-          {/* Body */}
-          <form className="needs-validation" noValidate onSubmit={handleSubmit}>
-            <div className="modal-body p-4">
+          {/* Body & Form */}
+          <form
+            className="needs-validation"
+            noValidate
+            onSubmit={handleSubmit}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+              flexGrow: 1,
+              margin: 0,
+            }}
+          >
+            <div className="modal-body p-4" style={{ overflowY: "auto", flexGrow: 1 }}>
               {/* Titles */}
               <div className="mb-4">
                 <label className="form-label fw-bold" htmlFor="opTitleKh">
@@ -355,7 +401,7 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
                       onChange={() => {}}
                     />
                     <div>
-                      <div className="fw-bold text-dark fs-6">សាធារណៈ (Public)</div>
+                      <div className="visibility-title">សាធារណៈ (Public)</div>
                       <div className="small text-muted" style={{ fontSize: "11px" }}>បង្ហាញជាសាធារណៈសម្រាប់គ្រប់គ្នា</div>
                     </div>
                   </div>
@@ -371,7 +417,7 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
                       onChange={() => {}}
                     />
                     <div>
-                      <div className="fw-bold text-dark fs-6">ឯកជន (Private)</div>
+                      <div className="visibility-title">ឯកជន (Private)</div>
                       <div className="small text-muted" style={{ fontSize: "11px" }}>ទាមទារកូដអញ្ជើញ ឬការអនុម័ត</div>
                     </div>
                   </div>
@@ -717,7 +763,7 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
                   }}
                 >
                   <i className="bi bi-images fs-3 mb-2 text-success"></i>
-                  <div className="fw-bold text-dark" style={{ fontSize: "14px" }}>
+                  <div className="fw-bold" style={{ fontSize: "14px" }}>
                     {imagePreviews.length >= MAX_IMAGES
                       ? `បានដល់ចំនួនអតិបរមា ${MAX_IMAGES} រូបហើយ`
                       : "ទាញរូបភាពមកទីនេះ ឬចុចជ្រើសរើសឯកសារ"
@@ -768,10 +814,12 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
                                 <span
                                   className="badge"
                                   style={{
-                                    background: "linear-gradient(135deg, #2d6a4f, #40916c)",
+                                    background: "linear-gradient(135deg, var(--color-accent) 0%, rgba(170, 255, 0, 0.7) 100%)",
+                                    color: "#000000",
                                     fontSize: "10px",
                                     borderRadius: "8px",
                                     padding: "3px 7px",
+                                    fontWeight: "600",
                                   }}
                                 >
                                   <i className="bi bi-image-fill me-1"></i>Thumbnail
@@ -811,7 +859,14 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
             </div>
 
             {/* Footer */}
-            <div className="modal-footer border-0 justify-content-end p-4">
+            <div
+              className="modal-footer border-0 justify-content-end p-4"
+              style={{
+                flexShrink: 0,
+                borderTop: "1px solid var(--color-border) !important",
+                backgroundColor: "var(--color-bg-surface)",
+              }}
+            >
               <button
                 type="button"
                 className="btn-premium-cancel me-2"
@@ -850,13 +905,13 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
           background-color: rgba(17, 24, 39, 0.4) !important;
         }
         .modal-header {
-          background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
-          border-bottom: none;
+          background: var(--color-bg-surface) !important;
+          border-bottom: 1px solid var(--color-border) !important;
         }
         .btn-close-custom {
           background: transparent;
           border: none;
-          color: white;
+          color: var(--color-text-secondary) !important;
           opacity: 0.8;
           font-size: 1.25rem;
           transition: all 0.2s ease;
@@ -866,38 +921,39 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
           justify-content: center;
         }
         .btn-close-custom:hover {
+          color: var(--color-accent) !important;
           opacity: 1;
           transform: rotate(90deg);
         }
         .form-label {
-          color: #374151;
+          color: var(--color-text-secondary);
           font-size: 13.5px;
           margin-bottom: 6px;
         }
         .form-control, .form-select {
-          background-color: #f9fafb;
-          border: 1.5px solid #e5e7eb;
-          border-radius: 12px;
-          padding: 11px 16px;
+          background-color: var(--color-bg-input) !important;
+          border: 1.5px solid var(--color-border) !important;
+          border-radius: 12px !important;
+          padding: 11px 16px !important;
           font-size: 14px;
-          color: #1f2937;
-          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+          color: var(--color-text-primary) !important;
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
         }
         .form-control:focus, .form-select:focus {
-          background-color: white;
-          border-color: #2d6a4f;
-          box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.12);
-          outline: none;
+          background-color: var(--color-bg-surface) !important;
+          border-color: var(--color-accent) !important;
+          box-shadow: 0 0 0 4px var(--color-accent-dim) !important;
+          outline: none !important;
         }
         .text-area-modern {
           resize: none;
           line-height: 1.5;
         }
         .visibility-card {
-          border: 1.5px solid #e5e7eb;
-          background-color: #f9fafb;
-          border-radius: 16px;
-          padding: 14px 18px;
+          border: 1.5px solid var(--color-border) !important;
+          background-color: var(--color-bg-input) !important;
+          border-radius: 16px !important;
+          padding: 14px 18px !important;
           cursor: pointer;
           transition: all 0.25s ease;
           flex: 1;
@@ -906,22 +962,31 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
           gap: 12px;
         }
         .visibility-card:hover {
-          border-color: #2d6a4f;
-          background-color: #f4fbf7;
+          border-color: var(--color-accent) !important;
+          background-color: var(--color-bg-card-hover) !important;
         }
         .visibility-card.active {
-          border-color: #2d6a4f;
-          background-color: #f4fbf7;
-          box-shadow: 0 4px 12px rgba(45, 106, 79, 0.06);
+          border-color: var(--color-accent) !important;
+          background-color: var(--color-bg-card-hover) !important;
+          box-shadow: 0 4px 12px var(--color-accent-glow) !important;
         }
         .visibility-card input[type="radio"] {
-          accent-color: #2d6a4f;
+          accent-color: var(--color-accent) !important;
           width: 18px;
           height: 18px;
           cursor: pointer;
         }
+        .visibility-title {
+          font-weight: 700;
+          color: var(--color-text-primary) !important;
+          font-size: 14px;
+        }
+        .visibility-desc {
+          font-size: 11px;
+          color: var(--color-text-secondary) !important;
+        }
         .section-divider {
-          border-top: 1.5px dashed #e5e7eb;
+          border-top: 1.5px dashed var(--color-border) !important;
           margin-top: 28px;
           margin-bottom: 24px;
           padding-top: 20px;
@@ -929,46 +994,53 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
         .section-title {
           font-size: 15px;
           font-weight: 700;
-          color: #1b4332;
+          color: var(--color-accent);
           margin-bottom: 18px;
         }
         .btn-tag-add {
-          border: 1.5px solid #2d6a4f;
-          color: #2d6a4f;
+          border: 1.5px solid var(--color-accent) !important;
+          color: var(--color-accent) !important;
           background: transparent;
           border-radius: 0 12px 12px 0;
           padding: 0 16px;
           transition: all 0.2s ease;
         }
         .btn-tag-add:hover {
-          background-color: #2d6a4f;
-          color: white;
+          background-color: var(--color-accent) !important;
+          color: #000000 !important;
         }
         .form-control:has(+ .btn-tag-add) {
-          border-radius: 12px 0 0 12px;
+          border-radius: 12px 0 0 12px !important;
         }
         .badge-tag {
           font-size: 12px;
           transition: all 0.2s ease;
+          background-color: var(--color-bg-input) !important;
+          border: 1.5px solid var(--color-border) !important;
+          color: var(--color-text-primary) !important;
         }
         .badge-tag i {
           font-size: 13.5px;
           transition: color 0.15s ease;
+          color: var(--color-text-secondary) !important;
         }
         .badge-tag i:hover {
-          color: #ef4444 !important;
+          color: var(--color-negative) !important;
         }
         .premium-dropzone {
-          border: 2px dashed #a3b899;
-          background-color: #f4fbf7;
+          border: 2px dashed var(--color-accent) !important;
+          background-color: var(--color-accent-dim) !important;
           border-radius: 16px;
           padding: 30px;
           transition: all 0.25s ease;
         }
         .premium-dropzone:hover {
-          background-color: #eaf7f0;
-          border-color: #2d6a4f;
+          background-color: var(--color-accent-glow) !important;
+          border-color: var(--color-accent) !important;
           transform: translateY(-1px);
+        }
+        .premium-dropzone .fw-bold {
+          color: var(--color-text-primary) !important;
         }
         .photo-preview-card {
           position: relative;
@@ -982,8 +1054,8 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
           transform: scale(1.02);
         }
         .photo-preview-card.thumbnail-selected {
-          border-color: #2d6a4f;
-          box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.25), 0 4px 10px rgba(0, 0, 0, 0.08);
+          border-color: var(--color-accent) !important;
+          box-shadow: 0 0 0 3px var(--color-accent-glow) !important;
         }
         .remove-btn {
           background: rgba(239, 68, 68, 0.9);
@@ -1004,8 +1076,8 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
         }
         .btn-premium-cancel {
           border: none;
-          background: #f3f4f6;
-          color: #4b5563;
+          background: var(--color-bg-input) !important;
+          color: var(--color-text-primary) !important;
           padding: 10px 24px;
           border-radius: 100px;
           font-weight: 600;
@@ -1013,18 +1085,18 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
           transition: all 0.2s ease;
         }
         .btn-premium-cancel:hover {
-          background: #e5e7eb;
-          color: #1f2937;
+          background: var(--color-bg-card-hover) !important;
+          color: var(--color-text-primary) !important;
         }
         .btn-premium-submit {
           border: none;
-          background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%);
-          color: white;
+          background: var(--color-accent) !important;
+          color: #000000 !important;
           padding: 10px 28px;
           border-radius: 100px;
-          font-weight: 600;
+          font-weight: 700;
           font-size: 14px;
-          box-shadow: 0 4px 12px rgba(45, 106, 79, 0.2);
+          box-shadow: 0 4px 12px var(--color-accent-glow);
           transition: all 0.25s ease;
         }
         .btn-premium-submit:hover {
@@ -1048,6 +1120,6 @@ export default function CreateOpportunityModal({ open, onClose, onSubmit }) {
           }
         }
       `}</style>
-    </div>
+    </>
   );
 }

@@ -1,12 +1,12 @@
 import localFont from 'next/font/local';
-import './globals.css';
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/autoplay';
+
+import './globals.css';
 
 import BootstrapClient from '@/components/common/BootstrapClient';
 import AOSInit from '@/components/common/AOSInit';

@@ -251,6 +251,216 @@ export default function OverviewPane() {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .vh-kpi {
+          background-color: var(--color-bg-card) !important;
+          border: 1px solid var(--color-border) !important;
+          border-radius: var(--radius-card) !important;
+          box-shadow: var(--shadow-card) !important;
+          padding: 20px;
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .vh-kpi:hover {
+          transform: translateY(-2px);
+          border-color: var(--color-border-hover) !important;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+        }
+        .vh-kpi .small {
+          color: var(--color-text-secondary) !important;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          font-size: 11px;
+          margin-bottom: 4px;
+        }
+        .vh-kpi .fs-3 {
+          font-size: 26px !important;
+          font-weight: 700;
+          color: var(--color-text-primary) !important;
+        }
+        .vh-kpi .vh-kpi-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 20px;
+        }
+        .vh-kpi-icon.bg-primary-subtle {
+          background-color: rgba(13, 110, 253, 0.12) !important;
+          color: #0d6efd !important;
+        }
+        .vh-kpi-icon.bg-success-subtle {
+          background-color: var(--color-accent-dim) !important;
+          color: var(--color-accent) !important;
+        }
+        .vh-kpi-icon.bg-purple-subtle {
+          background-color: rgba(165, 105, 189, 0.12) !important;
+          color: #a569bd !important;
+        }
+        .vh-kpi-icon.bg-warning-subtle {
+          background-color: rgba(255, 193, 7, 0.12) !important;
+          color: #ffc107 !important;
+        }
+        .vh-kpi .vh-progress {
+          height: 6px;
+          background-color: var(--color-border) !important;
+          border-radius: 100px;
+          margin-top: 8px;
+          overflow: hidden;
+        }
+        .vh-kpi .vh-progress .progress-bar {
+          border-radius: 100px;
+        }
+        .vh-kpi small {
+          color: var(--color-text-secondary) !important;
+          font-size: 11px;
+          margin-top: 4px;
+          display: block;
+        }
+
+        .vh-section-card {
+          background-color: var(--color-bg-card) !important;
+          border: 1px solid var(--color-border) !important;
+          border-radius: var(--radius-card) !important;
+          box-shadow: var(--shadow-card) !important;
+          padding: 24px !important;
+          transition: all 0.3s ease;
+        }
+        .vh-section-card h6 {
+          font-size: 16px;
+          font-weight: 700;
+          color: var(--color-text-primary) !important;
+          margin-bottom: 2px;
+        }
+        .vh-section-card small {
+          color: var(--color-text-secondary) !important;
+        }
+        .vh-section-card a {
+          color: var(--color-accent) !important;
+          font-weight: 600;
+          text-decoration: none;
+        }
+        .vh-section-card a:hover {
+          text-decoration: underline;
+        }
+
+        .vh-activity-item {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 14px 0;
+          border-bottom: 1px solid var(--color-border);
+        }
+        .vh-activity-item:last-of-type {
+          border-bottom: none;
+        }
+        .vh-activity-dot {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .vh-activity-dot.bg-success-subtle {
+          background-color: rgba(25, 135, 84, 0.12) !important;
+          color: #198754 !important;
+        }
+        .vh-activity-dot.bg-primary-subtle {
+          background-color: rgba(13, 110, 253, 0.12) !important;
+          color: #0d6efd !important;
+        }
+        .vh-activity-item .fw-semibold {
+          color: var(--color-text-primary);
+          font-size: 14.5px;
+        }
+        .vh-activity-item .small {
+          color: var(--color-text-secondary) !important;
+          font-size: 12px;
+        }
+        .vh-activity-item .badge {
+          font-size: 11px;
+          font-weight: 600;
+          padding: 6px 12px;
+          border-radius: 100px;
+        }
+        .vh-activity-item .badge.text-bg-success-subtle {
+          background-color: rgba(25, 135, 84, 0.12) !important;
+          color: #198754 !important;
+          border: 1px solid rgba(25, 135, 84, 0.2) !important;
+        }
+        .vh-activity-item .badge.text-bg-warning-subtle {
+          background-color: rgba(255, 193, 7, 0.12) !important;
+          color: #ffc107 !important;
+          border: 1px solid rgba(255, 193, 7, 0.2) !important;
+        }
+        .vh-activity-item .badge.text-bg-info-subtle {
+          background-color: rgba(13, 110, 253, 0.12) !important;
+          color: #0d6efd !important;
+          border: 1px solid rgba(13, 110, 253, 0.2) !important;
+        }
+        .vh-activity-item .badge.text-bg-primary-subtle {
+          background-color: rgba(165, 105, 189, 0.12) !important;
+          color: #a569bd !important;
+          border: 1px solid rgba(165, 105, 189, 0.2) !important;
+        }
+
+        .vh-reco-card {
+          background-color: var(--color-bg-input) !important;
+          border: 1px solid var(--color-border) !important;
+          border-radius: 14px !important;
+          padding: 16px;
+          transition: all 0.25s ease;
+        }
+        .vh-reco-card:hover {
+          border-color: var(--color-accent) !important;
+          box-shadow: 0 4px 15px var(--color-accent-dim);
+          transform: translateY(-1px);
+        }
+        .vh-reco-card .fw-semibold {
+          color: var(--color-text-primary);
+          font-size: 15px;
+        }
+        .vh-reco-card .text-muted {
+          color: var(--color-text-secondary) !important;
+        }
+        .vh-reco-card .small {
+          color: var(--color-text-secondary) !important;
+        }
+        .vh-reco-card .badge {
+          background-color: var(--color-bg-card) !important;
+          color: var(--color-text-primary) !important;
+          border: 1px solid var(--color-border) !important;
+          font-weight: 500;
+        }
+        .vh-reco-card .badge.text-success {
+          background-color: var(--color-accent-dim) !important;
+          color: var(--color-accent) !important;
+          border: none !important;
+          font-weight: 700;
+        }
+        .vh-reco-card .btn-primary {
+          background: var(--color-accent);
+          color: #000;
+          font-weight: 700;
+          border: none;
+          padding: 6px 16px;
+          border-radius: var(--radius-btn);
+          font-size: 13px;
+          transition: all 0.2s ease;
+        }
+        .vh-reco-card .btn-primary:hover {
+          opacity: 0.9;
+          box-shadow: 0 0 10px var(--color-accent-glow);
+        }
+      `}</style>
     </div>
   );
 }

@@ -188,27 +188,10 @@ export default function AdminCommentsPage() {
       <RoleGuard enabled={roleAllowed} />
 
       {/* Page Header */}
-      <div
-        className="page-header"
-        style={{
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-          padding: "2rem",
-          borderRadius: "12px",
-          color: "white",
-        }}
-      >
+      <div className="page-header">
         <div>
-          <h1 className="page-title" style={{ color: "white" }}>
-            <i className="bi bi-chat-dots-fill me-3"></i>
-            Comments Moderation
-          </h1>
-          <p
-            style={{
-              color: "rgba(255, 255, 255, 0.8)",
-              fontSize: "0.875rem",
-              marginTop: "4px",
-            }}
-          >
+          <h1 className="page-title">Comments Moderation</h1>
+          <p style={{ color: "var(--color-text-secondary)", fontSize: "0.875rem", marginTop: "4px" }}>
             Review and moderate user comments on opportunities
           </p>
         </div>
@@ -216,27 +199,21 @@ export default function AdminCommentsPage() {
           <button
             className={showFlaggedOnly ? "btn-primary" : "btn-secondary"}
             onClick={() => setShowFlaggedOnly(true)}
-            style={{
-              background: showFlaggedOnly ? "rgba(255,255,255,0.2)" : "white",
-              color: showFlaggedOnly ? "white" : "#333",
-            }}
+            style={{ padding: "8px 16px" }}
           >
             <i className="bi bi-flag-fill me-2"></i> Flagged ({stats.flagged})
           </button>
           <button
             className={showFlaggedOnly ? "btn-secondary" : "btn-primary"}
             onClick={() => setShowFlaggedOnly(false)}
-            style={{
-              background: !showFlaggedOnly ? "rgba(255,255,255,0.2)" : "white",
-              color: !showFlaggedOnly ? "white" : "#333",
-            }}
+            style={{ padding: "8px 16px" }}
           >
             <i className="bi bi-list me-2"></i> All Comments
           </button>
         </div>
       </div>
 
-      <div className={!roleAllowed ? "opacity-50 pointer-events-none" : ""}>
+      <div className={`space-y-6 ${!roleAllowed ? "opacity-50 pointer-events-none" : ""}`}>
         {error && (
           <div className="card" style={{ color: "var(--color-negative)" }}>
             {error}
@@ -244,12 +221,12 @@ export default function AdminCommentsPage() {
         )}
 
         {/* Filters */}
-        <div className="flex flex-wrap items-center gap-3 mb-6">
+        <div className="flex flex-wrap items-center gap-3">
           <select
-            className="btn-secondary"
+            className="form-input"
             value={oppFilter}
             onChange={(e) => setOppFilter(e.target.value)}
-            style={{ padding: "10px 16px", borderRadius: "8px" }}
+            style={{ padding: "10px 16px", borderRadius: "8px", width: "auto", maxWidth: "280px" }}
           >
             <option value="all">All Opportunities</option>
             {uniqueOpportunities.map((op) => (
@@ -259,10 +236,10 @@ export default function AdminCommentsPage() {
             ))}
           </select>
           <select
-            className="btn-secondary"
+            className="form-input"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            style={{ padding: "10px 16px", borderRadius: "8px" }}
+            style={{ padding: "10px 16px", borderRadius: "8px", width: "auto", maxWidth: "280px" }}
           >
             <option value="all">All Status</option>
             <option value="approved">Approved</option>
@@ -273,91 +250,27 @@ export default function AdminCommentsPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div
-            className="card"
-            style={{
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              color: "white",
-              border: "none",
-              borderRadius: "12px",
-              padding: "1.5rem",
-            }}
-          >
-            <div className="kpi-label" style={{ opacity: 0.9 }}>
-              Total Comments
-            </div>
-            <div
-              className="kpi-value"
-              style={{ color: "white", fontSize: "2rem" }}
-            >
-              {stats.total}
-            </div>
+        <div className="kpi-grid">
+          <div className="kpi-card">
+            <div className="kpi-label">Total Comments</div>
+            <div className="kpi-value">{stats.total}</div>
           </div>
-          <div
-            className="card"
-            style={{
-              background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-              color: "white",
-              border: "none",
-              borderRadius: "12px",
-              padding: "1.5rem",
-            }}
-          >
-            <div className="kpi-label" style={{ opacity: 0.9 }}>
-              Flagged
-            </div>
-            <div
-              className="kpi-value"
-              style={{ color: "white", fontSize: "2rem" }}
-            >
-              {stats.flagged}
-            </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Flagged</div>
+            <div className="kpi-value" style={{ color: "var(--color-negative)" }}>{stats.flagged}</div>
           </div>
-          <div
-            className="card"
-            style={{
-              background: "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)",
-              color: "white",
-              border: "none",
-              borderRadius: "12px",
-              padding: "1.5rem",
-            }}
-          >
-            <div className="kpi-label" style={{ opacity: 0.9 }}>
-              Approved
-            </div>
-            <div
-              className="kpi-value"
-              style={{ color: "white", fontSize: "2rem" }}
-            >
-              {stats.approved}
-            </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Approved</div>
+            <div className="kpi-value" style={{ color: "var(--color-positive)" }}>{stats.approved}</div>
           </div>
-          <div
-            className="card"
-            style={{
-              background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-              color: "white",
-              border: "none",
-              borderRadius: "12px",
-              padding: "1.5rem",
-            }}
-          >
-            <div className="kpi-label" style={{ opacity: 0.9 }}>
-              Hidden
-            </div>
-            <div
-              className="kpi-value"
-              style={{ color: "white", fontSize: "2rem" }}
-            >
-              {stats.hidden}
-            </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Hidden</div>
+            <div className="kpi-value" style={{ color: "var(--color-text-secondary)" }}>{stats.hidden}</div>
           </div>
         </div>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="three-col-grid">
           {/* Comments List */}
           <div className="lg:col-span-2 space-y-4">
             {!filtered.length ? (
@@ -424,8 +337,9 @@ export default function AdminCommentsPage() {
                           width: "48px",
                           height: "48px",
                           borderRadius: "50%",
-                          background:
-                            "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                          background: "var(--color-bg-input)",
+                          border: "1px solid var(--color-border)",
+                          color: "var(--color-accent)",
                         }}
                       >
                         {initial}
@@ -563,10 +477,7 @@ export default function AdminCommentsPage() {
                 <i
                   className="bi bi-pie-chart-fill me-2"
                   style={{
-                    background:
-                      "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
+                    color: "var(--color-accent)",
                   }}
                 ></i>
                 Statistics

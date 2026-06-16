@@ -4,11 +4,21 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 
 const SettingsContext = createContext();
 
+const hexToRgba = (hex, alpha) => {
+  if (!hex) return "";
+  const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+  const fullHex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(fullHex);
+  return result
+    ? `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, ${alpha})`
+    : "";
+};
+
 export const SettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState({
-    theme: "light",
+    theme: "dark",
     language: "km",
-    primaryColor: "#4e54c8",
+    primaryColor: "#A3E635",
     secondaryColor: "#8f94fb",
   });
 
@@ -28,6 +38,12 @@ export const SettingsProvider = ({ children }) => {
       document.documentElement.style.setProperty("--primary-color", settings.primaryColor);
       document.documentElement.style.setProperty("--btn-primary", settings.primaryColor);
       document.documentElement.style.setProperty("--link-color", settings.primaryColor);
+      document.documentElement.style.setProperty("--color-accent", settings.primaryColor);
+      
+      const dim = hexToRgba(settings.primaryColor, 0.15);
+      const glow = hexToRgba(settings.primaryColor, 0.25);
+      if (dim) document.documentElement.style.setProperty("--color-accent-dim", dim);
+      if (glow) document.documentElement.style.setProperty("--color-accent-glow", glow);
     }
     if (settings.secondaryColor) {
       document.documentElement.style.setProperty("--secondary-color", settings.secondaryColor);

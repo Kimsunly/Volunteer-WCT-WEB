@@ -3,15 +3,11 @@
 import Link from "next/link";
 import { logout as apiLogout } from "@/lib/services/auth";
 import { clearAuth } from "@/lib/utils/authState";
-import { useEffect, useState } from "react";
+import { useSettings } from "@/context/SettingsContext";
 
 export default function AdminNavbar() {
-  const [theme, setTheme] = useState("dark");
-
-  useEffect(() => {
-    const saved = localStorage.getItem("theme") || "dark";
-    setTheme(saved);
-  }, []);
+  const { settings, updateSetting } = useSettings();
+  const theme = settings.theme;
 
   const handleLogout = async () => {
     try {
@@ -25,10 +21,7 @@ export default function AdminNavbar() {
   };
 
   const toggleTheme = () => {
-    const newTheme = theme === "dark" ? "light" : "dark";
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-    document.documentElement.setAttribute("data-theme", newTheme);
+    updateSetting("theme", theme === "dark" ? "light" : "dark");
   };
 
   return (

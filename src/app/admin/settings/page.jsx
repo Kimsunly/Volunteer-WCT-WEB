@@ -17,29 +17,42 @@ export default function AdminSettingsPage() {
   const { settings, updateSetting } = useSettings();
 
   return (
-    <div className="page-container">
+    <div className="space-y-6">
       <div className="page-header">
         <div>
           <h1 className="page-title">Appearance</h1>
-          <p className="page-subtitle">Customize your admin dashboard look</p>
+          <p style={{ color: "var(--color-text-secondary)", fontSize: "0.875rem", marginTop: "4px" }}>
+            Customize your admin dashboard look
+          </p>
         </div>
       </div>
 
       {/* Interface Theme */}
-      <div className="card mb-6">
-        <div className="card-header">
-          <h5 className="card-title">Interface theme</h5>
-          <p className="card-description">Select or customize your UI theme.</p>
+      <div className="card">
+        <div className="card-header" style={{ marginBottom: "16px" }}>
+          <div>
+            <h5 className="card-title" style={{ margin: 0, fontSize: "1rem", fontWeight: "600", color: "var(--color-text-primary)" }}>Interface theme</h5>
+            <p style={{ color: "var(--color-text-secondary)", fontSize: "0.8125rem", margin: "4px 0 0 0" }}>Select or customize your UI theme.</p>
+          </div>
         </div>
-        <div className="card-body">
-          <div className="d-flex gap-4 flex-wrap">
+        <div>
+          <div className="flex flex-wrap gap-6">
             {/* System/Light Mode */}
             <button
               type="button"
               className="p-0 border-0 bg-transparent"
               onClick={() => updateSetting("theme", "light")}
+              style={{ cursor: "pointer", textAlign: "left" }}
             >
-              <div className={`p-2 rounded-4 border-3 transition-all ${settings.theme === "light" ? "border-accent" : "border-transparent"}`}>
+              <div 
+                className="transition-all"
+                style={{
+                  padding: "8px",
+                  borderRadius: "16px",
+                  border: "3px solid",
+                  borderColor: settings.theme === "light" ? "var(--color-accent)" : "transparent",
+                }}
+              >
                 <div
                   style={{
                     width: "180px",
@@ -91,7 +104,7 @@ export default function AdminSettingsPage() {
                       right: "15px",
                       height: "12px",
                       borderRadius: "4px",
-                      background: "var(--color-border)",
+                      background: "#e5e7eb",
                     }}
                   ></div>
                   <div
@@ -102,7 +115,7 @@ export default function AdminSettingsPage() {
                       right: "40px",
                       height: "12px",
                       borderRadius: "4px",
-                      background: "var(--color-border-light)",
+                      background: "#f3f4f6",
                     }}
                   ></div>
                   <div
@@ -113,7 +126,7 @@ export default function AdminSettingsPage() {
                       right: "60px",
                       height: "12px",
                       borderRadius: "4px",
-                      background: "var(--color-border-light)",
+                      background: "#f3f4f6",
                     }}
                   ></div>
                   {settings.theme === "light" && (
@@ -131,12 +144,12 @@ export default function AdminSettingsPage() {
                         justifyContent: "center",
                       }}
                     >
-                      <i className="bi bi-check-lg text-white"></i>
+                      <i className="bi bi-check-lg" style={{ color: "#000000", fontWeight: "bold" }}></i>
                     </div>
                   )}
                 </div>
               </div>
-              <p className="text-center mt-2 small fw-medium" style={{ color: "var(--color-text-primary)" }}>
+              <p className="text-center mt-2 small" style={{ color: "var(--color-text-primary)", fontWeight: "500", margin: "8px 0 0 0", textAlign: "center" }}>
                 Light
               </p>
             </button>
@@ -146,15 +159,24 @@ export default function AdminSettingsPage() {
               type="button"
               className="p-0 border-0 bg-transparent"
               onClick={() => updateSetting("theme", "dark")}
+              style={{ cursor: "pointer", textAlign: "left" }}
             >
-              <div className={`p-2 rounded-4 border-3 transition-all ${settings.theme === "dark" ? "border-accent" : "border-transparent"}`}>
+              <div 
+                className="transition-all"
+                style={{
+                  padding: "8px",
+                  borderRadius: "16px",
+                  border: "3px solid",
+                  borderColor: settings.theme === "dark" ? "var(--color-accent)" : "transparent",
+                }}
+              >
                 <div
                   style={{
                     width: "180px",
                     height: "120px",
                     borderRadius: "12px",
-                    background: "#1f2937",
-                    border: "1px solid #374151",
+                    background: "#1e1e1e",
+                    border: "1px solid var(--color-border)",
                     position: "relative",
                   }}
                 >
@@ -199,7 +221,7 @@ export default function AdminSettingsPage() {
                       right: "15px",
                       height: "12px",
                       borderRadius: "4px",
-                      background: "#4b5563",
+                      background: "var(--color-bg-input)",
                     }}
                   ></div>
                   <div
@@ -210,7 +232,7 @@ export default function AdminSettingsPage() {
                       right: "40px",
                       height: "12px",
                       borderRadius: "4px",
-                      background: "#374151",
+                      background: "var(--color-border)",
                     }}
                   ></div>
                   <div
@@ -221,7 +243,7 @@ export default function AdminSettingsPage() {
                       right: "60px",
                       height: "12px",
                       borderRadius: "4px",
-                      background: "#374151",
+                      background: "var(--color-border)",
                     }}
                   ></div>
                   {settings.theme === "dark" && (
@@ -239,12 +261,12 @@ export default function AdminSettingsPage() {
                         justifyContent: "center",
                       }}
                     >
-                      <i className="bi bi-check-lg text-white"></i>
+                      <i className="bi bi-check-lg" style={{ color: "#000000", fontWeight: "bold" }}></i>
                     </div>
                   )}
                 </div>
               </div>
-              <p className="text-center mt-2 small fw-medium" style={{ color: "var(--color-text-primary)" }}>
+              <p className="text-center mt-2 small" style={{ color: "var(--color-text-primary)", fontWeight: "500", margin: "8px 0 0 0", textAlign: "center" }}>
                 Dark
               </p>
             </button>
@@ -253,58 +275,62 @@ export default function AdminSettingsPage() {
       </div>
 
       {/* Brand Color */}
-      <div className="card mb-6">
-        <div className="card-header">
-          <h5 className="card-title">Brand color</h5>
-          <p className="card-description">Select or customize your brand color.</p>
+      <div className="card">
+        <div className="card-header" style={{ marginBottom: "16px" }}>
+          <div>
+            <h5 className="card-title" style={{ margin: 0, fontSize: "1rem", fontWeight: "600", color: "var(--color-text-primary)" }}>Brand color</h5>
+            <p style={{ color: "var(--color-text-secondary)", fontSize: "0.8125rem", margin: "4px 0 0 0" }}>Select or customize your brand color.</p>
+          </div>
         </div>
-        <div className="card-body">
-          <div className="d-flex gap-3 align-items-center mb-3">
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center" }}>
             {colorPresets.map((color, index) => (
               <button
                 key={index}
                 type="button"
                 className="p-0 border-0 rounded-circle"
                 style={{
-                  width: "32px",
-                  height: "32px",
+                  width: "36px",
+                  height: "36px",
                   background: color,
+                  borderRadius: "50%",
+                  cursor: "pointer",
                   boxShadow:
                     settings.primaryColor === color
-                      ? "0 0 0 3px rgba(163,230,53,0.2)"
+                      ? "0 0 0 3px var(--color-accent-glow)"
                       : "none",
                   border:
                     settings.primaryColor === color
                       ? "3px solid var(--color-accent)"
-                      : "none",
+                      : "1px solid var(--color-border)",
+                  transition: "all 0.15s ease",
                 }}
                 onClick={() => updateSetting("primaryColor", color)}
               />
             ))}
           </div>
-          <div className="d-flex gap-3 align-items-center">
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <label
-              className="form-label small fw-medium mb-0 me-2"
-              style={{ color: "var(--color-text-secondary)" }}
+              style={{ fontSize: "0.875rem", color: "var(--color-text-secondary)", fontWeight: "500", margin: 0 }}
             >
               Custom color:
             </label>
-            <span className="small fw-medium" style={{ color: "var(--color-text-primary)" }}>
+            <span style={{ fontSize: "0.875rem", color: "var(--color-text-primary)", fontWeight: "600" }}>
               {settings.primaryColor}
             </span>
             <input
               type="color"
-              className="form-control-color p-0 border-0"
               value={settings.primaryColor}
               onChange={(e) => updateSetting("primaryColor", e.target.value)}
               style={{
-                width: "36px",
-                height: "36px",
+                width: "40px",
+                height: "40px",
+                padding: "4px",
                 borderRadius: "50%",
-                boxShadow: settings.primaryColor
-                  ? "0 0 0 3px rgba(163,230,53,0.2)"
-                  : "none",
-                border: "3px solid var(--color-accent)",
+                background: "var(--color-bg-input)",
+                border: "1px solid var(--color-border)",
+                cursor: "pointer",
+                boxShadow: "var(--shadow-card)",
               }}
             />
           </div>
@@ -312,36 +338,38 @@ export default function AdminSettingsPage() {
       </div>
 
       {/* Language */}
-      <div className="card mb-6">
-        <div className="card-header">
-          <h5 className="card-title">Language</h5>
-          <p className="card-description">Select your preferred language.</p>
+      <div className="card">
+        <div className="card-header" style={{ marginBottom: "16px" }}>
+          <div>
+            <h5 className="card-title" style={{ margin: 0, fontSize: "1rem", fontWeight: "600", color: "var(--color-text-primary)" }}>Language</h5>
+            <p style={{ color: "var(--color-text-secondary)", fontSize: "0.8125rem", margin: "4px 0 0 0" }}>Select your preferred language.</p>
+          </div>
         </div>
-        <div className="card-body">
-          <div className="d-flex gap-4 flex-wrap">
+        <div>
+          <div className="flex flex-wrap gap-6">
             <button
               type="button"
               className="p-0 border-0 bg-transparent"
               onClick={() => updateSetting("language", "km")}
+              style={{ cursor: "pointer" }}
             >
               <div
-                className={`p-3 rounded-3 border-2 transition-all d-flex align-items-center gap-3 ${settings.language === "km" ? "border-accent" : "border-gray-200"}`}
+                className="transition-all flex items-center gap-3"
                 style={{
                   minWidth: "180px",
+                  padding: "16px",
+                  borderRadius: "12px",
+                  border: "2px solid",
                   borderColor: settings.language === "km" ? "var(--color-accent)" : "var(--color-border)",
-                  background: settings.language === "km" ? "var(--color-surface)" : "var(--color-surface-secondary)",
-                  boxShadow:
-                    settings.language === "km"
-                      ? "0 0 0 1px rgba(163,230,53,0.2)"
-                      : "none",
+                  background: settings.language === "km" ? "var(--color-accent-dim)" : "var(--color-bg-card)",
                 }}
               >
                 <img
                   src="/images/Icon/Cambodia.png"
                   alt="KH"
-                  style={{ width: "48px", height: "auto" }}
+                  style={{ width: "40px", height: "auto", borderRadius: "4px" }}
                 />
-                <span className="fw-semibold" style={{ color: "var(--color-text-primary)" }}>
+                <span style={{ color: "var(--color-text-primary)", fontWeight: "600", fontSize: "0.875rem" }}>
                   ភាសាខ្មែរ
                 </span>
               </div>
@@ -351,25 +379,25 @@ export default function AdminSettingsPage() {
               type="button"
               className="p-0 border-0 bg-transparent"
               onClick={() => updateSetting("language", "en")}
+              style={{ cursor: "pointer" }}
             >
               <div
-                className={`p-3 rounded-3 border-2 transition-all d-flex align-items-center gap-3 ${settings.language === "en" ? "border-accent" : "border-gray-200"}`}
+                className="transition-all flex items-center gap-3"
                 style={{
                   minWidth: "180px",
+                  padding: "16px",
+                  borderRadius: "12px",
+                  border: "2px solid",
                   borderColor: settings.language === "en" ? "var(--color-accent)" : "var(--color-border)",
-                  background: settings.language === "en" ? "var(--color-surface)" : "var(--color-surface-secondary)",
-                  boxShadow:
-                    settings.language === "en"
-                      ? "0 0 0 1px rgba(163,230,53,0.2)"
-                      : "none",
+                  background: settings.language === "en" ? "var(--color-accent-dim)" : "var(--color-bg-card)",
                 }}
               >
                 <img
                   src="/images/Icon/england.png"
                   alt="EN"
-                  style={{ width: "48px", height: "auto" }}
+                  style={{ width: "40px", height: "auto", borderRadius: "4px" }}
                 />
-                <span className="fw-semibold" style={{ color: "var(--color-text-primary)" }}>
+                <span style={{ color: "var(--color-text-primary)", fontWeight: "600", fontSize: "0.875rem" }}>
                   English
                 </span>
               </div>
