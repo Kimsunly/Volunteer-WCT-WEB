@@ -664,38 +664,75 @@ export default function AdminOrganizersPage() {
                   </div>
                 )}
 
-                {detail.document_url && (
-                  <div>
-                    <label
-                      className="block mb-1"
+                <div>
+                  <label
+                    className="block mb-1"
+                    style={{
+                      fontSize: "0.75rem",
+                      color: "var(--color-text-secondary)",
+                      fontWeight: "600",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
+                    }}
+                  >
+                    Verification Document (ឯកសារបញ្ជាក់)
+                  </label>
+                  {detail.document_url ? (
+                    <div style={{ marginTop: "6px" }}>
+                      {/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(detail.document_url) ? (
+                        <div style={{ position: "relative", borderRadius: "8px", overflow: "hidden", border: "1px solid var(--color-border)", marginTop: "8px", background: "var(--color-bg-input)", textAlign: "center" }}>
+                          <img 
+                            src={detail.document_url} 
+                            alt="Verification Document" 
+                            style={{ maxWidth: "100%", maxHeight: "240px", height: "auto", display: "block", margin: "0 auto", cursor: "zoom-in" }} 
+                            onClick={() => window.open(detail.document_url, '_blank')}
+                          />
+                          <div style={{ padding: "8px", fontSize: "0.75rem", color: "var(--color-text-secondary)", borderTop: "1px solid var(--color-border)" }}>
+                            <a href={detail.document_url} target="_blank" rel="noreferrer" style={{ color: "var(--color-accent)", textDecoration: "none" }}>
+                              <i className="bi bi-box-arrow-up-right me-1"></i> Open in new tab
+                            </a>
+                          </div>
+                        </div>
+                      ) : (
+                        <a
+                          href={detail.document_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn-secondary"
+                          style={{
+                            fontSize: "0.85rem",
+                            padding: "8px 16px",
+                            textDecoration: "none",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "8px"
+                          }}
+                        >
+                          <i className="bi bi-file-earmark-pdf-fill" style={{ color: "var(--color-negative)", fontSize: "1.2rem" }}></i>
+                          <span>មើលឯកសារ / View Document</span>
+                        </a>
+                      )}
+                    </div>
+                  ) : (
+                    <div 
                       style={{
-                        fontSize: "0.75rem",
-                        color: "var(--color-text-secondary)",
-                        fontWeight: "600",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em",
+                        marginTop: "6px",
+                        background: "rgba(245, 158, 11, 0.1)",
+                        border: "1px solid rgba(245, 158, 11, 0.2)",
+                        color: "#f59e0b",
+                        padding: "10px 14px",
+                        borderRadius: "8px",
+                        fontSize: "0.8125rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px"
                       }}
                     >
-                      Verification Document (ឯកសារបញ្ជាក់)
-                    </label>
-                    <div style={{ marginTop: "6px" }}>
-                      <a
-                        href={detail.document_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn-secondary"
-                        style={{
-                          fontSize: "0.85rem",
-                          padding: "8px 16px",
-                          textDecoration: "none",
-                        }}
-                      >
-                        <i className="bi bi-file-earmark-pdf-fill" style={{ color: "var(--color-negative)", marginRight: "8px" }}></i>
-                        មើលឯកសារ / View Document
-                      </a>
+                      <i className="bi bi-exclamation-triangle-fill"></i>
+                      <span>គ្មានឯកសារបញ្ជាក់ / No verification document uploaded</span>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
 
                 {detail.rejection_reason && (
                   <div>

@@ -155,7 +155,7 @@ body {
   background: var(--bg-page);
   color: var(--text-main);
   padding-top: var(--navbar-h) !important;
-  font-family: "Kantomruy", "Poppins";
+  font-family: var(--font-kantumruy), "Poppins", sans-serif;
   max-width: 100% !important;
   overflow-x: hidden !important;
 }
@@ -359,11 +359,13 @@ body {
   padding: 0 20px;
   color: var(--text-white-fixed);
   font-size: 18px;
-  border-right: 1px solid #fff !important;
+  border-right: 0 !important;
+  transition: color 0.2s ease, opacity 0.2s ease;
 }
 
-.top-header .nav-list .nav-link:nth-child(2) {
-  border-right: 0;
+.top-header .nav-list .nav-link:hover {
+  color: var(--primary-color) !important;
+  opacity: 1 !important;
 }
 
 .top-header .dropdown .btn {

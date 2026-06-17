@@ -24,11 +24,25 @@ export function AuthProvider({ children }) {
                 if (userData) {
                     setUser(userData);
                 } else {
+                    // No valid user data, clear tokens
                     setUser(null);
+                    localStorage.removeItem("authToken");
+                    localStorage.removeItem("role");
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("refreshToken");
+                    document.cookie = "authToken=; path=/; max-age=0";
+                    document.cookie = "role=; path=/; max-age=0";
                 }
             } catch (error) {
                 console.error("Auth check failed:", error);
                 setUser(null);
+                // Clear invalid tokens
+                localStorage.removeItem("authToken");
+                localStorage.removeItem("role");
+                localStorage.removeItem("token");
+                localStorage.removeItem("refreshToken");
+                document.cookie = "authToken=; path=/; max-age=0";
+                document.cookie = "role=; path=/; max-age=0";
             } finally {
                 setLoading(false);
             }

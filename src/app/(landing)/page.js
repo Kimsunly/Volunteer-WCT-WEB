@@ -70,7 +70,25 @@ async function getTestimonials() {
 export default async function LandingPage() {
     const cookieStore = await cookies();
     const token = cookieStore.get("authToken")?.value;
+    
+    // Let's verify the token is valid before showing HomepageContent
+    let isValidToken = false;
     if (token) {
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/auth/me`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if (res.ok) {
+                isValidToken = true;
+            }
+        } catch (e) {
+            console.error("Token validation failed:", e);
+        }
+    }
+
+    if (token && isValidToken) {
         return <HomepageContent />;
     }
 

@@ -7,11 +7,12 @@ import { useSettings } from "@/context/SettingsContext";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminNavbar from "./components/AdminNavbar";
 import RightPanel from "./components/RightPanel";
+import { getUserProfile } from "@/services/user";
 
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, loading, setUser } = useAuth();
   const [mounted, setMounted] = useState(false);
   const { settings, updateSetting } = useSettings();
 
@@ -19,10 +20,27 @@ export default function AdminLayout({ children }) {
     setMounted(true);
   }, []);
 
-
+  useEffect(() => {
+    const fetchLatestProfile = async () => {
+      try {
+        const latestProfile = await getUserProfile();
+        if (latestProfile) {
+          setUser((prev) => ({
+            ...prev,
+            ...latestProfile,
+          }));
+        }
+      } catch (err) {
+        console.error("Failed to fetch latest admin profile in layout:", err);
+      }
+    };
+    if (user && user.role?.toLowerCase() === "admin") {
+      fetchLatestProfile();
+    }
+  }, [user?.id]);
 
   useEffect(() => {
-    if (!loading && (!user || user.role !== "admin")) {
+    if (!loading && (!user || user.role?.toLowerCase() !== "admin")) {
       router.push("/auth/login");
     }
   }, [user, loading, router]);
@@ -37,6 +55,7 @@ export default function AdminLayout({ children }) {
     if (pathname.includes("/admin/comments")) return "comments";
     if (pathname.includes("/admin/users")) return "users";
     if (pathname.includes("/admin/donations")) return "donations";
+    if (pathname.includes("/admin/settings/profile")) return "settings-profile";
     if (pathname.includes("/admin/settings")) return "settings";
     return "dashboard";
   };

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
+import Link from "next/link";
 import { RoleGuard } from "../components";
 import {
   listAllOpportunities as listOpportunities,
@@ -11,6 +12,10 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import CreateOpportunityModal from "@/app/organizer/profile/components/CreateOpportunityModal";
 import EditOpportunityModal from "@/app/organizer/profile/components/EditOpportunityModal";
+import OpportunityDetailModal from "@/app/organizer/profile/components/OpportunityDetailModal";
+import ConfirmModal from "@/components/modals/ConfirmModal";
+import { closeOpportunity } from "@/services/opportunities";
+import { getApplicationsForOpportunity, updateApplicationStatus } from "@/services/applications";
 import toast from "react-hot-toast";
 import { parseApiError } from "@/lib/utils/apiError";
 
@@ -30,7 +35,16 @@ export default function AdminOpportunitiesPage() {
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
   const [selectedOp, setSelectedOp] = useState(null);
+
+  const [regsOpen, setRegsOpen] = useState(false);
+  const [regsLoading, setRegsLoading] = useState(false);
+  const [registrationsList, setRegistrationsList] = useState([]);
+  const [activeRegsOp, setActiveRegsOp] = useState(null);
+
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deletingOpportunityId, setDeletingOpportunityId] = useState(null);
 
   useEffect(() => {
     setMounted(true);
@@ -64,14 +78,31 @@ export default function AdminOpportunitiesPage() {
     }
   }, [authLoading, user, fetchOpps]);
 
-  const viewRegistrations = (item) => {
-    alert(`${item.applicants_count ?? 0} registrations for "${item.title}"`);
+  const viewRegistrations = async (item) => {
+    setActiveRegsOp(item);
+    setRegsOpen(true);
+    setRegsLoading(true);
+    setRegistrationsList([]);
+    try {
+      const res = await getApplicationsForOpportunity(item.id);
+      setRegistrationsList(res.data || res || []);
+    } catch (e) {
+      console.error("Failed to load registrations:", e);
+      toast.error("Failed to load registrations list");
+    } finally {
+      setRegsLoading(false);
+    }
   };
 
-  const handleDeleteOpp = async (id) => {
-    if (!confirm("Delete this opportunity permanently?")) return;
+  const handleDeleteOpp = (id) => {
+    setDeletingOpportunityId(id);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDeleteOpportunity = async () => {
+    if (!deletingOpportunityId) return;
     try {
-      await apiDeleteOpportunity(id);
+      await apiDeleteOpportunity(deletingOpportunityId);
       toast.success("លុបឱកាសដោយជោគជ័យ / Opportunity deleted successfully");
       await fetchOpps();
     } catch (e) {
@@ -81,18 +112,58 @@ export default function AdminOpportunitiesPage() {
     }
   };
 
+  const handleApproveApp = async (appId) => {
+    try {
+      await updateApplicationStatus(appId, "approved");
+      toast.success("បានអនុម័តពាក្យស្នើសុំដោយជោគជ័យ / Application approved successfully");
+      const res = await getApplicationsForOpportunity(activeRegsOp.id);
+      setRegistrationsList(res.data || res || []);
+      await fetchOpps();
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to approve application");
+    }
+  };
+
+  const handleRejectApp = async (appId) => {
+    try {
+      await updateApplicationStatus(appId, "rejected");
+      toast.success("បានបដិសេធពាក្យស្នើសុំ / Application rejected successfully");
+      const res = await getApplicationsForOpportunity(activeRegsOp.id);
+      setRegistrationsList(res.data || res || []);
+      await fetchOpps();
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to reject application");
+    }
+  };
+
+  const handleResetAppToPending = async (appId) => {
+    try {
+      await updateApplicationStatus(appId, "pending");
+      toast.success("បានត្រឡប់ទៅរង់ចាំពិនិត្យ / Application status reset to pending");
+      const res = await getApplicationsForOpportunity(activeRegsOp.id);
+      setRegistrationsList(res.data || res || []);
+      await fetchOpps();
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to reset application status");
+    }
+  };
+
   const openCreateOpp = () => {
     setCreateOpen(true);
   };
 
-  const openEditOpp = (item) => {
-    setSelectedOp({
+  const prepareSelectedOp = (item) => {
+    return {
       id: item.id,
       titleKh: item.title,
       titleEn: item.title,
       locationKh: item.logistic?.location_label || item.location || "",
       capacity: item.capacity || 10,
       status: item.status || "active",
+      registrations: item.applicants_count || 0,
       raw: {
         ...item,
         category_id: item.category_id || item.category?.id || item.category || "",
@@ -106,8 +177,17 @@ export default function AdminOpportunitiesPage() {
         housing: item.logistic?.housing || "None",
         transport: item.logistic?.transport || "None",
       }
-    });
+    };
+  };
+
+  const openEditOpp = (item) => {
+    setSelectedOp(prepareSelectedOp(item));
     setEditOpen(true);
+  };
+
+  const openDetailOpp = (item) => {
+    setSelectedOp(prepareSelectedOp(item));
+    setDetailOpen(true);
   };
 
   const handleCreateOpportunity = async (payload) => {
@@ -312,13 +392,13 @@ export default function AdminOpportunitiesPage() {
             <table className="data-table" style={{ width: "100%", tableLayout: "fixed" }}>
               <thead>
                 <tr>
-                  <th style={{ width: "25%", minWidth: "200px" }}>Title</th>
-                  <th style={{ width: "18%", minWidth: "130px" }}>Organization</th>
+                  <th style={{ width: "22%", minWidth: "180px" }}>Title</th>
+                  <th style={{ width: "16%", minWidth: "120px" }}>Organization</th>
                   <th style={{ width: "15%", minWidth: "140px" }}>Category</th>
                   <th style={{ width: "12%", minWidth: "100px" }}>Created</th>
                   <th style={{ width: "10%", minWidth: "100px" }}>Visibility</th>
                   <th style={{ width: "10%", minWidth: "90px" }}>Status</th>
-                  <th style={{ width: "10%", minWidth: "160px" }}>Actions</th>
+                  <th style={{ width: "15%", minWidth: "220px" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -343,7 +423,17 @@ export default function AdminOpportunitiesPage() {
                   opps.map((o) => (
                     <tr key={o.id}>
                       <td style={{ verticalAlign: "middle" }}>
-                        <strong style={{ color: "var(--color-text-primary)" }}>{o.title}</strong>
+                        <strong
+                          style={{
+                            color: "var(--color-text-primary)",
+                            cursor: "pointer",
+                            textDecoration: "underline",
+                          }}
+                          onClick={() => openDetailOpp(o)}
+                          title="View Detail"
+                        >
+                          {o.title}
+                        </strong>
                       </td>
                       <td style={{ verticalAlign: "middle", color: "var(--color-text-secondary)" }}>
                         {o.organization_name || o.organizer_name || "Admin"}
@@ -367,6 +457,23 @@ export default function AdminOpportunitiesPage() {
                       </td>
                       <td style={{ verticalAlign: "middle" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <button
+                            type="button"
+                            className="btn-secondary"
+                            style={{
+                              width: "36px",
+                              height: "36px",
+                              padding: 0,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              borderRadius: "var(--radius-sm)",
+                            }}
+                            onClick={() => openDetailOpp(o)}
+                            title="View Detail"
+                          >
+                            <i className="bi bi-eye"></i>
+                          </button>
                           <button
                             className="btn-secondary"
                             style={{
@@ -471,6 +578,228 @@ export default function AdminOpportunitiesPage() {
           onClose={() => setEditOpen(false)}
           opportunity={selectedOp}
           onSubmit={handleUpdateOpportunity}
+        />
+
+        <OpportunityDetailModal
+          open={detailOpen}
+          onClose={() => setDetailOpen(false)}
+          opportunity={selectedOp}
+          onEdit={(op) => {
+            setSelectedOp(op);
+            setEditOpen(true);
+          }}
+          onDelete={handleDeleteOpp}
+          onCloseOpportunity={async (id) => {
+            try {
+              await closeOpportunity(id);
+              await fetchOpps();
+              toast.success("បានបិទឱកាសដោយជោគជ័យ / Opportunity closed successfully");
+            } catch (e) {
+              console.error(e);
+              toast.error("Failed to close opportunity");
+            }
+          }}
+        />
+
+        {regsOpen && activeRegsOp && (
+          <>
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: "rgba(0, 0, 0, 0.6)",
+                backdropFilter: "blur(6px)",
+                zIndex: 1040,
+              }}
+              onClick={() => setRegsOpen(false)}
+            ></div>
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1050,
+                padding: "1rem",
+                pointerEvents: "none",
+              }}
+            >
+              <div
+                className="card shadow-lg overflow-hidden border-0"
+                style={{
+                  width: "100%",
+                  maxWidth: "850px",
+                  maxHeight: "90vh",
+                  overflowY: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
+                  pointerEvents: "auto",
+                  backgroundColor: "var(--color-bg-surface)",
+                  borderRadius: "16px",
+                  color: "var(--color-text-primary)",
+                  border: "1px solid var(--color-border)",
+                }}
+              >
+                <div
+                  className="modal-header p-4 d-flex align-items-center justify-content-between"
+                  style={{
+                    background: "var(--color-bg-surface)",
+                    borderBottom: "1px solid var(--color-border)",
+                    flexShrink: 0,
+                  }}
+                >
+                  <h5 className="modal-title d-flex align-items-center gap-2 mb-0" style={{ color: "var(--color-text-primary)", fontSize: "1.15rem", fontWeight: "600" }}>
+                    <i className="bi bi-people-fill fs-4" style={{ color: "var(--color-accent)" }}></i> បញ្ជីអ្នកចុះឈ្មោះ (Registrations List)
+                  </h5>
+                  <button
+                    type="button"
+                    className="btn-close-custom"
+                    onClick={() => setRegsOpen(false)}
+                  >
+                    <i className="bi bi-x-lg"></i>
+                  </button>
+                </div>
+
+                <div className="modal-body p-4" style={{ overflowY: "auto", flexGrow: 1 }}>
+                  <div className="mb-4">
+                    <h6 style={{ fontWeight: 700, margin: 0, color: "var(--color-text-secondary)" }}>ឱកាសការងារ / Opportunity:</h6>
+                    <p style={{ color: "var(--color-text-primary)", margin: "4px 0 0", fontSize: "1.05rem", fontWeight: "600" }}>{activeRegsOp.titleKh || activeRegsOp.title || ""}</p>
+                  </div>
+
+                  {regsLoading ? (
+                    <div className="text-center py-5">
+                      <div className="spinner-border text-success" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                    </div>
+                  ) : registrationsList.length === 0 ? (
+                    <div className="text-center py-5 text-muted">
+                      <i className="bi bi-inbox fs-1 d-block mb-2 text-muted" style={{ opacity: 0.4 }} />
+                      គ្មានការចុះឈ្មោះឡើយ / No registrations found.
+                    </div>
+                  ) : (
+                    <div className="table-responsive">
+                      <table className="data-table" style={{ width: "100%" }}>
+                        <thead>
+                          <tr>
+                            <th>អ្នកស្ម័គ្រចិត្ត</th>
+                            <th>ព័ត៌មានទាក់ទង</th>
+                            <th>ជំនាញ & សារ</th>
+                            <th>ស្ថានភាព</th>
+                            <th>សកម្មភាព</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {registrationsList.map((app) => {
+                            const displayName = [app.user?.first_name, app.user?.last_name].filter(Boolean).join(" ").trim() || app.name_snapshot || app.user?.name || "Anonymous";
+                            return (
+                              <tr key={app.id}>
+                                <td style={{ verticalAlign: "middle" }}>
+                                  <div>
+                                    <strong style={{ display: "block", color: "var(--color-text-primary)" }}>{displayName}</strong>
+                                    <span className="small text-muted">{app.sex === "male" ? "ប្រុស (Male)" : app.sex === "female" ? "ស្រី (Female)" : app.sex || "—"}</span>
+                                  </div>
+                                </td>
+                                <td style={{ verticalAlign: "middle" }}>
+                                  <div style={{ fontSize: "13px", color: "var(--color-text-secondary)" }}>
+                                    <div><i className="bi bi-envelope me-1"></i>{app.email_snapshot || app.user?.email || "—"}</div>
+                                    <div className="mt-1"><i className="bi bi-telephone me-1"></i>{app.phone_snapshot || app.user?.phone || "—"}</div>
+                                  </div>
+                                </td>
+                                <td style={{ verticalAlign: "middle" }}>
+                                  <div style={{ fontSize: "13px", maxWidth: "230px", color: "var(--color-text-secondary)" }}>
+                                    <div className="text-truncate" title={app.skills_text}><strong className="small" style={{ color: "var(--color-text-primary)" }}>ជំនាញ:</strong> {app.skills_text || "—"}</div>
+                                    <div className="text-truncate mt-1" title={app.message}><strong className="small" style={{ color: "var(--color-text-primary)" }}>សារ:</strong> {app.message || "—"}</div>
+                                    {app.cv_url && (
+                                      <div className="mt-1">
+                                        <a href={app.cv_url} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary py-0 px-2" style={{ fontSize: "11px", borderRadius: "6px" }}>
+                                          <i className="bi bi-file-earmark-pdf me-1"></i>មើល CV
+                                        </a>
+                                      </div>
+                                    )}
+                                  </div>
+                                </td>
+                                <td style={{ verticalAlign: "middle" }}>
+                                  <span className={`status-badge-custom ${app.status === "approved" || app.status === "accepted" ? "active" : app.status === "rejected" ? "rejected" : "pending"}`}>
+                                    {app.status === "approved" || app.status === "accepted" ? "Approved" : app.status === "rejected" ? "Rejected" : "Pending"}
+                                  </span>
+                                </td>
+                                <td style={{ verticalAlign: "middle" }}>
+                                  <div className="d-flex gap-2">
+                                    {app.status === "pending" && (
+                                      <>
+                                        <button
+                                          onClick={() => handleApproveApp(app.id)}
+                                          className="btn btn-success btn-sm py-1 px-2 rounded-3 d-flex align-items-center gap-1"
+                                          style={{ fontSize: "12px", border: "none", backgroundColor: "#198754", color: "#fff" }}
+                                          title="Approve"
+                                        >
+                                          <i className="bi bi-check-lg"></i> អនុម័ត
+                                        </button>
+                                        <button
+                                          onClick={() => handleRejectApp(app.id)}
+                                          className="btn btn-danger btn-sm py-1 px-2 rounded-3 d-flex align-items-center gap-1"
+                                          style={{ fontSize: "12px", border: "none", backgroundColor: "#dc3545", color: "#fff" }}
+                                          title="Reject"
+                                        >
+                                          <i className="bi bi-x-lg"></i> បដិសេធ
+                                        </button>
+                                      </>
+                                    )}
+                                    {(app.status === "approved" || app.status === "accepted" || app.status === "rejected") && (
+                                      <button
+                                        onClick={() => handleResetAppToPending(app.id)}
+                                        className="btn-secondary py-1 px-2 rounded-3 d-flex align-items-center gap-1"
+                                        style={{ fontSize: "12px", height: "30px", border: "1px solid var(--color-border)", borderRadius: "6px" }}
+                                        title="Reset to Pending"
+                                      >
+                                        <i className="bi bi-arrow-counterclockwise"></i> ត្រឡប់ក្រោយ
+                                      </button>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                <div className="modal-footer p-4 border-0 d-flex justify-content-end" style={{ flexShrink: 0, backgroundColor: "var(--color-bg-surface)" }}>
+                  <button
+                    type="button"
+                    className="btn-premium-cancel"
+                    onClick={() => setRegsOpen(false)}
+                  >
+                    បិទ / Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        <ConfirmModal
+          open={deleteConfirmOpen}
+          onClose={() => {
+            setDeleteConfirmOpen(false);
+            setDeletingOpportunityId(null);
+          }}
+          onConfirm={confirmDeleteOpportunity}
+          title="លុបឱកាសស្ម័គ្រចិត្ត / Delete Opportunity"
+          message="តើអ្នកពិតជាចង់លុបឱកាសស្ម័គ្រចិត្តនេះមែនទេ? សកម្មភាពនេះមិនអាចត្រឡប់ក្រោយវិញបានទេ។ / Are you sure you want to delete this opportunity permanently? This action cannot be undone."
+          confirmText="លុប / Delete"
+          cancelText="បោះបង់ / Cancel"
+          type="danger"
         />
       </div>
 
@@ -601,6 +930,39 @@ export default function AdminOpportunitiesPage() {
           background-color: rgba(108, 117, 125, 0.12) !important;
           color: var(--color-text-secondary) !important;
           border: 1px solid rgba(108, 117, 125, 0.2) !important;
+        }
+        .btn-close-custom {
+          background: transparent;
+          border: none;
+          color: var(--color-text-secondary) !important;
+          opacity: 0.8;
+          font-size: 1.25rem;
+          transition: all 0.2s ease;
+          padding: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+        }
+        .btn-close-custom:hover {
+          color: var(--color-accent) !important;
+          opacity: 1;
+          transform: rotate(90deg);
+        }
+        .btn-premium-cancel {
+          border: none;
+          background: var(--color-bg-input) !important;
+          color: var(--color-text-primary) !important;
+          padding: 10px 24px;
+          border-radius: 100px;
+          font-weight: 600;
+          font-size: 14px;
+          transition: all 0.2s ease;
+          cursor: pointer;
+        }
+        .btn-premium-cancel:hover {
+          background: var(--color-bg-card-hover) !important;
+          color: var(--color-text-primary) !important;
         }
       `}</style>
     </div>

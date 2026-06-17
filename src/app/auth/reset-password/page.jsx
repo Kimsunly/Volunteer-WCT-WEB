@@ -3,16 +3,27 @@
 import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AuthShell, PasswordField, StrengthMeter } from "../components";
+import { AuthShell, PasswordField, StrengthMeter, CodeInput } from "../components";
 import { resetPassword } from "@/lib/services/auth";
-import toast from "react-hot-toast";
+import { showToast } from "@/components/common/CustomToaster";
+import { parseApiError } from "@/lib/utils/apiError";
 
-function ResetPasswordForm() {
+function ResetPasswordForm({ step, setStep, tempOtp, setTempOtp }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
-  const [otp, setOtp] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const handleVerifyOtpStep = (e) => {
+    e.preventDefault();
+    const otpCode = document.getElementById("otp")?.value;
+    if (!otpCode || otpCode.length !== 6) {
+      showToast.error("សូមបញ្ចូលកូដ OTP ៦ ខ្ទង់", "កំហុស");
+      return;
+    }
+    setTempOtp(otpCode);
+    setStep(2);
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -20,16 +31,17 @@ function ResetPasswordForm() {
     const c = document.getElementById("cf-password")?.value;
 
     if (!email) {
-      toast.error("រកមិនឃើញអ៊ីមែលសម្រាប់ការកំណត់ឡើងវិញទេ");
+      showToast.error("រកមិនឃើញអ៊ីមែលសម្រាប់ការកំណត់ឡើងវិញទេ", "កំហុស");
       return;
     }
-    if (!otp || otp.length !== 6) {
-      toast.error("សូមបញ្ចូលកូដ OTP ៦ ខ្ទង់");
+    if (!tempOtp || tempOtp.length !== 6) {
+      showToast.error("សូមបញ្ចូលកូដ OTP ៦ ខ្ទង់", "កំហុស");
+      setStep(1);
       return;
     }
     if (p !== c) {
       document.getElementById("cf-password")?.classList.add("is-invalid");
-      toast.error("ពាក្យសម្ងាត់ និងការបញ្ជាក់មិនត្រូវគ្នាឡើយ");
+      showToast.error("ពាក្យសម្ងាត់ និងការបញ្ជាក់មិនត្រូវគ្នាឡើយ", "កំហុស");
       return;
     }
 
@@ -37,21 +49,45 @@ function ResetPasswordForm() {
       setSubmitting(true);
       await resetPassword({
         email,
-        otp,
+        otp: tempOtp,
         password: p,
         password_confirmation: c,
       });
-      toast.success("កំណត់ពាក្យសម្ងាត់ថ្មីជោគជ័យ! សូមចូលគណនីរបស់អ្នក។");
+      showToast.success("កំណត់ពាក្យសម្ងាត់ថ្មីជោគជ័យ! សូមចូលគណនីរបស់អ្នក។", "ជោគជ័យ");
       router.push("/auth/login");
     } catch (err) {
       console.error(err);
-      toast.error(
-        err.response?.data?.message || "បរាជ័យក្នុងការកំណត់ពាក្យសម្ងាត់ឡើងវិញ",
-      );
+      const msg = parseApiError(err) || "បរាជ័យក្នុងការកំណត់ពាក្យសម្ងាត់ឡើងវិញ";
+      showToast.error(msg, "កំហុស");
     } finally {
       setSubmitting(false);
     }
   };
+
+  if (step === 1) {
+    return (
+      <form
+        id="otpForm"
+        className="row gy-4 needs-validation"
+        noValidate
+        onSubmit={handleVerifyOtpStep}
+      >
+        <CodeInput id="otp" length={6} label="Enter 6-digit OTP" placeholder="Enter 6-digit OTP" />
+
+        <div className="col-12 mt-4">
+          <button type="submit" className="auth-modern-btn">
+            Verify OTP
+          </button>
+        </div>
+
+        <div className="col-12">
+          <p className="text-center mb-0">
+            ត្រលប់ទៅ <Link href="/auth/login">ចូលគណនី</Link>
+          </p>
+        </div>
+      </form>
+    );
+  }
 
   return (
     <form
@@ -60,23 +96,9 @@ function ResetPasswordForm() {
       noValidate
       onSubmit={onSubmit}
     >
-      <div className="col-12">
-        <input
-          type="text"
-          className="auth-modern-input w-100"
-          id="otp"
-          placeholder="Enter 6-digit OTP"
-          value={otp}
-          onChange={(e) => setOtp(e.target.value)}
-          maxLength={6}
-          required
-        />
-      </div>
-
       <PasswordField
         id="password"
         placeholder="New Password"
-        defaultValue="VolunteerCambo"
         minLength={6}
       />
 
@@ -92,22 +114,14 @@ function ResetPasswordForm() {
         >
           <p
             className="mb-2"
-            style={{
-              fontWeight: 700,
-              color: "#2d6a4f",
-              fontSize: 15,
-            }}
+            style={{ fontWeight: 700, color: "#2d6a4f", fontSize: 15 }}
           >
             <i className="bi bi-shield-lock me-2"></i>
             Password Requirements:
           </p>
           <ul
             className="mb-0 ps-3"
-            style={{
-              color: "#444",
-              fontSize: 14,
-              lineHeight: 1.6,
-            }}
+            style={{ color: "#444", fontSize: 14, lineHeight: 1.6 }}
           >
             <li>At least 6 characters</li>
             <li>Use numbers and letters</li>
@@ -126,11 +140,10 @@ function ResetPasswordForm() {
       <PasswordField
         id="cf-password"
         placeholder="Confirm New Password"
-        defaultValue="VolunteerCambo"
         minLength={6}
       />
 
-      <div className="col-12">
+      <div className="col-12 mt-4">
         <button type="submit" className="auth-modern-btn" disabled={submitting}>
           {submitting ? (
             <>
@@ -146,38 +159,45 @@ function ResetPasswordForm() {
           )}
         </button>
       </div>
+
+      <div className="col-12">
+        <p className="text-center mb-0">
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              setStep(1);
+            }}
+            style={{ color: "#2d6a4f", fontWeight: 700 }}
+          >
+            ត្រលប់ទៅបញ្ចូល OTP ឡើងវិញ
+          </a>
+        </p>
+      </div>
     </form>
   );
 }
 
 export default function ResetPasswordPage() {
+  const [step, setStep] = useState(1);
+  const [tempOtp, setTempOtp] = useState("");
+
   return (
-    <div className="authentication-body">
-      <main>
-        <section>
-          <div className="container">
-            <div className="row justify-content-center">
-              <div className="col-12">
-                <AuthShell
-                  imageSrc="/images/svg_login/Volunteering-bro.svg"
-                  title="Reset Password"
-                  switchText="Back to"
-                  switchLink="/auth/login"
-                  switchAction="Login"
-                >
-                  <Suspense
-                    fallback={
-                      <div className="text-center p-3">កំពុងផ្ទុក...</div>
-                    }
-                  >
-                    <ResetPasswordForm />
-                  </Suspense>
-                </AuthShell>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
+    <AuthShell
+      imageSrc="/images/svg_login/Taking care of the Earth-bro.svg"
+      title={step === 1 ? "Verify OTP" : "Reset Password"}
+      switchText="Back to"
+      switchLink="/auth/login"
+      switchAction="Login"
+    >
+      <Suspense fallback={<div className="text-center p-3">កំពុងផ្ទុក...</div>}>
+        <ResetPasswordForm
+          step={step}
+          setStep={setStep}
+          tempOtp={tempOtp}
+          setTempOtp={setTempOtp}
+        />
+      </Suspense>
+    </AuthShell>
   );
 }

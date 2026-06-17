@@ -60,7 +60,7 @@ export default function TopHeader() {
 
           {/* Quick Links */}
           <ul className="nav-list list-unstyled d-flex m-0">
-            <li className="nav-item me-3">
+            <li className="me-3">
               <Link
                 href="/about"
                 className="nav-link p-0 text-white small pe-2"
@@ -69,7 +69,7 @@ export default function TopHeader() {
                 អំពីយើង
               </Link>
             </li>
-            <li className="nav-item">
+            <li>
               <Link
                 href="/contact"
                 className="nav-link p-0 text-white small pe-2"

@@ -5,10 +5,10 @@ import api from "./api";
  * e.g. '/uploads/logos/file.png' → 'http://localhost:8000/uploads/logos/file.png'
  */
 export function buildApiUrl(path) {
-  if (!path) return null;
-  if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  const base = (process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000").replace(/\/$/, "");
-  return base + (path.startsWith("/") ? path : "/" + path);
+    if (!path) return null;
+    if (path.startsWith("http://") || path.startsWith("https://")) return path;
+    const base = (process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000").replace(/\/$/, "");
+    return base + (path.startsWith("/") ? path : "/" + path);
 }
 
 /**

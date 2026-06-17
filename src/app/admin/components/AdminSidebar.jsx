@@ -6,14 +6,48 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function AdminSidebar({ active }) {
   const { user } = useAuth();
-  const userName = user?.name || "Guy Hawkins";
+  const userName = [user?.first_name, user?.last_name].filter(Boolean).join(" ") || user?.name || "Guy Hawkins";
   const userInitial = userName.charAt(0).toUpperCase();
+
+  const getAvatarSrc = () => {
+    const raw = user?.avatar_url || user?.avatar;
+    if (!raw) return null;
+    if (raw.startsWith("http") || raw.startsWith("data:")) return raw;
+    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+    return `${apiBase.replace(/\/$/, "")}/${raw.replace(/^\//, "")}`;
+  };
+
+  const avatarSrc = getAvatarSrc();
 
   return (
     <aside className="sidebar">
       {/* User Profile */}
       <div className="sidebar-user">
-        <div className="avatar">{userInitial}</div>
+        {avatarSrc ? (
+          <div 
+            className="avatar" 
+            style={{ 
+              overflow: "hidden", 
+              position: "relative",
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "var(--color-border)"
+            }}
+          >
+            <img 
+              src={avatarSrc} 
+              alt="Avatar" 
+              style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+              referrerPolicy="no-referrer"
+            />
+          </div>
+        ) : (
+          <div className="avatar">{userInitial}</div>
+        )}
         <div
           style={{
             color: "var(--color-text-primary)",
@@ -62,6 +96,13 @@ export default function AdminSidebar({ active }) {
         {/* Settings Group */}
         <div className="nav-group">
           <div className="nav-group-label">Settings</div>
+          <Link
+            href="/admin/settings/profile"
+            className={`nav-item ${active === "settings-profile" ? "active" : ""}`}
+          >
+            <i className="bi bi-person-fill-gear"></i>
+            Profile Settings
+          </Link>
           <Link
             href="/admin/settings"
             className={`nav-item ${active === "settings" ? "active" : ""}`}

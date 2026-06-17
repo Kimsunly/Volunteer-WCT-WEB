@@ -144,6 +144,9 @@ export default function EditOpportunityModal({
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
     const cleanPath = path.startsWith("/") ? path : `/${path}`;
     
+    if (cleanPath.startsWith("/images/")) {
+      return cleanPath;
+    }
     if (cleanPath.startsWith("/storage/")) {
       return `${apiBaseUrl}${cleanPath}`;
     }

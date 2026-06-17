@@ -8,7 +8,37 @@
 /* === DESIGN SYSTEM === */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+/* @font-face Declarations for Cross-Browser Compatibility */
+@font-face {
+  font-family: 'Kantumruy Pro';
+  src: url('/fonts/Kantumruy_Pro,Moul/Kantumruy_Pro/KantumruyPro-VariableFont_wght.ttf') format('truetype-variations'),
+       url('/fonts/Kantumruy_Pro,Moul/Kantumruy_Pro/KantumruyPro-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Kantumruy Pro';
+  src: url('/fonts/Kantumruy_Pro,Moul/Kantumruy_Pro/KantumruyPro-Italic-VariableFont_wght.ttf') format('truetype-variations'),
+       url('/fonts/Kantumruy_Pro,Moul/Kantumruy_Pro/KantumruyPro-Italic-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Moul';
+  src: url('/fonts/Kantumruy_Pro,Moul/Moul/Moul-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
+  --font-kantumruy: 'Kantumruy Pro', 'Inter', sans-serif;
+  --font-moul: 'Moul', serif;
+
   /* === DARK MODE (default) === */
   --color-bg-base: #131313;
   --color-bg-surface: #1A1A1A;
@@ -65,7 +95,7 @@
 }
 
 * {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-kantumruy), 'Inter', sans-serif;
 }
 
 /* === GLOBAL STYLES === */

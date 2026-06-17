@@ -71,7 +71,7 @@ function ConfirmCodeForm() {
       noValidate
       onSubmit={handleSubmit}
     >
-      <CodeInput id="code" length={6} defaultValue="123456" />
+      <CodeInput id="code" length={6} />
 
       <div className="col-12">
         <p className="text-center mb-0" style={{ fontSize: 14 }}>
@@ -117,32 +117,16 @@ function ConfirmCodeForm() {
 
 export default function ConfirmCodePage() {
   return (
-    <div className="authentication-body">
-      <main>
-        <section>
-          <div className="container">
-            <div className="row justify-content-center">
-              <div className="col-12">
-                <AuthShell
-                  imageSrc="/images/svg_login/Volunteering-bro.svg"
-                  title="Verify OTP"
-                  switchText="Back to"
-                  switchLink="/auth/login"
-                  switchAction="Login"
-                >
-                  <Suspense
-                    fallback={
-                      <div className="text-center p-3">កំពុងផ្ទុក...</div>
-                    }
-                  >
-                    <ConfirmCodeForm />
-                  </Suspense>
-                </AuthShell>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
+    <AuthShell
+      imageSrc="/images/svg_login/Environment-bro.svg"
+      title="Verify OTP"
+      switchText="Back to"
+      switchLink="/auth/login"
+      switchAction="Login"
+    >
+      <Suspense fallback={<div className="text-center p-3">កំពុងផ្ទុក...</div>}>
+        <ConfirmCodeForm />
+      </Suspense>
+    </AuthShell>
   );
 }
