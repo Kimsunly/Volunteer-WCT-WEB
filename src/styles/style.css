@@ -1470,48 +1470,41 @@ footer p.text-center {
 /* Date Badge */
 .event-date-badge {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  top: 12px;
+  right: 12px;
   z-index: 10;
 }
 
 .date-circle {
-  width: 70px;
-  height: 70px;
-  background: white;
-  border-radius: 50%;
+  min-width: 52px;
+  min-height: 52px;
+  padding: 6px 8px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.05);
-  }
+  gap: 2px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(6px);
 }
 
 .date-day {
-  font-size: 1.5rem;
+  font-size: 0.9rem;
   font-weight: 800;
-  color: var(--primary-color);
+  color: #0f172a;
   line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 .date-month {
-  font-size: 0.75rem;
+  font-size: 0.5rem;
   font-weight: 600;
-  color: var(--text-muted);
-  margin-top: 2px;
+  color: #64748b;
+  line-height: 1;
+  letter-spacing: 0.02em;
 }
 
 /* Event Image */
@@ -1653,12 +1646,17 @@ footer p.text-center {
   }
 
   .date-circle {
-    width: 60px;
-    height: 60px;
+    min-width: 46px;
+    min-height: 46px;
+    padding: 5px 6px;
   }
 
   .date-day {
-    font-size: 1.3rem;
+    font-size: 0.82rem;
+  }
+
+  .date-month {
+    font-size: 0.46rem;
   }
 }
 
@@ -1717,8 +1715,10 @@ footer p.text-center {
   transform: rotate(180deg);
 } */
 .benefits-modern {
-  padding: 100px 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 88px 0;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.12), transparent 35%),
+    linear-gradient(135deg, #5b6cff 0%, #6d7fe9 45%, #4f67d6 100%);
   position: relative;
   overflow: hidden;
 }
@@ -1726,89 +1726,81 @@ footer p.text-center {
 .benefits-modern::before {
   content: '';
   position: absolute;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-  background-size: 50px 50px;
-  animation: movePattern 60s linear infinite;
-  opacity: 0.3;
-}
-
-@keyframes movePattern {
-  0% {
-    transform: translate(0, 0);
-  }
-
-  100% {
-    transform: translate(50px, 50px);
-  }
+  inset: 0;
+  background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.08) 0, transparent 28%),
+    radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.05) 0, transparent 24%),
+    radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.06) 0, transparent 26%);
+  opacity: 0.9;
 }
 
 /* Section Header */
 .benefits-badge {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.14);
   color: white;
-  padding: 10px 24px;
+  padding: 8px 18px;
   border-radius: 50px;
   font-weight: 600;
-  font-size: 0.9rem;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .benefits-title {
-  font-size: 2.5rem;
+  font-size: clamp(2rem, 3vw, 2.6rem);
   font-weight: 800;
   color: white;
 }
 
 .benefits-subtitle {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: rgba(255, 255, 255, 0.9);
   max-width: 700px;
+  line-height: 1.7;
 }
 
 /* Benefit Card */
 .benefit-card {
   background: white;
-  border-radius: 24px;
-  padding: 35px;
+  border-radius: 22px;
+  padding: 30px;
   height: 100%;
   position: relative;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(15, 23, 42, 0.06);
 }
 
 .benefit-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  transform: translateY(-8px);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
 }
 
 /* Icon Section */
 .benefit-icon-wrapper {
   position: relative;
-  width: 100px;
-  height: 100px;
-  margin-bottom: 25px;
+  width: 88px;
+  height: 88px;
+  margin-bottom: 22px;
 }
 
 .benefit-icon {
-  width: 100px;
-  height: 100px;
-  border-radius: 20px;
+  width: 88px;
+  height: 88px;
+  border-radius: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 18px;
   position: relative;
   z-index: 2;
   transition: transform 0.4s ease;
 }
 
 .benefit-card:hover .benefit-icon {
-  transform: rotate(-10deg) scale(1.1);
+  transform: rotate(-4deg) scale(1.04);
 }
 
 .benefit-icon img {
@@ -1819,15 +1811,14 @@ footer p.text-center {
 
 .benefit-glow {
   position: absolute;
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  opacity: 0.3;
-  filter: blur(20px);
-  animation: pulse 3s infinite;
+  opacity: 0.18;
+  filter: blur(18px);
 }
 
 /* Color Variants */
@@ -1873,10 +1864,10 @@ footer p.text-center {
 
 /* Content */
 .benefit-title {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--text-black);
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   line-height: 1.3;
 }
 
@@ -1889,16 +1880,16 @@ footer p.text-center {
 .benefit-list li {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 15px;
-  font-size: 0.95rem;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 0.92rem;
   color: var(--text-muted);
-  line-height: 1.6;
+  line-height: 1.55;
 }
 
 .benefit-list i {
-  color: #10b981;
-  font-size: 1.2rem;
+  color: #14b8a6;
+  font-size: 1.05rem;
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -1917,9 +1908,9 @@ footer p.text-center {
 
 /* CTA Card */
 .benefit-cta-card {
-  background: linear-gradient(135deg, #FF6B6B, #FFB6B6);
-  border-radius: 24px;
-  padding: 40px 35px;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  border-radius: 22px;
+  padding: 34px 30px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -1928,77 +1919,65 @@ footer p.text-center {
   text-align: center;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 10px 40px rgba(255, 107, 107, 0.3);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .benefit-cta-card::before {
   content: '';
   position: absolute;
-  width: 200px;
-  height: 200px;
-  background: rgba(255, 255, 255, 0.1);
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.12), transparent 70%);
   border-radius: 50%;
-  top: -100px;
-  right: -100px;
+  top: -90px;
+  right: -90px;
 }
 
 .cta-icon {
-  width: 80px;
-  height: 80px;
-  background: rgba(255, 255, 255, 0.2);
+  width: 72px;
+  height: 72px;
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.5rem;
+  font-size: 2rem;
   color: white;
-  margin-bottom: 20px;
-  animation: bounce 2s infinite;
-}
-
-@keyframes bounce {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-10px);
-  }
+  margin-bottom: 18px;
 }
 
 .benefit-cta-card h3 {
-  font-size: 1.6rem;
+  font-size: 1.35rem;
   font-weight: 800;
   color: white;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
 .benefit-cta-card p {
   color: rgba(255, 255, 255, 0.9);
-  font-size: 1rem;
-  margin-bottom: 25px;
-  line-height: 1.6;
+  font-size: 0.95rem;
+  margin-bottom: 22px;
+  line-height: 1.65;
 }
 
 .cta-button {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: white;
-  color: #FF6B6B;
-  padding: 14px 28px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #0f172a;
+  padding: 12px 24px;
   border-radius: 50px;
   font-weight: 700;
   text-decoration: none;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
 }
 
 .cta-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.16);
   color: #FF6B6B;
 }
 

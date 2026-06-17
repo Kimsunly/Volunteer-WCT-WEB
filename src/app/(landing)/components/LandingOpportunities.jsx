@@ -14,7 +14,7 @@ export default function LandingOpportunities({ items = [] }) {
         const data = await listCategories(true);
         setCategories(data || []);
       } catch (e) {
-        console.error("Failed to fetch categories", e);
+        console.error(" iled to fetch categories", e);
       }
     }
     fetchCategories();
