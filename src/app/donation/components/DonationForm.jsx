@@ -124,7 +124,7 @@ export default function DonationForm() {
     >
       {/* Form Header */}
       <div className="mb-4 text-center text-md-start">
-        <h3 className="fw-bold mb-1 d-flex align-items-center justify-content-center justify-content-md-start gap-2" style={{ color: "#111827", letterSpacing: "-0.75px" }}>
+        <h3 className="fw-bold mb-1 d-flex align-items-center justify-content-center justify-content-md-start gap-2" style={{ color: "var(--color-text-primary)", letterSpacing: "-0.75px" }}>
           <span className="d-inline-flex align-items-center justify-content-center rounded-3" style={{ width: "38px", height: "38px", backgroundColor: "rgba(239, 68, 68, 0.1)", color: "#ef4444" }}>
             <i className="bi bi-heart-fill fs-5"></i>
           </span>
@@ -137,23 +137,21 @@ export default function DonationForm() {
       <div className="mb-4">
         <div 
           className="d-flex p-1 rounded-4 position-relative" 
-          style={{ backgroundColor: "#f3f4f6", border: "1px solid #e5e7eb" }}
+          style={{ backgroundColor: "var(--color-bg-base)", border: "1px solid var(--color-border)" }}
         >
           <button
             type="button"
-            className={`flex-fill py-2.5 px-3 rounded-3 border-0 fw-bold transition-all d-flex align-items-center justify-content-center gap-2 ${
-              form.donationType === "once"
-                ? "bg-white shadow-sm"
-                : "bg-transparent text-secondary"
-            }`}
+            className="flex-fill py-2.5 px-3 rounded-3 border-0 fw-bold transition-all d-flex align-items-center justify-content-center gap-2"
             onClick={() =>
               setForm((prev) => ({ ...prev, donationType: "once" }))
             }
             style={{ 
               fontSize: "0.95rem",
-              color: form.donationType === "once" ? "#2d6a4f" : "#6b7280",
+              background: form.donationType === "once" ? "linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%)" : "transparent",
+              color: form.donationType === "once" ? "#ffffff" : "var(--color-text-secondary)",
               fontWeight: "600",
-              transition: "all 0.3s ease"
+              transition: "all 0.3s ease",
+              boxShadow: form.donationType === "once" ? "0 4px 12px rgba(45, 106, 79, 0.15)" : "none"
             }}
           >
             <i className="bi bi-gift-fill"></i>
@@ -161,19 +159,17 @@ export default function DonationForm() {
           </button>
           <button
             type="button"
-            className={`flex-fill py-2.5 px-3 rounded-3 border-0 fw-bold transition-all d-flex align-items-center justify-content-center gap-2 ${
-              form.donationType === "monthly"
-                ? "bg-white shadow-sm"
-                : "bg-transparent text-secondary"
-            }`}
+            className="flex-fill py-2.5 px-3 rounded-3 border-0 fw-bold transition-all d-flex align-items-center justify-content-center gap-2"
             onClick={() =>
               setForm((prev) => ({ ...prev, donationType: "monthly" }))
             }
             style={{ 
               fontSize: "0.95rem",
-              color: form.donationType === "monthly" ? "#2d6a4f" : "#6b7280",
+              background: form.donationType === "monthly" ? "linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%)" : "transparent",
+              color: form.donationType === "monthly" ? "#ffffff" : "var(--color-text-secondary)",
               fontWeight: "600",
-              transition: "all 0.3s ease"
+              transition: "all 0.3s ease",
+              boxShadow: form.donationType === "monthly" ? "0 4px 12px rgba(45, 106, 79, 0.15)" : "none"
             }}
           >
             <i className="bi bi-calendar-check-fill"></i>
@@ -184,7 +180,7 @@ export default function DonationForm() {
 
       {/* Amount Selection */}
       <div className="mb-4">
-        <label className="form-label small fw-bold mb-2" style={{ color: "#4b5563" }}>
+        <label className="form-label small fw-bold mb-2" style={{ color: "var(--color-text-primary)" }}>
           ចំនួនទឹកប្រាក់បរិច្ចាគ (Amount)
         </label>
         <div className="row g-3 mb-3">
@@ -198,9 +194,9 @@ export default function DonationForm() {
                   onClick={() => handleAmountClick(amt)}
                   style={{
                     fontSize: "0.95rem",
-                    background: isSelected ? "linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%)" : "#ffffff",
-                    borderColor: isSelected ? "transparent" : "#e5e7eb",
-                    color: isSelected ? "#ffffff" : "#374151",
+                    background: isSelected ? "linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%)" : "var(--color-bg-surface)",
+                    borderColor: isSelected ? "transparent" : "var(--color-border)",
+                    color: isSelected ? "#ffffff" : "var(--color-text-primary)",
                     boxShadow: isSelected ? "0 8px 16px rgba(45, 106, 79, 0.2)" : "none",
                     transform: isSelected ? "scale(1.02)" : "scale(1)",
                     transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
@@ -217,16 +213,16 @@ export default function DonationForm() {
         <div
           className="input-group align-items-center px-3 rounded-3 custom-amount-wrapper"
           style={{ 
-            border: "1px solid #e5e7eb", 
-            backgroundColor: "#ffffff", 
+            border: "1px solid var(--color-border)", 
+            backgroundColor: "var(--color-bg-input)", 
             transition: "all 0.2s ease",
             boxShadow: form.customAmount ? "0 0 0 3px rgba(45, 106, 79, 0.15)" : "none",
-            borderColor: form.customAmount ? "#2d6a4f" : "#e5e7eb"
+            borderColor: form.customAmount ? "#2d6a4f" : "var(--color-border)"
           }}
         >
           <span
             className="fw-bold"
-            style={{ fontSize: "1.1rem", color: form.customAmount ? "#2d6a4f" : "#9ca3af" }}
+            style={{ fontSize: "1.1rem", color: form.customAmount ? "#2d6a4f" : "var(--color-text-secondary)" }}
           >
             $
           </span>
@@ -241,8 +237,9 @@ export default function DonationForm() {
             style={{ 
               boxShadow: "none",
               fontSize: "0.95rem",
-              color: "#1f2937",
-              fontWeight: form.customAmount ? "600" : "400"
+              color: "var(--color-text-primary)",
+              fontWeight: form.customAmount ? "600" : "400",
+              backgroundColor: "transparent"
             }}
           />
         </div>
@@ -250,7 +247,7 @@ export default function DonationForm() {
 
       {/* Cause Selection */}
       <div className="mb-4">
-        <label className="form-label small fw-bold mb-2" style={{ color: "#4b5563" }}>
+        <label className="form-label small fw-bold mb-2" style={{ color: "var(--color-text-primary)" }}>
           ជ្រើសរើសគោលបំណង (Select Purpose)
         </label>
         <div className="row g-3">
@@ -271,11 +268,11 @@ export default function DonationForm() {
                   type="button"
                   className="w-100 p-3 rounded-4 border text-start transition-all duration-200 card-hover-effect position-relative"
                   style={{
-                    backgroundColor: isSelected ? themeColors.lightBg : "#ffffff",
-                    borderColor: isSelected ? themeColors.base : "#e5e7eb",
+                    backgroundColor: isSelected ? themeColors.bg : "var(--color-bg-surface)",
+                    borderColor: isSelected ? themeColors.base : "var(--color-border)",
                     borderWidth: isSelected ? "1.5px" : "1px",
                     borderStyle: "solid",
-                    boxShadow: isSelected ? `0 10px 25px -5px ${themeColors.bg}` : "0 4px 6px -1px rgba(0,0,0,0.01), 0 2px 4px -1px rgba(0,0,0,0.005)"
+                    boxShadow: isSelected ? `0 10px 25px -5px ${themeColors.bg}` : "none"
                   }}
                   onClick={() => setForm((prev) => ({ ...prev, cause: c.id }))}
                 >
@@ -310,12 +307,12 @@ export default function DonationForm() {
                     </div>
                     
                     <div className="flex-grow-1 min-w-0 pe-3">
-                      <div className="fw-bold text-dark text-truncate" style={{ fontSize: "0.95rem" }}>
+                      <div className="fw-bold text-truncate" style={{ fontSize: "0.95rem", color: "var(--color-text-primary)" }}>
                         {c.name}
                       </div>
                       
                       {/* Dynamic Progress Bar */}
-                      <div className="progress mt-2 bg-light" style={{ height: "4px", borderRadius: "10px" }}>
+                      <div className="progress mt-2 bg-light" style={{ height: "4px", borderRadius: "10px", backgroundColor: "var(--color-bg-base)" }}>
                         <div
                           className="progress-bar transition-all duration-500"
                           style={{ 
@@ -326,9 +323,9 @@ export default function DonationForm() {
                         ></div>
                       </div>
                       
-                      <div className="d-flex justify-content-between mt-1 text-muted" style={{ fontSize: "0.75rem" }}>
-                        <span>${c.collected.toLocaleString()}</span>
-                        <span className="fw-medium">${c.target.toLocaleString()}</span>
+                      <div className="d-flex justify-content-between mt-1 text-muted" style={{ fontSize: "0.75rem", color: "var(--color-text-secondary)" }}>
+                        <span style={{ color: "var(--color-text-secondary)" }}>${c.collected.toLocaleString()}</span>
+                        <span className="fw-medium" style={{ color: "var(--color-text-secondary)" }}>${c.target.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
@@ -341,15 +338,15 @@ export default function DonationForm() {
 
       {/* Donor Information */}
       <div className="mb-4">
-        <label className="form-label small fw-bold mb-2" style={{ color: "#4b5563" }}>
+        <label className="form-label small fw-bold mb-2" style={{ color: "var(--color-text-primary)" }}>
           ព័ត៌មានអ្នកបរិច្ចាគ (Donor Details)
         </label>
         <div className="row g-3">
           <div className="col-md-6">
             <div>
-              <span className="small text-secondary mb-1 d-block fw-semibold" style={{ fontSize: "0.8rem" }}>នាមត្រកូល (Last Name) <span className="text-danger">*</span></span>
-              <div className="input-group align-items-center px-3 rounded-3 form-input-wrapper" style={{ border: "1px solid #e5e7eb", backgroundColor: "#ffffff", transition: "all 0.2s ease" }}>
-                <i className="bi bi-person text-muted me-2" style={{ fontSize: "1rem" }}></i>
+              <span className="small mb-1 d-block fw-semibold" style={{ fontSize: "0.8rem", color: "var(--color-text-secondary)" }}>នាមត្រកូល (Last Name) <span className="text-danger">*</span></span>
+              <div className="input-group align-items-center px-3 rounded-3 form-input-wrapper" style={{ border: "1px solid var(--color-border)", backgroundColor: "var(--color-bg-input)", transition: "all 0.2s ease" }}>
+                <i className="bi bi-person text-muted me-2" style={{ fontSize: "1rem", color: "var(--color-text-secondary)" }}></i>
                 <input
                   type="text"
                   className="form-control border-0 bg-transparent py-2.5"
@@ -358,16 +355,16 @@ export default function DonationForm() {
                   value={form.lastName}
                   onChange={handleChange}
                   required
-                  style={{ boxShadow: "none", fontSize: "0.9rem", color: "#1f2937" }}
+                  style={{ boxShadow: "none", fontSize: "0.9rem", color: "var(--color-text-primary)", backgroundColor: "transparent" }}
                 />
               </div>
             </div>
           </div>
           <div className="col-md-6">
             <div>
-              <span className="small text-secondary mb-1 d-block fw-semibold" style={{ fontSize: "0.8rem" }}>នាមខ្លួន (First Name) <span className="text-danger">*</span></span>
-              <div className="input-group align-items-center px-3 rounded-3 form-input-wrapper" style={{ border: "1px solid #e5e7eb", backgroundColor: "#ffffff", transition: "all 0.2s ease" }}>
-                <i className="bi bi-person text-muted me-2" style={{ fontSize: "1rem" }}></i>
+              <span className="small mb-1 d-block fw-semibold" style={{ fontSize: "0.8rem", color: "var(--color-text-secondary)" }}>នាមខ្លួន (First Name) <span className="text-danger">*</span></span>
+              <div className="input-group align-items-center px-3 rounded-3 form-input-wrapper" style={{ border: "1px solid var(--color-border)", backgroundColor: "var(--color-bg-input)", transition: "all 0.2s ease" }}>
+                <i className="bi bi-person text-muted me-2" style={{ fontSize: "1rem", color: "var(--color-text-secondary)" }}></i>
                 <input
                   type="text"
                   className="form-control border-0 bg-transparent py-2.5"
@@ -376,16 +373,16 @@ export default function DonationForm() {
                   value={form.firstName}
                   onChange={handleChange}
                   required
-                  style={{ boxShadow: "none", fontSize: "0.9rem", color: "#1f2937" }}
+                  style={{ boxShadow: "none", fontSize: "0.9rem", color: "var(--color-text-primary)", backgroundColor: "transparent" }}
                 />
               </div>
             </div>
           </div>
           <div className="col-md-6">
             <div>
-              <span className="small text-secondary mb-1 d-block fw-semibold" style={{ fontSize: "0.8rem" }}>អ៊ីមែល (Email) <span className="text-danger">*</span></span>
-              <div className="input-group align-items-center px-3 rounded-3 form-input-wrapper" style={{ border: "1px solid #e5e7eb", backgroundColor: "#ffffff", transition: "all 0.2s ease" }}>
-                <i className="bi bi-envelope text-muted me-2" style={{ fontSize: "1rem" }}></i>
+              <span className="small mb-1 d-block fw-semibold" style={{ fontSize: "0.8rem", color: "var(--color-text-secondary)" }}>អ៊ីមែល (Email) <span className="text-danger">*</span></span>
+              <div className="input-group align-items-center px-3 rounded-3 form-input-wrapper" style={{ border: "1px solid var(--color-border)", backgroundColor: "var(--color-bg-input)", transition: "all 0.2s ease" }}>
+                <i className="bi bi-envelope text-muted me-2" style={{ fontSize: "1rem", color: "var(--color-text-secondary)" }}></i>
                 <input
                   type="email"
                   className="form-control border-0 bg-transparent py-2.5"
@@ -394,16 +391,16 @@ export default function DonationForm() {
                   value={form.email}
                   onChange={handleChange}
                   required
-                  style={{ boxShadow: "none", fontSize: "0.9rem", color: "#1f2937" }}
+                  style={{ boxShadow: "none", fontSize: "0.9rem", color: "var(--color-text-primary)", backgroundColor: "transparent" }}
                 />
               </div>
             </div>
           </div>
           <div className="col-md-6">
             <div>
-              <span className="small text-secondary mb-1 d-block fw-semibold" style={{ fontSize: "0.8rem" }}>លេខទូរស័ព្ទ (Phone Number)</span>
-              <div className="input-group align-items-center px-3 rounded-3 form-input-wrapper" style={{ border: "1px solid #e5e7eb", backgroundColor: "#ffffff", transition: "all 0.2s ease" }}>
-                <i className="bi bi-telephone text-muted me-2" style={{ fontSize: "1rem" }}></i>
+              <span className="small mb-1 d-block fw-semibold" style={{ fontSize: "0.8rem", color: "var(--color-text-secondary)" }}>លេខទូរស័ព្ទ (Phone Number)</span>
+              <div className="input-group align-items-center px-3 rounded-3 form-input-wrapper" style={{ border: "1px solid var(--color-border)", backgroundColor: "var(--color-bg-input)", transition: "all 0.2s ease" }}>
+                <i className="bi bi-telephone text-muted me-2" style={{ fontSize: "1rem", color: "var(--color-text-secondary)" }}></i>
                 <input
                   type="tel"
                   className="form-control border-0 bg-transparent py-2.5"
@@ -411,7 +408,7 @@ export default function DonationForm() {
                   placeholder="012 345 678"
                   value={form.phone}
                   onChange={handleChange}
-                  style={{ boxShadow: "none", fontSize: "0.9rem", color: "#1f2937" }}
+                  style={{ boxShadow: "none", fontSize: "0.9rem", color: "var(--color-text-primary)", backgroundColor: "transparent" }}
                 />
               </div>
             </div>

@@ -3,10 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { AuthShell, PasswordField } from "../components";
-import { register as apiRegister, me as apiMe } from "@/lib/services/auth";
+import { register as apiRegister } from "@/lib/services/auth";
 import { useRouter } from "next/navigation";
-import { setAuth } from "@/lib/utils/authState";
-import { useAuth } from "@/context/AuthContext";
 import { signIn } from "next-auth/react";
 import { toast } from "react-hot-toast";
 import { showToast } from "@/components/common/CustomToaster";
@@ -14,8 +12,8 @@ import LoadingButton from "@/components/common/LoadingButton";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { setUser } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+
   const onSubmit = async (e) => {
     e.preventDefault();
     const form = e.currentTarget;
@@ -28,7 +26,6 @@ export default function RegisterPage() {
       phone: form.querySelector("#phone")?.value,
     };
 
-    // Strong Password Validation
     const passwordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if (!passwordRegex.test(payload.password)) {
@@ -39,7 +36,6 @@ export default function RegisterPage() {
       return;
     }
 
-    // quick client-side check
     if (
       payload.password &&
       payload.passwordConfirm &&
@@ -51,6 +47,7 @@ export default function RegisterPage() {
       );
       return;
     }
+
     try {
       setSubmitting(true);
       await apiRegister(payload);
@@ -71,138 +68,115 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="authentication-body">
-      <main>
-        <section>
-          <div className="container">
-            <div className="row justify-content-center">
-              <div className="col-12">
-                <AuthShell
-                  imageSrc="/images/svg_login/Volunteering-bro.svg"
-                  title="Register"
-                  switchText="Already have an account?"
-                  switchLink="/auth/login"
-                  switchAction="Login"
-                  onGoogleClick={() => {
-                    toast.loading("កំពុងភ្ជាប់ទៅ Google...");
-                    signIn("google");
-                  }}
-                  onFacebookClick={() => {
-                    toast.loading("កំពុងភ្ជាប់ទៅ Facebook...");
-                    signIn("facebook");
-                  }}
-                  onGithubClick={() => {
-                    toast.loading("កំពុងភ្ជាប់ទៅ GitHub...");
-                    signIn("github");
-                  }}
-                >
-                  <form
-                    id="registerForm"
-                    className="row gy-3 needs-validation"
-                    noValidate
-                    onSubmit={onSubmit}
-                  >
-                    <div className="col-12 col-md-6">
-                      <input
-                        type="text"
-                        className="auth-modern-input w-100"
-                        id="firstname"
-                        placeholder="First Name"
-                        defaultValue="ចាន់"
-                        required
-                      />
-                    </div>
+    <AuthShell
+      imageSrc="/images/svg_login/Team work.svg"
+      title="Register"
+      switchText="Already have an account?"
+      switchLink="/auth/login"
+      switchAction="Login"
+      onGoogleClick={() => {
+        toast.loading("កំពុងភ្ជាប់ទៅ Google...");
+        signIn("google");
+      }}
+      onFacebookClick={() => {
+        toast.loading("កំពុងភ្ជាប់ទៅ Facebook...");
+        signIn("facebook");
+      }}
+      onGithubClick={() => {
+        toast.loading("កំពុងភ្ជាប់ទៅ GitHub...");
+        signIn("github");
+      }}
+    >
+      <form
+        id="registerForm"
+        className="row gy-3 needs-validation"
+        noValidate
+        onSubmit={onSubmit}
+      >
+        <div className="col-12 col-md-6">
+          <input
+            type="text"
+            className="auth-modern-input w-100"
+            id="firstname"
+            placeholder="First Name"
+            required
+          />
+        </div>
 
-                    <div className="col-12 col-md-6">
-                      <input
-                        type="text"
-                        className="auth-modern-input w-100"
-                        id="lastname"
-                        placeholder="Last Name"
-                        defaultValue="រដ្ឋនា"
-                        required
-                      />
-                    </div>
+        <div className="col-12 col-md-6">
+          <input
+            type="text"
+            className="auth-modern-input w-100"
+            id="lastname"
+            placeholder="Last Name"
+            required
+          />
+        </div>
 
-                    <div className="col-12">
-                      <input
-                        type="email"
-                        className="auth-modern-input w-100"
-                        id="email"
-                        placeholder="Email or phone no"
-                        defaultValue="RathanaKh123@gmail.com"
-                        required
-                      />
-                    </div>
+        <div className="col-12">
+          <input
+            type="email"
+            className="auth-modern-input w-100"
+            id="email"
+            placeholder="Email Address"
+            required
+          />
+        </div>
 
-                    <PasswordField
-                      id="password"
-                      placeholder="Password"
-                      defaultValue="1234567"
-                      minLength={6}
-                    />
+        <PasswordField
+          id="password"
+          placeholder="Password"
+          minLength={6}
+        />
 
-                    <PasswordField
-                      id="passwordConfirm"
-                      placeholder="Confirm Password"
-                      defaultValue="1234567"
-                      minLength={6}
-                    />
+        <PasswordField
+          id="passwordConfirm"
+          placeholder="Confirm Password"
+          minLength={6}
+        />
 
-                    <div className="col-12">
-                      <input
-                        type="tel"
-                        className="auth-modern-input w-100"
-                        id="phone"
-                        placeholder="Phone Number"
-                        defaultValue="+855 12 345 678"
-                        required
-                      />
-                    </div>
+        <div className="col-12">
+          <input
+            type="tel"
+            className="auth-modern-input w-100"
+            id="phone"
+            placeholder="Phone Number"
+            required
+          />
+        </div>
 
-                    <div className="col-12">
-                      <div className="auth-modern-checkbox-container">
-                        <input
-                          type="checkbox"
-                          id="terms"
-                          defaultChecked
-                          required
-                        />
-                        <label htmlFor="terms">
-                          Recieve news and updates for volunteers
-                        </label>
-                      </div>
-                    </div>
-
-                    <div className="col-12">
-                      <LoadingButton
-                        type="submit"
-                        className="auth-modern-btn"
-                        loading={submitting}
-                        loadingText="កំពុងបង្កើត..."
-                      >
-                        Get Started
-                      </LoadingButton>
-                    </div>
-
-                    <div className="col-12 mt-4">
-                      <p className="text-center mb-0 text-muted">
-                        Register for organization?{" "}
-                        <Link
-                          href="/auth/org/register"
-                          style={{ color: "#2d6a4f", fontWeight: 700 }}
-                        >
-                          Register as Organizer
-                        </Link>
-                      </p>
-                    </div>
-                  </form>
-                </AuthShell>
-              </div>
-            </div>
+        <div className="col-12">
+          <div className="auth-modern-checkbox-container">
+            <input type="checkbox" id="terms" defaultChecked required />
+            <label htmlFor="terms">
+              Receive news and updates for volunteers
+            </label>
           </div>
-        </section>
-      </main>
-    </div>
+        </div>
+
+        <div className="col-12">
+          <LoadingButton
+            type="submit"
+            className="auth-modern-btn"
+            loading={submitting}
+            loadingText="កំពុងបង្កើត..."
+          >
+            Get Started
+          </LoadingButton>
+        </div>
+
+        <div className="col-12 mt-4">
+          <p className="text-center mb-0 text-muted">
+            Register for organization?{" "}
+            <Link
+              href="/auth/org/register"
+              style={{ color: "#2d6a4f", fontWeight: 700 }}
+            >
+              Register as Organizer
+            </Link>
+          </p>
+        </div>
+      </form>
+    </AuthShell>
   );
 }

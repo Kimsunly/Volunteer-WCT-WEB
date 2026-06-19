@@ -39,7 +39,7 @@ export default function QRDonateModal({ open, onClose, hospital }) {
           <div className="modal-header border-0 pb-0">
             <h5
               className="modal-title fw-bold fs-3"
-              style={{ color: "#1f2a37" }}
+              style={{ color: "var(--color-text-primary)" }}
             >
               <i
                 className="bi bi-qr-code-scan me-2"
@@ -58,28 +58,28 @@ export default function QRDonateModal({ open, onClose, hospital }) {
           <div className="modal-body">
             {/* Hospital Header */}
             <div className="mb-4">
-              <h4 className="fw-bold mb-2" style={{ color: "#1f2a37" }}>
+              <h4 className="fw-bold mb-2" style={{ color: "var(--color-text-primary)" }}>
                 {hospital.name}
               </h4>
-              <p className="text-muted mb-2 d-flex align-items-center gap-2">
+              <p className="mb-2 d-flex align-items-center gap-2" style={{ color: "var(--color-text-secondary)" }}>
                 <i className="bi bi-geo-alt"></i> {hospital.location}
               </p>
-              <p className="text-muted mb-2 d-flex align-items-center gap-2">
+              <p className="mb-2 d-flex align-items-center gap-2" style={{ color: "var(--color-text-secondary)" }}>
                 <i className="bi bi-calendar"></i> បង្កើតនៅ {hospital.founded}
               </p>
             </div>
 
             {/* Description & Mission */}
             <div className="mb-4">
-              <h6 className="fw-semibold mb-2" style={{ color: "#374151" }}>
+              <h6 className="fw-semibold mb-2" style={{ color: "var(--color-text-primary)" }}>
                 អំពីមន្ទីរពេទ្យ
               </h6>
-              <p className="text-secondary mb-3" style={{ lineHeight: "1.7" }}>
+              <p className="mb-3" style={{ lineHeight: "1.7", color: "var(--color-text-secondary)" }}>
                 {hospital.description}
               </p>
               <p
-                className="text-secondary mb-3"
-                style={{ lineHeight: "1.7", fontWeight: 500 }}
+                className="mb-3"
+                style={{ lineHeight: "1.7", fontWeight: 500, color: "var(--color-text-primary)" }}
               >
                 <i className="bi bi-bullseye me-2 text-primary"></i>
                 {hospital.mission}
@@ -88,7 +88,7 @@ export default function QRDonateModal({ open, onClose, hospital }) {
 
             {/* Services */}
             <div className="mb-4">
-              <h6 className="fw-semibold mb-3" style={{ color: "#374151" }}>
+              <h6 className="fw-semibold mb-3" style={{ color: "var(--color-text-primary)" }}>
                 សេវាដែលផ្តល់
               </h6>
               <div className="row g-2">
@@ -96,10 +96,10 @@ export default function QRDonateModal({ open, onClose, hospital }) {
                   <div key={index} className="col-12 col-md-6">
                     <div
                       className="d-flex align-items-center gap-2 p-2 rounded-3"
-                      style={{ backgroundColor: "#f8f9fa" }}
+                      style={{ backgroundColor: "var(--color-bg-input)", border: "1px solid var(--color-border)" }}
                     >
                       <i className="bi bi-check-circle-fill text-success"></i>
-                      <span className="small text-secondary">{service}</span>
+                      <span className="small" style={{ color: "var(--color-text-secondary)" }}>{service}</span>
                     </div>
                   </div>
                 ))}
@@ -107,8 +107,8 @@ export default function QRDonateModal({ open, onClose, hospital }) {
             </div>
 
             {/* QR Code */}
-            <div className="text-center mt-4 pt-4 border-top">
-              <h6 className="fw-semibold mb-3" style={{ color: "#374151" }}>
+            <div className="text-center mt-4 pt-4 border-top" style={{ borderColor: "var(--color-border)" }}>
+              <h6 className="fw-semibold mb-3" style={{ color: "var(--color-text-primary)" }}>
                 ស្កែនដើម្បីបរិច្ចាគ
               </h6>
               <div className="d-flex justify-content-center mb-3">
@@ -119,7 +119,8 @@ export default function QRDonateModal({ open, onClose, hospital }) {
                     position: "relative",
                     borderRadius: "16px",
                     overflow: "hidden",
-                    backgroundColor: "#f8f9fa",
+                    backgroundColor: "var(--color-bg-input)",
+                    border: "1px solid var(--color-border)"
                   }}
                 >
                   <Image
@@ -131,7 +132,7 @@ export default function QRDonateModal({ open, onClose, hospital }) {
                   />
                 </div>
               </div>
-              <p className="text-muted" style={{ fontSize: "0.95rem" }}>
+              <p className="text-muted" style={{ fontSize: "0.95rem", color: "var(--color-text-secondary)" }}>
                 សូមស្កែន QR Code ដើម្បីបរិច្ចាគដោយផ្ទាល់ទៅកាន់ {hospital.name}
               </p>
             </div>

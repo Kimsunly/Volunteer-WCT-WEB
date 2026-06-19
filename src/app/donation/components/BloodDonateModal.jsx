@@ -83,28 +83,71 @@ export default function BloodDonateModal({ open, onClose }) {
 
   return (
     <div
-      className="modal fade show"
-      style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+      className="modal fade show d-flex align-items-center justify-content-center"
+      style={{
+        display: "flex",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.6)",
+        backdropFilter: "blur(6px)",
+        zIndex: 1050,
+        padding: "1rem",
+      }}
       aria-modal="true"
       role="dialog"
       onClick={onClose}
     >
       <div
-        className="modal-dialog modal-lg modal-dialog-centered"
+        className="modal-dialog modal-lg modal-dialog-centered w-100 m-0"
+        style={{ maxWidth: "800px" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="modal-content rounded-4 shadow-lg">
-          <div className="modal-header">
-            <h5 className="modal-title">
-              <i className="bi bi-droplet-fill me-2 text-danger"></i>{" "}
-              ចុះឈ្មោះបរិច្ចាគឈាម
-            </h5>
+        <div
+          className="modal-content rounded-4 shadow-lg overflow-hidden"
+          style={{
+            background: "var(--color-bg-card)",
+            border: "1px solid var(--color-border)",
+            boxShadow: "var(--shadow-card)",
+          }}
+        >
+          {/* Header */}
+          <div
+            className="modal-header d-flex align-items-center justify-content-between p-4 px-md-5"
+            style={{ borderBottom: "1px solid var(--color-border)" }}
+          >
+            <h4
+              className="modal-title fw-bold m-0 d-flex align-items-center gap-2"
+              style={{ color: "var(--color-text-primary)", fontSize: "1.5rem" }}
+            >
+              <i className="bi bi-droplet-fill text-danger"></i> ចុះឈ្មោះបរិច្ចាគឈាម
+            </h4>
             <button
               type="button"
-              className="btn-close"
-              aria-label="Close"
+              className="d-flex align-items-center justify-content-center rounded-circle"
               onClick={onClose}
-            ></button>
+              style={{
+                width: "36px",
+                height: "36px",
+                background: "var(--color-bg-input)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-text-primary)",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "var(--color-bg-card-hover)";
+                e.currentTarget.style.borderColor = "var(--color-border-hover)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "var(--color-bg-input)";
+                e.currentTarget.style.borderColor = "var(--color-border)";
+              }}
+            >
+              <i className="bi bi-x-lg" style={{ fontSize: "1rem" }}></i>
+            </button>
           </div>
 
           <form
@@ -112,10 +155,11 @@ export default function BloodDonateModal({ open, onClose }) {
             noValidate
             className={validated ? "was-validated" : ""}
           >
-            <div className="modal-body">
-              <div className="row g-3">
+            {/* Body */}
+            <div className="modal-body p-4 p-md-5 overflow-auto" style={{ maxHeight: "70vh" }}>
+              <div className="row g-4">
                 <div className="col-md-6">
-                  <label htmlFor="fullName" className="form-label">
+                  <label htmlFor="fullName" className="form-label mb-2">
                     ឈ្មោះពេញ
                   </label>
                   <input
@@ -127,11 +171,11 @@ export default function BloodDonateModal({ open, onClose }) {
                     onChange={handleChange}
                     required
                   />
-                  <div className="invalid-feedback">សូមបញ្ចូលឈ្មោះ</div>
+                  <div className="invalid-feedback mt-2">សូមបញ្ចូលឈ្មោះ</div>
                 </div>
 
                 <div className="col-md-6">
-                  <label htmlFor="email" className="form-label">
+                  <label htmlFor="email" className="form-label mb-2">
                     អ៊ីមែល
                   </label>
                   <input
@@ -143,11 +187,11 @@ export default function BloodDonateModal({ open, onClose }) {
                     onChange={handleChange}
                     required
                   />
-                  <div className="invalid-feedback">អ៊ីមែលមិនត្រឹមត្រូវ</div>
+                  <div className="invalid-feedback mt-2">អ៊ីមែលមិនត្រឹមត្រូវ</div>
                 </div>
 
                 <div className="col-md-6">
-                  <label htmlFor="phone" className="form-label">
+                  <label htmlFor="phone" className="form-label mb-2">
                     លេខទូរស័ព្ទ
                   </label>
                   <input
@@ -161,7 +205,7 @@ export default function BloodDonateModal({ open, onClose }) {
                 </div>
 
                 <div className="col-md-3">
-                  <label htmlFor="dob" className="form-label">
+                  <label htmlFor="dob" className="form-label mb-2">
                     ថ្ងៃខែឆ្នាំកំណើត
                   </label>
                   <input
@@ -173,13 +217,13 @@ export default function BloodDonateModal({ open, onClose }) {
                     onChange={handleChange}
                     required
                   />
-                  <div className="invalid-feedback">
+                  <div className="invalid-feedback mt-2">
                     អាយុត្រូវនៅចន្លោះ 18–60 ឆ្នាំ
                   </div>
                 </div>
 
                 <div className="col-md-3">
-                  <label htmlFor="bloodType" className="form-label">
+                  <label htmlFor="bloodType" className="form-label mb-2">
                     ប្រភេទឈាម
                   </label>
                   <select
@@ -199,16 +243,16 @@ export default function BloodDonateModal({ open, onClose }) {
                       )
                     )}
                   </select>
-                  <div className="invalid-feedback">សូមជ្រើសរើសប្រភេទឈាម</div>
+                  <div className="invalid-feedback mt-2">សូមជ្រើសរើសប្រភេទឈាម</div>
                 </div>
 
-                <div className="col-12">
-                  <div className="form-check">
+                <div className="col-12 mt-4">
+                  <div className="form-check d-flex align-items-center gap-2">
                     <input
                       id="agree"
                       name="agree"
                       type="checkbox"
-                      className="form-check-input"
+                      className="form-check-input m-0"
                       checked={form.agree}
                       onChange={handleChange}
                       required
@@ -216,30 +260,66 @@ export default function BloodDonateModal({ open, onClose }) {
                     <label className="form-check-label" htmlFor="agree">
                       ខ្ញុំយល់ព្រមនឹងលក្ខខណ្ឌ និងគោលការណ៍ឯកជនភាព
                     </label>
-                    <div className="invalid-feedback">ត្រូវតែយល់ព្រម</div>
                   </div>
+                  <div className="invalid-feedback mt-2">ត្រូវតែយល់ព្រម</div>
                 </div>
               </div>
             </div>
 
-            <div className="modal-footer">
+            {/* Footer */}
+            <div
+              className="modal-footer p-4 d-flex justify-content-end gap-3"
+              style={{
+                background: "var(--color-bg-surface)",
+                borderTop: "1px solid var(--color-border)",
+              }}
+            >
               <button
                 type="button"
-                className="btn btn-secondary"
+                className="btn px-4 py-2.5 rounded-3 fw-bold"
                 onClick={onClose}
                 disabled={submitting}
+                style={{
+                  background: "var(--color-bg-input)",
+                  border: "1px solid var(--color-border)",
+                  color: "var(--color-text-primary)",
+                  transition: "all 0.2s ease",
+                  minWidth: "100px",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "var(--color-bg-card-hover)";
+                  e.currentTarget.style.borderColor = "var(--color-border-hover)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "var(--color-bg-input)";
+                  e.currentTarget.style.borderColor = "var(--color-border)";
+                }}
               >
                 បិទ
               </button>
-              <button type="submit" className="btn btn-danger" disabled={submitting}>
+              <button
+                type="submit"
+                className="btn px-4 py-2.5 rounded-3 fw-bold shadow-sm d-flex align-items-center gap-2"
+                disabled={submitting}
+                style={{
+                  background: "linear-gradient(135deg, #FF4D4D 0%, #dc3545 100%)",
+                  borderColor: "#FF4D4D",
+                  color: "#FFFFFF",
+                  transition: "all 0.2s ease",
+                }}
+              >
                 {submitting ? (
                   <>
-                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span
+                      className="spinner-border spinner-border-sm"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
                     កំពុងបញ្ជូន...
                   </>
                 ) : (
                   <>
-                    <i className="bi bi-droplet-fill me-1"></i> បញ្ជូនការចុះឈ្មោះ
+                    <i className="bi bi-droplet-fill"></i> បញ្ជូនការចុះឈ្មោះ
                   </>
                 )}
               </button>

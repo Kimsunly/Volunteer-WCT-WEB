@@ -60,6 +60,16 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'ui-avatars.com',
       },
+      // Smakjit API image hosting
+      {
+        protocol: 'https',
+        hostname: 'smakjit.publicvm.com',
+      },
+      // Shutterstock
+      {
+        protocol: 'https',
+        hostname: '**.shutterstock.com',
+      },
     ],
   },
 };

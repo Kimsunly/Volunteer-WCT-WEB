@@ -22,7 +22,7 @@ export default function TopHeader() {
         color: "var(--text-white-fixed)",
       }}
     >
-      <div className="container d-flex justify-content-between align-items-center py-2">
+      <div className="container d-flex justify-content-between align-items-center py-1">
         {/* Social Links */}
         <div className="d-none d-lg-flex align-items-center">
           <ul className="list-unstyled d-flex m-0 me-4 footer-social">
@@ -60,7 +60,7 @@ export default function TopHeader() {
 
           {/* Quick Links */}
           <ul className="nav-list list-unstyled d-flex m-0">
-            <li className="nav-item me-3">
+            <li className="me-3">
               <Link
                 href="/about"
                 className="nav-link p-0 text-white small pe-2"
@@ -69,7 +69,7 @@ export default function TopHeader() {
                 អំពីយើង
               </Link>
             </li>
-            <li className="nav-item">
+            <li>
               <Link
                 href="/contact"
                 className="nav-link p-0 text-white small pe-2"
@@ -95,7 +95,7 @@ export default function TopHeader() {
           <div>
             <h5
               className="m-0 fw-bold small"
-              style={{ color: "var(--text-white-fixed)" }}
+              style={{ color: "var(--primary-color)" }}
             >
               ស្ម័គ្រចិត្ត
             </h5>

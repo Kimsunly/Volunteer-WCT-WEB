@@ -118,38 +118,122 @@ export default function DonationGrid({ onInfo, onBloodRegister, onQRDonate }) {
 
     return (
       <div className="card-content">
-        <div className="mb-3">
-          <p className="text-secondary mb-2 d-flex align-items-center gap-2">
-            <i className="bi bi-geo-alt text-primary"></i> {details.location}
-          </p>
-          <p className="text-secondary mb-2 d-flex align-items-center gap-2">
-            <i className="bi bi-calendar text-primary"></i> បង្កើតនៅ{" "}
-            {details.founded}
-          </p>
+        {/* Info Grid */}
+        <div className="row g-3 mb-4">
+          <div className="col-12 col-sm-6">
+            <div
+              className="d-flex align-items-center gap-3 p-3 rounded-4"
+              style={{
+                background: "var(--color-bg-surface)",
+                border: "1px solid var(--color-border)",
+              }}
+            >
+              <div
+                className="d-flex align-items-center justify-content-center rounded-circle"
+                style={{
+                  width: "42px",
+                  height: "42px",
+                  background: "var(--color-accent-dim)",
+                  color: "var(--color-accent)",
+                  flexShrink: 0
+                }}
+              >
+                <i className="bi bi-geo-alt-fill" style={{ fontSize: "1.2rem" }}></i>
+              </div>
+              <div className="d-flex flex-column">
+                <span className="text-uppercase fw-bold small" style={{ color: "var(--color-text-secondary)", fontSize: "0.75rem", letterSpacing: "0.05em" }}>ទីតាំង</span>
+                <span className="fw-semibold" style={{ color: "var(--color-text-primary)", fontSize: "0.95rem" }}>{details.location}</span>
+              </div>
+            </div>
+          </div>
+          <div className="col-12 col-sm-6">
+            <div
+              className="d-flex align-items-center gap-3 p-3 rounded-4"
+              style={{
+                background: "var(--color-bg-surface)",
+                border: "1px solid var(--color-border)",
+              }}
+            >
+              <div
+                className="d-flex align-items-center justify-content-center rounded-circle"
+                style={{
+                  width: "42px",
+                  height: "42px",
+                  background: "var(--color-accent-dim)",
+                  color: "var(--color-accent)",
+                  flexShrink: 0
+                }}
+              >
+                <i className="bi bi-calendar-event-fill" style={{ fontSize: "1.2rem" }}></i>
+              </div>
+              <div className="d-flex flex-column">
+                <span className="text-uppercase fw-bold small" style={{ color: "var(--color-text-secondary)", fontSize: "0.75rem", letterSpacing: "0.05em" }}>បង្កើតឡើង</span>
+                <span className="fw-semibold" style={{ color: "var(--color-text-primary)", fontSize: "0.95rem" }}>ឆ្នាំ {details.founded}</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <p className="mb-3" style={{ lineHeight: "1.7" }}>
+        <p className="mb-4" style={{ lineHeight: "1.8", color: "var(--color-text-secondary)", fontSize: "1.05rem" }}>
           {details.description}
         </p>
 
-        <p className="mb-3" style={{ lineHeight: "1.7", fontWeight: 500 }}>
-          <i className="bi bi-bullseye me-2 text-primary"></i>
-          {details.mission}
-        </p>
+        {/* Mission Callout */}
+        <div
+          className="rounded-4 p-4 mb-4"
+          style={{
+            background: "var(--color-bg-input)",
+            border: "1px dashed var(--color-border)",
+          }}
+        >
+          <div className="d-flex gap-3 align-items-start">
+            <div
+              className="d-flex align-items-center justify-content-center rounded-circle mt-1"
+              style={{
+                width: "32px",
+                height: "32px",
+                background: "var(--color-accent-dim)",
+                color: "var(--color-accent)",
+                flexShrink: 0
+              }}
+            >
+              <i className="bi bi-bullseye" style={{ fontSize: "1rem" }}></i>
+            </div>
+            <div>
+              <span className="d-block text-uppercase fw-bold mb-1" style={{ color: "var(--color-text-secondary)", fontSize: "0.8rem", letterSpacing: "0.04em" }}>បេសកកម្មរបស់យើង</span>
+              <p className="mb-0 fw-medium" style={{ color: "var(--color-text-primary)", lineHeight: "1.6" }}>{details.mission}</p>
+            </div>
+          </div>
+        </div>
 
-        <div className="mt-3">
-          <h6 className="fw-semibold mb-2" style={{ color: "#374151" }}>
+        {/* Services List */}
+        <div className="mt-4">
+          <h5 className="fw-bold mb-3" style={{ color: "var(--color-text-primary)", fontSize: "1.15rem" }}>
             សេវាដែលផ្តល់
-          </h6>
-          <div className="row g-2">
+          </h5>
+          <div className="row g-3">
             {details.services.map((service, index) => (
-              <div key={index} className="col-12">
+              <div key={index} className="col-12 col-md-6">
                 <div
-                  className="d-flex align-items-center gap-2 p-2 rounded-3"
-                  style={{ backgroundColor: "#f8f9fa" }}
+                  className="d-flex align-items-center gap-3 p-3 rounded-4"
+                  style={{
+                    backgroundColor: "var(--color-bg-surface)",
+                    border: "1px solid var(--color-border)",
+                  }}
                 >
-                  <i className="bi bi-check-circle-fill text-success"></i>
-                  <span className="small text-secondary">{service}</span>
+                  <div
+                    className="d-flex align-items-center justify-content-center rounded-circle"
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                      backgroundColor: "rgba(16, 185, 129, 0.12)",
+                      color: "#10B981",
+                      flexShrink: 0
+                    }}
+                  >
+                    <i className="bi bi-check2" style={{ fontSize: "1.1rem" }}></i>
+                  </div>
+                  <span className="small fw-semibold" style={{ color: "var(--color-text-primary)" }}>{service}</span>
                 </div>
               </div>
             ))}

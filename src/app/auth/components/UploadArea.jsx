@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import Image from "next/image";
 /**
  * UploadArea
  * - Click / drag-and-drop file upload with preview
@@ -66,10 +65,10 @@ export default function UploadArea({
         <div className="border p-3 text-center">
           <div className="icons fa-2x mb-2">
             {preview ? (
-              <Image
+              <img
                 src={preview}
                 alt="Preview"
-                style={{ maxWidth: 100, maxHeight: 100, borderRadius: 8 }}
+                style={{ maxWidth: 100, maxHeight: 100, borderRadius: 8, objectFit: "cover" }}
               />
             ) : (
               <>

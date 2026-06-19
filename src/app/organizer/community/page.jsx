@@ -149,7 +149,7 @@ export default function OrganizerCommunityPage() {
   if (!mounted) return null;
 
   return (
-    <main className="flex-grow-1" style={{ marginTop: 130 }}>
+    <main className="flex-grow-1" style={{ marginTop: 85 }}>
       <div className="container py-4">
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-4">

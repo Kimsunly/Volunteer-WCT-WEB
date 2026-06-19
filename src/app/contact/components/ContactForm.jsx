@@ -12,6 +12,7 @@ export default function ContactForm() {
     firstName: "",
     email: "",
     phone: "",
+    subject: "",
     message: "",
   });
 
@@ -28,6 +29,7 @@ export default function ContactForm() {
       last_name: form.lastName,
       email: form.email,
       phone: form.phone,
+      subject: form.subject,
       message: form.message,
     };
 
@@ -50,6 +52,7 @@ export default function ContactForm() {
       firstName: "",
       email: "",
       phone: "",
+      subject: "",
       message: "",
     });
   };
@@ -105,6 +108,23 @@ export default function ContactForm() {
               required
             />
             <label htmlFor="email">អ៊ីម៉ែល</label>
+          </div>
+        </div>
+
+        {/* Subject */}
+        <div className="col-12">
+          <div className="mb-4 form-floating">
+            <input
+              type="text"
+              className="form-control"
+              id="subject"
+              name="subject"
+              placeholder="ប្រធានបទ"
+              value={form.subject}
+              onChange={handleChange}
+              required
+            />
+            <label htmlFor="subject">ប្រធានបទ</label>
           </div>
         </div>
 

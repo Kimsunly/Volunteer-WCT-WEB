@@ -111,8 +111,18 @@ export async function verifyOtp({ email, otp }) {
     return data;
 }
 
+export async function verifyPasswordOtp({ email, otp }) {
+    const { data } = await api.post("/verify-password-otp", { email, otp });
+    return data;
+}
+
 export async function resendOtp({ email }) {
     const { data } = await api.post("/resend-otp", { email });
+    return data;
+}
+
+export async function resendPasswordOtp({ email }) {
+    const { data } = await api.post("/resend-otp/forgot", { email });
     return data;
 }
 

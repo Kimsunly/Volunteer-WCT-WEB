@@ -32,86 +32,66 @@ export default function AboutUs() {
   ];
 
   return (
-    <section className="about-us position-relative">
-      <div className="pattern">
-        <img
-          src="/images/homepage/pattern-9.png"
-          alt=""
-          className="about-pattern"
-        />
-        <img
-          src="/images/homepage/pattern-9.png"
-          alt=""
-          className="about-pattern2"
-        />
-        <img
-          src="/images/homepage/pattern-4.png"
-          alt=""
-          className="pattern_01"
-        />
-        <img
-          src="/images/homepage/pattern-4.png"
-          alt=""
-          className="pattern_02"
-        />
-        <img
-          src="/images/homepage/pattern-4.png"
-          alt=""
-          className="pattern_03"
-        />
-        <div className="box box1"></div>
-        <div className="box box2"></div>
-      </div>
+    <section className="about-modern-wrapper position-relative">
+      <div className="about-glow-blob" />
 
       <div className="container">
-        <div className="row">
-          <div className="col-xl-6">
-            <div
-              className="about-us-img h-100 d-flex justify-content-center"
-              data-aos="fade-right"
-            >
-              <img
-                src="/images/homepage/about_02.jpg"
-                alt="About us"
-                className="img-fluid"
-              />
+        <div className="row align-items-center g-5">
+          <div className="col-xl-6" data-aos="fade-right">
+            <div className="about-img-container">
+              <div className="about-img-main-wrap">
+                <img
+                  src="/images/homepage/about_02.jpg"
+                  alt="About us"
+                  className="about-img-main"
+                />
+              </div>
+              <div className="about-floating-badge">
+                <div className="about-badge-icon">
+                  <i className="bi bi-heart-fill"></i>
+                </div>
+                <div className="about-badge-text">
+                  <span className="about-badge-num">100%</span>
+                  <span className="about-badge-lbl">ទឹកចិត្តស្ម័គ្រចិត្ត</span>
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="col-xl-6">
             <div
-              className="about-us-content position-relative"
+              className="about-us-content position-relative ps-lg-4"
               data-aos="fade-left"
             >
-              <span>អំពីយើង</span>
-              <h2 className="section-title mt-3 lh-sm">
+              <span className="about-sub-label">អំពីយើង</span>
+              <h2 className="about-header-title mt-3 mb-3">
                 គោលបំណង និងបេសកកម្មរបស់ពួកយើង
               </h2>
-              <p className="section-decript mt-2">
+              <p className="about-desc-text mb-4">
                 យើងជាក្រុមស្ម័គ្រចិត្តនៅកម្ពុជា ដែលបង្កើតឡើងដោយក្រុមយុវជន
                 និងមនុស្សមានចិត្តក្តីស្រឡាញ់មនុស្សជាតិ។
                 យើងមានបំណងជួយដល់សហគមន៍ក្នុងតំបន់ត្រូវការ ដោយផ្តោតលើវិស័យអប់រំ
                 ការពារបរិស្ថាន និងការអភិវឌ្ឍសហគមន៍។
               </p>
 
-              <ul className="mission-list list-unstyled">
+              <div className="about-mission-cards-list">
                 {missions.map((m, idx) => (
-                  <li
+                  <div
                     key={m.title}
-                    className="mt-4"
+                    className="about-mission-card"
                     data-aos="fade-left"
-                    data-aos-delay={200 + idx * 150}
+                    data-aos-delay={200 + idx * 100}
                   >
-                    <div className="list-img">
-                      <img src={m.icon} alt="" className="img-fluid" />
+                    <div className="about-mission-icon-wrap">
+                      <img src={m.icon} alt="" className="about-mission-icon" />
                     </div>
                     <div className="list-content ps-3">
-                      <h4 className="mb-1">{m.title}</h4>
-                      <p className="mb-0">{m.desc}</p>
+                      <h4 className="about-mission-title">{m.title}</h4>
+                      <p className="about-mission-desc">{m.desc}</p>
                     </div>
-                  </li>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           </div>
         </div>

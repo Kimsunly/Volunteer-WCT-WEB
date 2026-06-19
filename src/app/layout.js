@@ -19,12 +19,29 @@ import { Toaster } from 'react-hot-toast';
 const kantumruy = localFont({
   src: [
     {
-      path: '../../public/fonts/Kantumruy_Pro/KantumruyPro-VariableFont_wght.ttf',
+      path: '../../public/fonts/Kantumruy_Pro,Moul/Kantumruy_Pro/KantumruyPro-VariableFont_wght.ttf',
       weight: '100 900',
       style: 'normal',
     },
+    {
+      path: '../../public/fonts/Kantumruy_Pro,Moul/Kantumruy_Pro/KantumruyPro-Italic-VariableFont_wght.ttf',
+      weight: '100 900',
+      style: 'italic',
+    },
   ],
   variable: '--font-kantumruy',
+  display: 'swap',
+});
+
+const moul = localFont({
+  src: [
+    {
+      path: '../../public/fonts/Kantumruy_Pro,Moul/Moul/Moul-Regular.ttf',
+      weight: '400',
+      style: 'normal',
+    },
+  ],
+  variable: '--font-moul',
   display: 'swap',
 });
 
@@ -40,7 +57,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="km" data-theme="light" className={kantumruy.variable} suppressHydrationWarning>
+    <html lang="km" data-theme="light" data-scroll-behavior="smooth" className={`${kantumruy.variable} ${moul.variable}`} suppressHydrationWarning>
       <body style={{ fontFamily: 'var(--font-kantumruy), sans-serif' }}>
         <SessionProviderWrapper>
           <AuthProvider>

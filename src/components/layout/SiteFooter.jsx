@@ -9,8 +9,8 @@ export default function SiteFooter() {
         <div className="row g-4">
           <div className="col-lg-4 col-md-6">
             <div className="d-flex align-items-center mb-3 gap-3">
-              <Image src={logo} alt="Logo" className="flex-shrink-0" style={{ height: 60, width: "auto", borderRadius: 4 }} />
-              <h4 className="fw-bold m-0 lh-1" style={{ color: "var(--accent-primary)" }}>ស្ម័គ្រចិត្ត</h4>
+              <Image src={logo} alt="Logo" className="shrink-0" style={{ height: 60, width: "auto", borderRadius: 4 }} />
+              <h4 className="fw-bold m-0 lh-1" style={{ color: "var(--primary-color)" }}>ស្ម័គ្រចិត្ត</h4>
             </div>
             <p className="small text-white opacity-75">
               បេសកកម្មរបស់យើងគឺភ្ជាប់ស្មារតីអាណិតអាសូរជាមួយនឹងឱកាសស្ម័គ្រចិត្តប្រកបដោយអត្ថន័យ ដើម្បីកសាងសហគមន៍កាន់តែរឹងមាំ និងមានការចូលរួម។
@@ -25,7 +25,7 @@ export default function SiteFooter() {
           </div>
 
           <div className="col-lg-2 col-md-6">
-            <h5 className="fw-bold mb-3" style={{ color: "var(--accent-primary)" }}>តំណរភ្ជាប់រហ័ស</h5>
+            <h5 className="fw-bold mb-3" style={{ color: "var(--primary-color)" }}>តំណរភ្ជាប់រហ័ស</h5>
             <ul className="list-unstyled footer-nav-links">
               <li><Link href="/">ទំព័រដើម</Link></li>
               <li><Link href="/opportunities">ការងារស្ម័គ្រចិត្ត</Link></li>
@@ -37,10 +37,10 @@ export default function SiteFooter() {
           </div>
 
           <div className="col-lg-3 col-md-6">
-            <h5 className="fw-bold mb-3" style={{ color: "var(--accent-primary)" }}>ព័ត៌មាន</h5>
+            <h5 className="fw-bold mb-3" style={{ color: "var(--primary-color)" }}>ព័ត៌មាន</h5>
             <ul className="list-unstyled footer-nav-links">
               <li><Link href="/about">អំពីរយើង</Link></li>
-              <li><Link href="/contact">ទំនាក់ទំនង</Link></li>
+              <li><Link href="/contact" style={{ color: "#fff" }}>ទំនាក់ទំនង</Link></li>
               <li><a href="#">គោលការណ៍ឯកជន</a></li>
               <li><a href="#">លក្ខខណ្ឌប្រើប្រាស់</a></li>
               <li><a href="#">ជំនួយ</a></li>
@@ -48,11 +48,11 @@ export default function SiteFooter() {
           </div>
 
           <div className="col-lg-3 col-md-6">
-            <h5 className="fw-bold mb-3" style={{ color: "var(--accent-primary)" }}>ទំនាក់ទំនង</h5>
+            <h5 className="fw-bold mb-3" style={{ color: "var(--primary-color)" }}>ទំនាក់ទំនង</h5>
             <ul className="list-unstyled footer-contact-info">
-              <li className="mb-2 small"><i className="bi bi-geo-alt me-2" style={{ color: "var(--accent-primary)" }} />ផ្ទះលេខ: XXXX, ផ្លូវ YYYY, ភ្នំពេញ</li>
-              <li className="mb-2 small"><i className="bi bi-telephone me-2" style={{ color: "var(--accent-primary)" }} />(855) 12 345 678</li>
-              <li className="mb-2 small"><i className="bi bi-envelope me-2" style={{ color: "var(--accent-primary)" }} />info@volunteer.org</li>
+              <li className="mb-2 small"><i className="bi bi-geo-alt me-2" style={{ color: "var(--primary-color)" }} />ផ្ទះលេខ: XXXX, ផ្លូវ YYYY, ភ្នំពេញ</li>
+              <li className="mb-2 small"><i className="bi bi-telephone me-2" style={{ color: "var(--primary-color)" }} />(855) 12 345 678</li>
+              <li className="mb-2 small"><i className="bi bi-envelope me-2" style={{ color: "var(--primary-color)" }} />info@volunteer.org</li>
             </ul>
           </div>
         </div>

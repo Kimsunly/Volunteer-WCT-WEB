@@ -11,6 +11,10 @@ import BenefitsGrid from "./components/BenefitsGrid";
 import FAQAccordion from "./components/FAQAccordion";
 import TestimonialsSlider from "./components/TestimonialsSlider";
 
+import QuickMatcher from "./components/QuickMatcher";
+import LatestStories from "./components/LatestStories";
+import VolunteerSpotlight from "./components/VolunteerSpotlight";
+
 
 
 async function getUpcomingEvents() {
@@ -67,16 +71,52 @@ async function getTestimonials() {
     return [];
 }
 
+async function getBlogs() {
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/blogs`, { cache: 'no-store' });
+        if (res.ok) {
+            const json = await res.json();
+            if (json.success && json.data) {
+                return json.data;
+            }
+            if (json.data) return json.data;
+            if (Array.isArray(json)) return json;
+        }
+    } catch (e) {
+        console.error("Failed to fetch blogs:", e);
+    }
+    return [];
+}
+
 export default async function LandingPage() {
     const cookieStore = await cookies();
     const token = cookieStore.get("authToken")?.value;
+    
+    // Let's verify the token is valid before showing HomepageContent
+    let isValidToken = false;
     if (token) {
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/auth/me`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if (res.ok) {
+                isValidToken = true;
+            }
+        } catch (e) {
+            console.error("Token validation failed:", e);
+        }
+    }
+
+    if (token && isValidToken) {
         return <HomepageContent />;
     }
 
     const events = await getUpcomingEvents();
     const opportunities = await getOpportunities();
     const testimonials = await getTestimonials();
+    const blogs = await getBlogs();
 
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
     const ensureAbsoluteUrl = (path) => {
@@ -117,7 +157,7 @@ export default async function LandingPage() {
             },
             images: images,
             imageUrl: images[0] || "/images/placeholder.png",
-            date: item.logistic?.start_date ? new Date(item.logistic.start_date).toLocaleDateString('km-KH', { day: '2-digit', month: 'long', year: 'numeric' }) : 'TBD',
+            start_date: item.logistic?.start_date,
             time: item.logistic?.time_range || 'TBD',
             transport: item.logistic?.transport,
             housing: item.logistic?.housing,
@@ -156,8 +196,11 @@ export default async function LandingPage() {
             <AboutUs />
             <BenefitsGrid />
             <StatsStripModern />
+            <QuickMatcher items={displayOpps} />
             <LandingOpportunities items={displayOpps} />
+            <VolunteerSpotlight />
             <UpcomingEvents items={displayEvents} />
+            <LatestStories blogs={blogs} />
             <TestimonialsSlider testimonials={testimonials} />
             <OrganizerCTA />
             <FAQAccordion />

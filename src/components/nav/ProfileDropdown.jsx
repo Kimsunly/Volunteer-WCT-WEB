@@ -56,6 +56,19 @@ export default function ProfileDropdown({ onBecomeOrganizer }) {
       </button>
 
       <ul className="dropdown-menu dropdown-menu-end">
+        <li className="px-3 py-2 border-bottom" style={{ minWidth: "200px" }}>
+          <div className="fw-bold text-truncate text-primary-theme" style={{ maxWidth: "180px", fontSize: "14px" }}>
+            {user.name}
+          </div>
+          <div className="text-muted small text-truncate" style={{ maxWidth: "180px", fontSize: "12px" }}>
+            {user.email}
+          </div>
+          {user.role === "user" && user.status === "pending" && (
+            <span className="badge bg-warning-subtle text-warning mt-1 d-inline-flex align-items-center gap-1" style={{ fontSize: "10.5px", whiteSpace: "normal", textAlign: "left" }}>
+              <i className="bi bi-clock-history"></i> រង់ចាំការអនុម័តជាអ្នករៀបចំ
+            </span>
+          )}
+        </li>
         <li>
           <Link className="dropdown-item" href={getDashboardUrl()}>
             <i className="bi bi-person-circle"></i>
@@ -77,8 +90,17 @@ export default function ProfileDropdown({ onBecomeOrganizer }) {
                 textAlign: "left",
               }}
             >
-              <i className="bi bi-briefcase"></i>
-              <span className="ps-2">ក្លាយជាអ្នករៀបចំ</span>
+              {user.status === "pending" ? (
+                <>
+                  <i className="bi bi-hourglass-split text-warning"></i>
+                  <span className="ps-2 text-warning fw-semibold">កំពុងពិនិត្យការស្នើសុំ</span>
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-briefcase"></i>
+                  <span className="ps-2">ក្លាយជាអ្នករៀបចំ</span>
+                </>
+              )}
             </button>
           </li>
         )}

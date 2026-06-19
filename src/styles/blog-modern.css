@@ -1,13 +1,13 @@
 .blog-card-modern {
     border-radius: 1.5rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border) !important;
 }
 
 .blog-card-modern:hover {
     transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
 }
 
 .blog-card-img-wrapper {
@@ -23,9 +23,9 @@
 }
 
 .badge-modern-category {
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--color-bg-surface);
     backdrop-filter: blur(4px);
-    color: #2b2d42;
+    color: var(--color-text-primary);
     font-weight: 700;
     padding: 0.5rem 1rem;
     border-radius: 0.75rem;
@@ -34,14 +34,14 @@
 }
 
 .blog-card-title-modern {
-    color: #2b2d42;
+    color: var(--color-text-primary);
     font-size: 1.25rem;
     line-height: 1.4;
 }
 
 .btn-modern-action {
-    background: #2b2d42;
-    color: #ffffff;
+    background: var(--btn-primary);
+    color: var(--text-white-fixed) !important;
     border-radius: 0.8rem;
     transition: all 0.3s ease;
     border: none;
@@ -50,8 +50,9 @@
 }
 
 .btn-modern-action:hover {
-    background: #1a1b29;
-    color: #ffffff;
+    background: var(--btn-primary);
+    opacity: 0.9;
+    color: var(--text-white-fixed) !important;
     transform: scale(1.02);
 }
 
@@ -62,12 +63,12 @@
 }
 
 .blog-tags-modern .badge:hover {
-    background: #e9ecef !important;
-    border-color: #dee2e6 !important;
+    background: var(--color-bg-input) !important;
+    border-color: var(--color-border) !important;
 }
 
 .blog-meta-modern i {
-    color: #6c757d;
+    color: var(--color-text-secondary);
 }
 
 .filter-pills .btn {
@@ -75,25 +76,26 @@
     padding: 0.5rem 1.25rem;
     font-weight: 500;
     transition: all 0.3s ease;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--color-border);
 }
 
 .filter-pills .btn-outline-primary {
-    background: #fff;
-    color: #2b2d42;
-    border-color: #dee2e6;
+    background: var(--color-bg-card);
+    color: var(--color-text-primary);
+    border-color: var(--color-border);
 }
 
 .filter-pills .btn-outline-primary:hover {
-    background: #f8f9fa;
-    border-color: #2b2d42;
-    color: #2b2d42;
+    background: var(--color-bg-card-hover);
+    border-color: var(--color-border-hover);
+    color: var(--color-text-primary);
 }
 
 .filter-pills .btn-primary.active {
-    background: #2b2d42 !important;
-    border-color: #2b2d42 !important;
-    box-shadow: 0 4px 12px rgba(43, 45, 66, 0.2);
+    background: var(--btn-primary) !important;
+    border-color: var(--btn-primary) !important;
+    color: var(--text-white-fixed) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .search-box .input-group {
@@ -103,14 +105,22 @@
 }
 
 .search-box .input-group-text {
-    background: #fff;
+    background: var(--color-bg-surface);
+    color: var(--color-text-secondary);
     border: none;
     padding-left: 1.5rem;
 }
 
 .search-box .form-control {
+    background: var(--color-bg-surface);
+    color: var(--color-text-primary);
     border: none;
     padding: 0.75rem 1.5rem 0.75rem 0.5rem;
+}
+
+.search-box .form-control::placeholder {
+    color: var(--color-text-secondary);
+    opacity: 0.7;
 }
 
 .search-box .form-control:focus {
@@ -141,8 +151,8 @@
 }
 
 .badge-modern-category-static {
-    background: #f1f3f5;
-    color: #2b2d42;
+    background: var(--color-bg-input);
+    color: var(--color-text-primary);
     font-weight: 700;
     padding: 0.5rem 1.25rem;
     border-radius: 50px;
@@ -150,7 +160,7 @@
 }
 
 .featured-title-modern {
-    color: #2b2d42;
+    color: var(--color-text-primary);
     font-size: 2.5rem;
     line-height: 1.2;
 }
@@ -167,17 +177,18 @@
 
 /* Blog Hero Modern */
 .blog-hero {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: linear-gradient(135deg, var(--color-bg-surface) 0%, var(--color-bg-base) 100%) !important;
     padding: 100px 0;
 }
 
 .blog-badge {
     display: inline-flex;
     align-items: center;
-    background: #ffffff;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
     padding: 0.5rem 1.25rem;
     border-radius: 50px;
-    color: #2b2d42;
+    color: var(--color-text-primary);
     font-weight: 700;
     font-size: 0.85rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -187,26 +198,26 @@
 .blog-hero-title {
     font-size: 3.5rem;
     font-weight: 800;
-    color: #2b2d42;
+    color: var(--color-text-primary);
     line-height: 1.2;
     margin-bottom: 1.5rem;
 }
 
 .blog-hero-subtitle {
     font-size: 1.1rem;
-    color: #6c757d;
+    color: var(--color-text-secondary);
     max-width: 600px;
     line-height: 1.8;
 }
 
 .stat-item h3 {
     font-weight: 800;
-    color: #2b2d42;
+    color: var(--btn-primary);
     margin-bottom: 0.25rem;
 }
 
 .stat-item p {
-    color: #6c757d;
+    color: var(--color-text-secondary);
     font-size: 0.9rem;
     font-weight: 500;
 }

@@ -4,20 +4,7 @@ import React from "react";
 import Image from "next/image";
 
 export default function ProfileHeader({ user, onOpenSettings }) {
-  const { name, avatar, tierLabel, notifCount, providers = [] } = user;
-
-  const getProviderIcon = (provider) => {
-    switch (provider.toLowerCase()) {
-      case "google":
-        return "/images/Icon/search.png";
-      case "github":
-        return "/images/Icon/github.png";
-      case "facebook":
-        return "/images/Icon/facebook.png";
-      default:
-        return null;
-    }
-  };
+  const { name, avatar, tierLabel, status } = user;
 
   return (
     <div className="d-flex align-items-center gap-3 mb-3">
@@ -26,24 +13,30 @@ export default function ProfileHeader({ user, onOpenSettings }) {
       </div>
 
       <div>
-        <h3 className="mb-1">{name}</h3>
+        <h3 className="mb-1 d-flex align-items-center gap-2">
+          {name}
+          {status === "pending" && (
+            <i
+              className="bi bi-hourglass-split text-warning animate-pulse"
+              title="រង់ចាំការអនុម័តជាអ្នករៀបចំ"
+              style={{ fontSize: "1.1rem" }}
+            ></i>
+          )}
+        </h3>
         <div className="d-flex align-items-center gap-2 small">
           <span className="badge rounded-pill text-bg-warning-subtle text-warning fw-semibold">
             {tierLabel}
           </span>
+          {status === "pending" && (
+            <span className="badge rounded-pill bg-warning-subtle text-warning fw-semibold border border-warning-subtle d-inline-flex align-items-center gap-1">
+              <i className="bi bi-clock-history"></i>
+              រង់ចាំការអនុម័តជាអ្នករៀបចំ (Pending Organizer Approval)
+            </span>
+          )}
         </div>
       </div>
 
       <div className="ms-auto d-flex align-items-center gap-3">
-        <a className="position-relative text-decoration-none" href="#">
-          <i className="bi bi-bell fs-5"></i>
-          {notifCount > 0 && (
-            <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-              {notifCount}
-            </span>
-          )}
-        </a>
-
         {/* Gear icon opens settings modal */}
         <button
           type="button"
