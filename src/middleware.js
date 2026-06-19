@@ -13,6 +13,13 @@ export function middleware(request) {
     const role = request.cookies.get('role')?.value || 'user';
     const isAuthenticated = !!token;
 
+    // Redirect authenticated users away from login/register pages
+    const authRoutes = ['/auth/login', '/auth/register', '/auth/org/login', '/auth/org/register'];
+    if (authRoutes.some(route => pathname === route) && isAuthenticated) {
+        const redirectUrl = role === 'admin' ? '/admin/dashboard' : '/';
+        return NextResponse.redirect(new URL(redirectUrl, request.url));
+    }
+
     // Auth protection
     const protectedRoutes = ['/user', '/organizer', '/admin', '/user-profile'];
     if (protectedRoutes.some(route => pathname.startsWith(route)) && !isAuthenticated) {
@@ -41,5 +48,9 @@ export const config = {
         '/user-profile',
         '/organizer/:path*',
         '/admin/:path*',
+        '/auth/login',
+        '/auth/register',
+        '/auth/org/login',
+        '/auth/org/register',
     ],
 };
