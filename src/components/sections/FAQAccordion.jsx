@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 
 const faqs = [
   {
@@ -38,9 +39,6 @@ export default function FAQAccordion() {
                 alt="FAQ"
                 className="img-fluid"
               />
-              <div className="floating-q q1">?</div>
-              <div className="floating-q q2">?</div>
-              <div className="floating-q q3">?</div>
             </div>
           </div>
 
@@ -102,9 +100,9 @@ export default function FAQAccordion() {
                   <h4>មានសំណួរផ្សេងទៀត?</h4>
                   <p>ទាក់ទងមកយើង ហើយយើងនឹងជួយឆ្លើយសំណួររបស់អ្នក</p>
                 </div>
-                <a href="/contact" className="btn-faq-contact">
+                <Link href="/contact" className="btn-faq-contact">
                   ទាក់ទង
-                </a>
+                </Link>
               </div>
             </div>
           </div>

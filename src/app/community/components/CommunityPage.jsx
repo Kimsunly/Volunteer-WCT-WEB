@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
 import DeleteCommentModal from "@/components/modals/DeleteCommentModal";
+import SafeDate from "@/components/common/SafeDate";
 import { listCommunityPosts, likeCommunityPost } from "@/services/community";
 import {
   getComments,
@@ -187,11 +189,7 @@ export default function CommunityPage() {
           organizer_name: p.user?.name || p.author?.name || "Volunteer WCT",
           organizer_avatar:
             p.user?.avatar_url || p.author?.avatar_url || "/images/profile.png",
-          created_at: new Date(p.created_at).toLocaleDateString("km-KH", {
-            day: "2-digit",
-            month: "long",
-            year: "numeric",
-          }),
+          created_at: p.created_at, // Keep raw date string
           category: p.category,
           title: p.title,
           title_kh: p.title_kh || "",
@@ -294,7 +292,7 @@ export default function CommunityPage() {
 
   if (loading && isFirstLoad)
     return (
-      <div className="container py-5 text-center" style={{ marginTop: 130 }}>
+      <div className="container py-5 text-center" style={{ marginTop: 85 }}>
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Loading...</span>
         </div>
@@ -304,7 +302,7 @@ export default function CommunityPage() {
   return (
     <main
       className="flex-grow-1 bg-light"
-      style={{ marginTop: 130, paddingBottom: "2rem" }}
+      style={{ marginTop: "120px", paddingBottom: "2rem" }}
     >
       <div className="container py-4">
         {/* Hero Section */}
@@ -370,14 +368,7 @@ export default function CommunityPage() {
             filtered.map((post) => (
               <div key={post.id} className="col-lg-6">
                 <div
-                  className="card h-100 border-0 shadow-lg rounded-5 overflow-hidden"
-                  style={{ transition: "all 0.3s ease", cursor: "pointer" }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.transform = "translateY(-8px)")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.transform = "translateY(0)")
-                  }
+                  className="community-post-card h-100"
                   onClick={() => setSelectedPost(post)}
                 >
                   {/* Image */}
@@ -401,10 +392,7 @@ export default function CommunityPage() {
                       {/* Category Badge */}
                       {post.category && (
                         <div className="position-absolute top-3 left-3">
-                          <span
-                            className="badge bg-white text-dark rounded-pill px-3 py-2 fw-semibold shadow-sm"
-                            style={{ fontSize: "0.85rem" }}
-                          >
+                          <span className="post-category-badge">
                             {post.category}
                           </span>
                         </div>
@@ -414,47 +402,44 @@ export default function CommunityPage() {
 
                   <div className="card-body p-4">
                     {/* Header */}
-                    <div className="d-flex align-items-center justify-content-between mb-3">
-                      <div className="d-flex align-items-center gap-2">
-                        <img
-                          src={post.organizer_avatar}
-                          className="rounded-circle"
-                          alt={post.organizer_name}
-                          width={48}
-                          height={48}
-                          style={{ objectFit: "cover" }}
-                        />
+                    <div className="d-flex align-items-center justify-content-between mb-4">
+                      <div className="d-flex align-items-center gap-3">
+                        <div className="post-author-avatar-wrap">
+                          <img
+                            src={post.organizer_avatar}
+                            className="rounded-circle"
+                            alt={post.organizer_name}
+                            width={48}
+                            height={48}
+                            style={{ objectFit: "cover" }}
+                          />
+                        </div>
                         <div className="d-flex flex-column">
-                          <span className="fw-semibold text-dark">
+                          <span className="post-author-name">
                             {post.organizer_name}
                           </span>
-                          <span
-                            className="text-muted small"
-                            style={{ fontSize: "0.8rem" }}
-                          >
-                            {post.created_at}
+                          <span className="post-date">
+                            <SafeDate
+                              dateString={post.created_at}
+                              options={{
+                                day: "2-digit",
+                                month: "long",
+                                year: "numeric",
+                              }}
+                            />
                           </span>
                         </div>
                       </div>
                     </div>
 
                     {/* Content */}
-                    <h5
-                      className="card-title mb-2 text-dark"
-                      style={{ fontWeight: 700, lineHeight: "1.4" }}
-                    >
-                      {post.title}
-                    </h5>
+                    <h5 className="post-title mb-2">{post.title}</h5>
                     {post.title_kh && (
-                      <h6 className="card-subtitle text-muted mb-3">
-                        {post.title_kh}
-                      </h6>
+                      <h6 className="post-subtitle mb-3">{post.title_kh}</h6>
                     )}
                     <p
-                      className="card-text text-muted mb-4"
+                      className="post-body-text mb-4"
                       style={{
-                        fontSize: "0.95rem",
-                        lineHeight: "1.6",
                         display: "-webkit-box",
                         WebkitLineClamp: 3,
                         WebkitBoxOrient: "vertical",
@@ -468,10 +453,7 @@ export default function CommunityPage() {
                     {post.tags && post.tags.length > 0 && (
                       <div className="d-flex flex-wrap gap-2 mb-4">
                         {post.tags.map((tag, i) => (
-                          <span
-                            key={i}
-                            className="badge bg-light text-dark small px-2 py-1 rounded-3"
-                          >
+                          <span key={i} className="post-tag-chip">
                             #{tag}
                           </span>
                         ))}
@@ -479,15 +461,11 @@ export default function CommunityPage() {
                     )}
 
                     {/* Footer */}
-                    <div className="d-flex justify-content-between align-items-center">
-                      <div className="d-flex gap-3">
+                    <div className="d-flex justify-content-between align-items-center mt-auto">
+                      <div className="d-flex gap-2">
                         {/* Like */}
                         <button
-                          className="btn btn-light rounded-4 px-4 py-2 d-flex align-items-center gap-2"
-                          style={{
-                            border: "none",
-                            transition: "all 0.2s ease",
-                          }}
+                          className="post-action-btn"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleLike(post.id);
@@ -495,41 +473,22 @@ export default function CommunityPage() {
                         >
                           <i
                             className={`bi ${post.liked ? "bi-heart-fill text-danger" : "bi-heart"}`}
-                            style={{ fontSize: "1.2rem" }}
+                            style={{ fontSize: "1.1rem" }}
                           ></i>
-                          <span className="fw-semibold">
-                            {post.likes_count}
-                          </span>
+                          <span>{post.likes_count}</span>
                         </button>
 
                         {/* Comment */}
-                        <button
-                          className="btn btn-light rounded-4 px-4 py-2 d-flex align-items-center gap-2"
-                          style={{
-                            border: "none",
-                            transition: "all 0.2s ease",
-                          }}
-                        >
+                        <button className="post-action-btn">
                           <i
                             className="bi bi-chat"
-                            style={{ fontSize: "1.2rem" }}
+                            style={{ fontSize: "1.1rem" }}
                           ></i>
-                          <span className="fw-semibold">
-                            {post.comments_count}
-                          </span>
+                          <span>{post.comments_count}</span>
                         </button>
                       </div>
 
-                      <button
-                        className="btn btn-primary rounded-4 px-4 py-2 fw-semibold"
-                        style={{
-                          background:
-                            "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                          border: "none",
-                        }}
-                      >
-                        អានបន្ថែម
-                      </button>
+                      <button className="post-readmore-btn">អានបន្ថែម</button>
                     </div>
                   </div>
                 </div>
@@ -577,7 +536,14 @@ export default function CommunityPage() {
                         {selectedPost.organizer_name}
                       </span>
                       <span className="text-muted small">
-                        {selectedPost.created_at}
+                        <SafeDate
+                          dateString={selectedPost.created_at}
+                          options={{
+                            day: "2-digit",
+                            month: "long",
+                            year: "numeric",
+                          }}
+                        />
                       </span>
                     </div>
                   </div>
@@ -733,9 +699,9 @@ export default function CommunityPage() {
                 ) : (
                   <div className="alert alert-light text-center border mb-4 rounded-4">
                     សូម{" "}
-                    <a href="/auth/login" className="alert-link fw-semibold">
+                    <Link href="/auth/login" className="alert-link fw-semibold">
                       ចូលគណនី
-                    </a>{" "}
+                    </Link>{" "}
                     ដើម្បីបញ្ចេញមតិយោបល់
                   </div>
                 )}
@@ -815,9 +781,7 @@ export default function CommunityPage() {
                                   className="text-muted"
                                   style={{ fontSize: "0.75rem" }}
                                 >
-                                  {new Date(
-                                    comment.created_at,
-                                  ).toLocaleDateString("km-KH")}
+                                  <SafeDate dateString={comment.created_at} />
                                 </small>
                               </div>
                             </div>
@@ -951,6 +915,24 @@ export default function CommunityPage() {
         commentId={deletingCommentId}
         onDeleteSuccess={confirmDeleteComment}
       />
+
+      <style jsx>{`
+        .form-control,
+        .form-select,
+        .input-group-text {
+          background-color: var(--color-bg-surface) !important;
+          color: var(--color-text-primary) !important;
+        }
+
+        .form-control::placeholder {
+          color: var(--color-text-secondary) !important;
+          opacity: 0.7 !important;
+        }
+
+        .input-group-text i {
+          color: var(--color-text-secondary) !important;
+        }
+      `}</style>
     </main>
   );
 }

@@ -57,7 +57,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="km" data-theme="light" className={`${kantumruy.variable} ${moul.variable}`} suppressHydrationWarning>
+    <html lang="km" data-theme="light" data-scroll-behavior="smooth" className={`${kantumruy.variable} ${moul.variable}`} suppressHydrationWarning>
       <body style={{ fontFamily: 'var(--font-kantumruy), sans-serif' }}>
         <SessionProviderWrapper>
           <AuthProvider>

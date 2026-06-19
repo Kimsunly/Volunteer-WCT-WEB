@@ -33,7 +33,16 @@ export default function LandingOpportunities({ items = [] }) {
   const filtered = useMemo(
     () =>
       active === "all" ? items : items.filter((i) => {
-        const catName = i.category?.label || i.category?.name || i.category;
+        let catName;
+        if (i.category?.label) {
+          catName = i.category.label;
+        } else if (i.category?.name) {
+          catName = i.category.name;
+        } else if (typeof i.category === "string") {
+          catName = i.category;
+        } else if (i.category_label) {
+          catName = i.category_label;
+        }
         return catName?.toLowerCase() === active;
       }),
     [active, items]
@@ -77,7 +86,7 @@ export default function LandingOpportunities({ items = [] }) {
         </div>
 
         <div className="row mt-2 gy-4">
-          {filtered.map((item, idx) => (
+          {filtered.slice(0, 3).map((item, idx) => (
             <OpportunityCard
               key={item.id || idx}
               data={item}

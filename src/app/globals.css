@@ -3,6 +3,7 @@
 @import '../styles/blog-modern.css';
 @import '../styles/auth-modern.css';
 @import '../styles/hero-responsive-fix.css';
+@import '../styles/home-modern.css';
 @import '../styles/style.css';
 
 /* === DESIGN SYSTEM === */
@@ -103,6 +104,9 @@ html,
 body {
   margin: 0;
   padding: 0;
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 *,
@@ -644,7 +648,7 @@ body {
 .dashboard-shell input[type="text"],
 .dashboard-shell input[type="email"],
 .dashboard-shell input[type="password"] {
-  background: var(--color-bg-input) !important;
+  background-color: var(--color-bg-input) !important;
   border: 1px solid var(--color-border) !important;
   border-radius: var(--radius-sm) !important;
   color: var(--color-text-primary) !important;
@@ -671,10 +675,75 @@ body {
   color: var(--color-text-muted) !important;
 }
 
-.dashboard-shell select option {
+/* === UNIFIED MODERN SELECT / DROPDOWN SYSTEM === */
+select,
+.form-select,
+.form-select-custom,
+.premium-select-field,
+.select-status-theme {
+  background-color: var(--color-bg-input) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 12px !important;
+  color: var(--color-text-primary) !important;
+  padding: 10px 36px 10px 16px !important;
+  font-size: 14px !important;
+  width: 100%;
+  height: auto !important;
+  outline: none !important;
+  cursor: pointer !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23AAFF00' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 14px center !important;
+  background-size: 14px 12px !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+[data-theme="light"] select,
+[data-theme="light"] .form-select,
+[data-theme="light"] .form-select-custom,
+[data-theme="light"] .premium-select-field,
+[data-theme="light"] .select-status-theme {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%234B5563' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+}
+
+select:hover,
+.form-select:hover,
+.form-select-custom:hover,
+.premium-select-field:hover,
+.select-status-theme:hover {
+  border-color: var(--color-border-hover) !important;
+}
+
+select:focus,
+.form-select:focus,
+.form-select-custom:focus,
+.premium-select-field:focus,
+.select-status-theme:focus {
+  border-color: var(--color-accent) !important;
+  box-shadow: 0 0 0 3px var(--color-accent-glow) !important;
+  background-color: var(--color-bg-card) !important;
+}
+
+select option,
+.form-select option,
+.form-select-custom option,
+.premium-select-field option,
+.select-status-theme option {
   background-color: var(--color-bg-surface) !important;
   color: var(--color-text-primary) !important;
+  padding: 12px !important;
+  font-size: 14px !important;
 }
+
+/* Small variation */
+select.form-select-sm,
+.form-select-sm {
+  padding: 6px 30px 6px 12px !important;
+  font-size: 12px !important;
+  border-radius: 8px !important;
+}
+
 
 /* === PREMIUM CARD === */
 .premium-card {
@@ -1013,4 +1082,1593 @@ body {
   .two-col-grid {
     grid-template-columns: 1fr !important;
   }
+}
+
+/* === DARK THEME OVERRIDES FOR BOOTSTRAP / INLINE STYLES === */
+[data-theme="dark"] .bg-white {
+  background-color: var(--color-bg-card) !important;
+}
+[data-theme="dark"] .bg-light {
+  background-color: var(--color-bg-input) !important;
+}
+[data-theme="dark"] .text-dark,
+[data-theme="dark"] .text-black {
+  color: var(--color-text-primary) !important;
+}
+[data-theme="dark"] .text-muted {
+  color: var(--color-text-secondary) !important;
+}
+[data-theme="dark"] .border,
+[data-theme="dark"] .border-top,
+[data-theme="dark"] .border-bottom,
+[data-theme="dark"] .border-start,
+[data-theme="dark"] .border-end {
+  border-color: var(--color-border) !important;
+}
+[data-theme="dark"] .modal-content {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border) !important;
+}
+[data-theme="dark"] .modal-header {
+  border-bottom-color: var(--color-border) !important;
+}
+[data-theme="dark"] .modal-footer {
+  border-top-color: var(--color-border) !important;
+}
+[data-theme="dark"] .btn-close {
+  filter: invert(1) grayscale(1) brightness(2) !important;
+}
+
+/* Nav Notification Bell Button Theme Support */
+.navbar .nav-action .nav-notification .btn,
+.navbar .btn[data-bs-toggle="dropdown"] {
+  background-color: var(--color-bg-input, #EEEEEE) !important;
+  color: var(--color-text-primary, #111111) !important;
+  border: 1px solid var(--color-border, transparent) !important;
+  transition: all 0.3s ease;
+}
+
+.navbar .nav-action .nav-notification .btn:hover,
+.navbar .btn[data-bs-toggle="dropdown"]:hover {
+  background-color: var(--color-bg-card-hover, #CCCCCC) !important;
+  color: var(--color-text-primary, #111111) !important;
+}
+
+.navbar .nav-action .nav-notification i {
+  color: var(--color-text-primary, #111111) !important;
+}
+
+/* Nav Notification Dropdown Theme Support */
+.nav-notification .dropdown-menu {
+  background-color: var(--color-bg-card, #ffffff) !important;
+  border: 1px solid var(--color-border, #E5E7EB) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="dark"] .nav-notification .dropdown-menu {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+.nav-notification .dropdown-menu li {
+  background: transparent !important;
+}
+
+.nav-notification .dropdown-menu .dropdown-item {
+  color: var(--color-text-primary, #111111) !important;
+  background-color: transparent !important;
+  border-bottom: 1px solid var(--color-border, #E5E7EB) !important;
+  transition: background-color 0.2s ease;
+}
+
+.nav-notification .dropdown-menu .dropdown-item:hover {
+  background-color: var(--color-bg-card-hover, #F8F9FA) !important;
+}
+
+.nav-notification .dropdown-menu .dropdown-item.bg-light {
+  background-color: var(--color-bg-input, #F0F2F5) !important;
+}
+
+[data-theme="dark"] .nav-notification .dropdown-menu .dropdown-item.bg-light {
+  background-color: var(--color-bg-input, #2A2A2A) !important;
+}
+
+.nav-notification .dropdown-menu h6,
+.nav-notification .dropdown-menu strong {
+  color: var(--color-text-primary, #111111) !important;
+}
+
+.nav-notification .dropdown-menu .text-muted,
+.nav-notification .dropdown-menu small {
+  color: var(--color-text-secondary, #6B7280) !important;
+}
+
+.nav-notification .dropdown-menu .text-secondary {
+  color: var(--color-text-muted, #9CA3AF) !important;
+}
+
+.nav-notification .dropdown-menu .text-primary,
+.nav-notification .dropdown-menu .btn-link {
+  color: var(--color-accent, #2d6a4f) !important;
+}
+
+.nav-notification .dropdown-menu .text-primary:hover,
+.nav-notification .dropdown-menu .btn-link:hover {
+  opacity: 0.8;
+}
+
+/* ==========================================================================
+   MODERN SPLIT-PANE PROFILE EDIT MODAL (Light/Dark Theme)
+   ========================================================================== */
+
+.modern-settings-modal .modal-dialog {
+  max-width: 900px !important;
+}
+
+.modern-settings-modal .modal-content {
+  background: var(--color-bg-surface) !important;
+  color: var(--color-text-primary) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--shadow-card), 0 25px 60px rgba(0, 0, 0, 0.35) !important;
+  overflow: hidden;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Header style - minimal, clean, border bottom only */
+.modern-settings-modal .modal-header {
+  background: var(--color-bg-surface) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+  padding: 1.25rem 1.75rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--color-text-primary) !important;
+}
+
+.modern-settings-modal .modal-header .modal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.modern-settings-modal .modal-header .btn-close {
+  opacity: 0.7;
+  transition: all 0.2s ease;
+  padding: 0.5rem !important;
+  margin: 0 !important;
+}
+
+[data-theme="light"] .modern-settings-modal .modal-header .btn-close {
+  filter: grayscale(1) brightness(0.2) !important;
+}
+
+[data-theme="dark"] .modern-settings-modal .modal-header .btn-close {
+  filter: invert(1) grayscale(1) brightness(1.5) !important;
+}
+
+.modern-settings-modal .modal-header .btn-close:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Modal Body - Flex Split Pane */
+.modern-settings-modal .modal-body {
+  padding: 0 !important;
+  display: flex;
+  min-height: 520px;
+  background-color: var(--color-bg-surface) !important;
+  overflow: hidden;
+}
+
+/* Sidebar navigation */
+.modern-settings-modal .modal-sidebar {
+  width: 245px;
+  background-color: var(--color-bg-base) !important;
+  border-right: 1px solid var(--color-border) !important;
+  padding: 1.5rem 1rem !important;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.modern-settings-modal .sidebar-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: left;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.modern-settings-modal .sidebar-tab-btn i {
+  font-size: 1.1rem;
+  transition: transform 0.2s ease;
+}
+
+.modern-settings-modal .sidebar-tab-btn:hover {
+  background-color: var(--color-bg-card-hover);
+  color: var(--color-text-primary);
+}
+
+.modern-settings-modal .sidebar-tab-btn:hover i {
+  transform: translateX(2px);
+}
+
+.modern-settings-modal .sidebar-tab-btn.active {
+  background-color: var(--color-accent-dim) !important;
+  color: var(--color-accent) !important;
+  font-weight: 600;
+}
+
+/* Right Content Pane */
+.modern-settings-modal .modal-tab-content {
+  flex: 1;
+  padding: 2rem !important;
+  overflow-y: auto;
+  max-height: 520px;
+}
+
+/* Content titles */
+.modern-settings-modal .tab-section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.75rem;
+}
+
+.modern-settings-modal .tab-section-title i {
+  color: var(--color-accent);
+}
+
+/* Premium Form Elements */
+.modern-settings-modal .form-label {
+  color: var(--color-text-secondary) !important;
+  font-weight: 600;
+  font-size: 0.825rem;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.modern-settings-modal .form-control,
+.modern-settings-modal .form-select {
+  background-color: var(--color-bg-input) !important;
+  color: var(--color-text-primary) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 10px !important;
+  padding: 0.65rem 0.9rem !important;
+  font-size: 0.9rem !important;
+  transition: all 0.15s ease-in-out !important;
+}
+
+.modern-settings-modal .form-control:focus,
+.modern-settings-modal .form-select:focus {
+  border-color: var(--color-accent) !important;
+  box-shadow: 0 0 0 3px var(--color-accent-glow) !important;
+  outline: none !important;
+}
+
+.modern-settings-modal .form-control::placeholder {
+  color: var(--color-text-secondary) !important;
+  opacity: 0.5;
+}
+
+.modern-settings-modal .form-control:disabled,
+.modern-settings-modal .form-control[readonly] {
+  background-color: var(--color-bg-base) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-secondary) !important;
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Custom styled inputs for input-group */
+.modern-settings-modal .input-group {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.modern-settings-modal .input-group-text {
+  background-color: var(--color-bg-base) !important;
+  border: 1px solid var(--color-border) !important;
+  border-right: none !important;
+  color: var(--color-text-secondary) !important;
+  padding: 0.65rem 0.9rem !important;
+  font-size: 0.9rem !important;
+}
+
+.modern-settings-modal .input-group .form-control {
+  border-left: none !important;
+}
+
+/* Modern Avatar Uploader UI */
+.modern-settings-modal .avatar-upload-section {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.25rem;
+  background-color: var(--color-bg-base);
+  border-radius: 14px;
+  border: 1px dashed var(--color-border);
+  margin-bottom: 2rem;
+}
+
+.modern-settings-modal .avatar-container {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  flex-shrink: 0;
+}
+
+.modern-settings-modal .avatar-preview {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 3px solid var(--color-border);
+  object-fit: cover;
+  transition: all 0.2s ease;
+}
+
+.modern-settings-modal .avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.65);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  opacity: 0;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.modern-settings-modal .avatar-container:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.modern-settings-modal .avatar-container:hover .avatar-preview {
+  border-color: var(--color-accent);
+}
+
+.modern-settings-modal .avatar-overlay i {
+  font-size: 1.25rem;
+  margin-bottom: 2px;
+}
+
+.modern-settings-modal .avatar-overlay span {
+  font-size: 0.65rem;
+  font-weight: 600;
+}
+
+.modern-settings-modal .avatar-upload-info h6 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: var(--color-text-primary);
+}
+
+.modern-settings-modal .avatar-upload-info p {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.modern-settings-modal .btn-upload-avatar {
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.modern-settings-modal .btn-upload-avatar:hover {
+  background-color: var(--color-bg-card-hover);
+  border-color: var(--color-border-hover);
+}
+
+/* Modal Footer buttons */
+.modern-settings-modal .modal-footer {
+  border-top: 1px solid var(--color-border) !important;
+  padding: 1.25rem 1.75rem !important;
+  background-color: var(--color-bg-surface) !important;
+}
+
+.modern-settings-modal .btn-cancel {
+  background-color: var(--color-bg-base) !important;
+  color: var(--color-text-primary) !important;
+  border: 1px solid var(--color-border) !important;
+  padding: 0.55rem 1.25rem !important;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 10px !important;
+  transition: all 0.15s ease !important;
+}
+
+.modern-settings-modal .btn-cancel:hover {
+  background-color: var(--color-bg-card-hover) !important;
+  border-color: var(--color-border-hover) !important;
+}
+
+.modern-settings-modal .btn-save {
+  background-color: var(--color-accent) !important;
+  color: #000000 !important;
+  border: none !important;
+  padding: 0.55rem 1.25rem !important;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 10px !important;
+  transition: all 0.15s ease !important;
+  box-shadow: 0 4px 12px var(--color-accent-glow) !important;
+}
+
+[data-theme="light"] .modern-settings-modal .btn-save {
+  color: #ffffff !important;
+}
+
+.modern-settings-modal .btn-save:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px var(--color-accent-glow) !important;
+}
+
+.modern-settings-modal .btn-save:active {
+  transform: translateY(0);
+}
+
+.modern-settings-modal .btn-save:disabled {
+  background-color: var(--color-bg-input) !important;
+  color: var(--color-text-muted) !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Custom backdrop filter blur */
+.custom-modal-backdrop {
+  backdrop-filter: blur(10px) !important;
+  background-color: rgba(0, 0, 0, 0.55) !important;
+  transition: opacity 0.15s linear;
+}
+
+@media (max-width: 768px) {
+  .modern-settings-modal .modal-dialog {
+    margin: 0.5rem !important;
+    max-width: calc(100% - 1rem) !important;
+  }
+  .modern-settings-modal .modal-body {
+    flex-direction: column !important;
+    min-height: auto !important;
+    max-height: 60vh !important;
+    overflow-y: auto !important;
+  }
+  .modern-settings-modal .modal-sidebar {
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--color-border) !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    padding: 0.5rem !important;
+    gap: 0.25rem !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    background-color: var(--color-bg-base) !important;
+  }
+  .modern-settings-modal .sidebar-tab-btn {
+    white-space: nowrap !important;
+    padding: 0.5rem 0.75rem !important;
+    gap: 0.5rem !important;
+    width: auto !important;
+    border-radius: 8px !important;
+  }
+  .modern-settings-modal .modal-tab-content {
+    padding: 1.25rem !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .modern-settings-modal .avatar-upload-section {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 1rem !important;
+    padding: 1rem !important;
+  }
+  .modern-settings-modal .avatar-upload-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* ==========================================================================
+   GLOBAL THEMING & SPECIFICITY FIXES
+   ========================================================================== */
+
+/* Fix specificity issue for primary buttons (especially anchors/Links) */
+a.btn-primary,
+.btn-primary {
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+}
+
+a.btn-primary:hover,
+.btn-primary:hover {
+  color: #ffffff !important;
+  opacity: 0.95;
+}
+
+/* Theme support for the social connections card wrapper */
+.user-profile-connections-card {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text-primary) !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+.user-profile-connections-card h5,
+.user-profile-connections-card h6 {
+  color: var(--color-text-primary) !important;
+}
+
+/* Theme support for the activities pane table cells */
+.table.vh-table tbody tr td,
+.table.vh-table thead tr th {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border) !important;
+}
+
+.table.vh-table thead tr th {
+  color: var(--color-text-primary) !important;
+}
+
+.table.vh-table tbody tr {
+  border-color: var(--color-border) !important;
+}
+
+/* Highly visible borders for opportunity and recommendation cards */
+.vh-op-card,
+.vh-reco-card {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text-primary) !important;
+  border: 1px solid var(--color-border-hover) !important; /* Slightly lighter border */
+}
+
+/* Highlighted borders in dark mode for clear visibility */
+[data-theme="dark"] .vh-op-card,
+[data-theme="dark"] .vh-reco-card {
+  border: 1px solid #3d3d3d !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+}
+
+[data-theme="dark"] .vh-op-card h6,
+[data-theme="dark"] .vh-reco-card .fw-semibold {
+  color: var(--color-text-primary) !important;
+}
+
+/* ==========================================================================
+   OPPORTUNITY DETAIL PAGE - FULL DARK/LIGHT THEME SUPPORT
+   ========================================================================== */
+
+/* ---- Contact Section Wrapper ---- */
+.contact-card {
+  background: var(--color-bg-surface) !important;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 30px;
+}
+
+.contact-card h3 {
+  color: var(--color-text-primary) !important;
+}
+
+/* ---- Contact Item Cards (the 3 icon cards: website/email/phone) ---- */
+.contact-card .card,
+.contact-card .card.bg-light {
+  background-color: var(--color-bg-input) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.contact-card .card h6.text-muted {
+  color: var(--color-text-secondary) !important;
+}
+
+.contact-card .card a.text-dark {
+  color: var(--color-text-primary) !important;
+}
+
+.contact-card a.text-dark,
+.contact-card a.fw-bold {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .contact-card a:hover {
+  color: var(--color-accent) !important;
+  text-decoration: underline;
+}
+
+/* ---- Quick Info Card (ព័ត៌មានរហ័ស) ---- */
+.card.card-info,
+.card.card-info.bg-light {
+  background-color: var(--color-bg-input) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.card.card-info h5,
+.card.card-info h6 {
+  color: var(--color-text-primary) !important;
+}
+
+.card.card-info .text-muted,
+.card.card-info strong.text-muted {
+  color: var(--color-text-secondary) !important;
+}
+
+.card.card-info span {
+  color: var(--color-text-primary);
+}
+
+/* Benefits badge inside quick info */
+.card.card-info .badge.bg-white,
+.card.card-info .badge.bg-white.text-dark {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* ---- Organization Section ---- */
+.organization,
+.organization.bg-light {
+  background-color: var(--color-bg-input) !important;
+  border-color: var(--color-border) !important;
+}
+
+.organization p.text-muted,
+.organization .mb-0.text-muted {
+  color: var(--color-text-secondary) !important;
+}
+
+/* ---- Comments Section ---- */
+/* Comments guideline card (left column bg-light) */
+.card.bg-light.shadow-sm,
+section#opportunity-comments .card.bg-light {
+  background-color: var(--color-bg-input) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+section#opportunity-comments .card.bg-light h5,
+section#opportunity-comments .card.bg-light h6 {
+  color: var(--color-text-primary) !important;
+}
+
+section#opportunity-comments .card.bg-light .text-muted,
+section#opportunity-comments .card.bg-light small {
+  color: var(--color-text-secondary) !important;
+}
+
+/* Individual comment rows bg-white */
+.border-bottom.pb-3.bg-white {
+  background-color: var(--color-bg-card) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* Comment count badge */
+.badge.bg-light.text-dark {
+  background-color: var(--color-bg-input) !important;
+  color: var(--color-text-primary) !important;
+  border: 1px solid var(--color-border);
+}
+
+/* Comments section text color */
+section#opportunity-comments strong.small,
+section#opportunity-comments .small {
+  color: var(--color-text-primary);
+}
+
+section#opportunity-comments .text-muted {
+  color: var(--color-text-secondary) !important;
+}
+
+/* Textarea inside comment form */
+section#opportunity-comments textarea.form-control {
+  background-color: var(--color-bg-input) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border) !important;
+}
+
+section#opportunity-comments textarea.form-control:focus {
+  border-color: var(--color-accent) !important;
+  box-shadow: 0 0 0 3px var(--color-accent-dim) !important;
+}
+
+section#opportunity-comments textarea.form-control::placeholder {
+  color: var(--color-text-secondary) !important;
+  opacity: 0.6;
+}
+
+/* ---- Testimonials (feedback cards inside impact section) ---- */
+/* These use bg-white text-dark inside the impact gradient section */
+.card.bg-white.text-dark.feedback {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.card.bg-white.text-dark.feedback h5,
+.card.bg-white.text-dark.feedback .text-muted {
+  color: var(--color-text-secondary) !important;
+}
+
+.card.bg-white.text-dark.feedback p {
+  color: var(--color-text-primary) !important;
+}
+
+/* ---- Section Headings & General page text ---- */
+.program-info p,
+.skill-require ul li,
+.tasks ul li {
+  color: var(--color-text-secondary) !important;
+}
+
+.section-heading {
+  color: var(--color-text-primary) !important;
+}
+
+/* Border-bottom dividers */
+.section-heading.border-bottom,
+h3.border-bottom {
+  border-color: var(--color-border) !important;
+}
+
+/* ---- Additional Recommendations section (if on detail page) ---- */
+.opportunity-detail-related .card.bg-light,
+.recommendations-row .card.bg-light {
+  background-color: var(--color-bg-card) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* ---- Generic Bootstrap overrides for opportunity detail page ---- */
+/* Override bg-light for all cards on this page context */
+main.flex-grow-1 .container .card.bg-light {
+  background-color: var(--color-bg-input) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+main.flex-grow-1 .container .card.bg-light h5,
+main.flex-grow-1 .container .card.bg-light h6,
+main.flex-grow-1 .container .card.bg-light strong {
+  color: var(--color-text-primary) !important;
+}
+
+main.flex-grow-1 .container .card.bg-light .text-muted,
+main.flex-grow-1 .container .card.bg-light small {
+  color: var(--color-text-secondary) !important;
+}
+
+/* Link colors inside cards */
+main.flex-grow-1 .container .card a.text-dark {
+  color: var(--color-accent) !important;
+  font-weight: 600;
+}
+
+main.flex-grow-1 .container .card a.text-dark:hover {
+  opacity: 0.8;
+}
+
+/* Breadcrumb theme support */
+.breadcrumb-page .breadcrumb .breadcrumb-item.active {
+  color: var(--color-text-secondary) !important;
+}
+
+.breadcrumb-page .breadcrumb-item + .breadcrumb-item::before {
+  color: var(--color-text-muted);
+}
+
+/* Skills & Tasks list item text */
+.list-group-item.bg-transparent {
+  background-color: transparent !important;
+  color: var(--color-text-secondary) !important;
+  border-color: transparent !important;
+}
+
+/* HR dividers inside comments */
+section#opportunity-comments hr {
+  border-color: var(--color-border) !important;
+  opacity: 1;
+}
+
+/* ---- Related Opportunities Cards ---- */
+main.flex-grow-1 .container .card.hover-lift,
+main.flex-grow-1 .container .card.shadow-sm.hover-lift {
+  background-color: var(--color-bg-card) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+main.flex-grow-1 .container .card.hover-lift:hover {
+  border-color: var(--color-border-hover) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+}
+
+[data-theme="dark"] main.flex-grow-1 .container .card.hover-lift:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important;
+}
+
+main.flex-grow-1 .container .card.hover-lift .card-title {
+  color: var(--color-text-primary) !important;
+}
+
+main.flex-grow-1 .container .card.hover-lift .small.text-muted {
+  color: var(--color-text-secondary) !important;
+}
+
+/* ---- Main page background ---- */
+main.flex-grow-1 > .container {
+  background-color: transparent;
+  color: var(--color-text-primary);
+}
+
+/* ---- Global bg-light override on the page ---- */
+main.flex-grow-1 .bg-light {
+  background-color: var(--color-bg-input) !important;
+}
+
+/* ---- Global bg-white override on the page ---- */
+main.flex-grow-1 .bg-white {
+  background-color: var(--color-bg-card) !important;
+}
+
+/* ---- text-dark inside opportunity page ---- */
+main.flex-grow-1 .text-dark:not(.btn):not(button):not(.badge) {
+  color: var(--color-text-primary) !important;
+}
+
+/* ==========================================
+   CAROUSEL, STATS & ACHIEVEMENTS REDESIGN
+   ========================================== */
+
+/* 1. Testimonials Slider Spacing Fix */
+.testimonials-modern .testimonial-slider-wrapper .swiper {
+  padding-bottom: 60px !important;
+}
+
+.testimonials-modern .testimonial-slider-wrapper .swiper-pagination {
+  bottom: 15px !important;
+}
+
+/* 2. Stats Strip Modern Overrides */
+.state-area {
+  background: transparent !important;
+}
+
+.stat-card-modern-redesigned {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-card-modern-redesigned:hover {
+  transform: translateY(-8px);
+  border-color: var(--color-border-hover);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .stat-card-modern-redesigned:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.stat-icon-wrap {
+  width: 70px;
+  height: 70px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin: 0 auto 1.5rem;
+  transition: transform 0.5s ease;
+}
+
+.stat-card-modern-redesigned:hover .stat-icon-wrap {
+  transform: scale(1.1) rotate(10deg);
+}
+
+/* Specific colors for homepage stats icons */
+.stat-icon-color-0 {
+  background: linear-gradient(135deg, rgba(77, 184, 255, 0.15) 0%, rgba(0, 194, 178, 0.15) 100%);
+  color: #00D2B2;
+  border: 1px solid rgba(0, 194, 178, 0.3);
+}
+.stat-icon-color-1 {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.15) 100%);
+  color: #10B981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.stat-icon-color-2 {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.15) 100%);
+  color: #F59E0B;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.stat-icon-color-3 {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.15) 100%);
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.stat-number {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 1.1rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+/* 3. Redesigned About Achievements */
+.about-achievements {
+  background: transparent;
+  overflow: hidden;
+  position: relative;
+}
+
+.achievements-blur-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.achievements-blur-bg .blur-circle {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.04;
+}
+
+.achievements-blur-bg .circle-1 {
+  width: 300px;
+  height: 300px;
+  background: var(--color-accent);
+  top: 10%;
+  left: 5%;
+}
+
+.achievements-blur-bg .circle-2 {
+  width: 250px;
+  height: 250px;
+  background: #00D2B2;
+  bottom: 10%;
+  right: 5%;
+}
+
+.achievements-badge {
+  display: inline-flex;
+  align-items: center;
+  background: var(--color-accent-dim);
+  color: var(--color-accent);
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: 1px solid rgba(170, 255, 0, 0.2);
+}
+
+[data-theme="light"] .achievements-badge {
+  border: 1px solid rgba(122, 204, 0, 0.2);
+}
+
+.achievements-title {
+  color: var(--color-text-primary);
+  font-size: 2.25rem;
+}
+
+.achievements-subtitle {
+  color: var(--color-text-secondary);
+  max-width: 600px;
+  font-size: 1.05rem;
+}
+
+.achievement-card-redesigned {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--shadow-card);
+  position: relative;
+  z-index: 1;
+}
+
+.achievement-card-redesigned:hover {
+  transform: translateY(-8px);
+  border-color: var(--color-border-hover);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .achievement-card-redesigned:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.achievement-icon-wrap {
+  width: 65px;
+  height: 65px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  transition: transform 0.5s ease;
+}
+
+.achievement-card-redesigned:hover .achievement-icon-wrap {
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* Color schemes for icon wrappers */
+.achievement-icon-wrap.color-0 {
+  background: linear-gradient(135deg, rgba(255, 77, 77, 0.12) 0%, rgba(255, 107, 107, 0.12) 100%);
+  color: #FF4D4D;
+  border: 1px solid rgba(255, 77, 77, 0.25);
+}
+
+.achievement-icon-wrap.color-1 {
+  background: linear-gradient(135deg, rgba(77, 184, 255, 0.12) 0%, rgba(0, 194, 178, 0.12) 100%);
+  color: #00D2B2;
+  border: 1px solid rgba(0, 194, 178, 0.25);
+}
+
+.achievement-icon-wrap.color-2 {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(217, 119, 6, 0.12) 100%);
+  color: #F59E0B;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.achievement-icon-wrap.color-3 {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.12) 100%);
+  color: #10B981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.achievement-number {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.achievement-label {
+  font-size: 1.1rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  line-height: 1.4;
+  margin-bottom: 0;
+}
+
+/* 4. Redesigned Community Post Card */
+.community-post-card {
+  background: var(--color-bg-card) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 24px !important;
+  overflow: hidden;
+  box-shadow: var(--shadow-card) !important;
+}
+
+/* Category Badge inside card */
+.post-category-badge {
+  background: rgba(122, 204, 0, 0.15) !important;
+  color: var(--color-accent) !important;
+  border: 1px solid rgba(122, 204, 0, 0.25) !important;
+  font-weight: 600 !important;
+  font-size: 0.8rem !important;
+  padding: 6px 14px !important;
+  border-radius: 50px !important;
+}
+
+[data-theme="dark"] .post-category-badge {
+  background: rgba(170, 255, 0, 0.15) !important;
+  border: 1px solid rgba(170, 255, 0, 0.25) !important;
+}
+
+/* Post Author avatar ring */
+.post-author-avatar-wrap {
+  position: relative;
+}
+
+.post-author-avatar-wrap img {
+  border: 2px solid var(--color-border) !important;
+}
+
+.post-author-name {
+  color: var(--color-text-primary) !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+}
+
+.post-date {
+  color: var(--color-text-secondary) !important;
+  font-size: 0.8rem !important;
+}
+
+.post-title {
+  color: var(--color-text-primary) !important;
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+  font-size: 1.25rem !important;
+}
+
+.post-subtitle {
+  color: var(--color-text-secondary) !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+}
+
+.post-body-text {
+  color: var(--color-text-secondary) !important;
+  font-size: 0.95rem !important;
+  line-height: 1.6 !important;
+}
+
+/* Modern Tag Chips */
+.post-tag-chip {
+  background: var(--color-bg-input) !important;
+  color: var(--color-text-secondary) !important;
+  border: 1px solid var(--color-border) !important;
+  padding: 4px 12px !important;
+  border-radius: 8px !important;
+  font-size: 0.8rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.post-tag-chip:hover {
+  background: var(--color-bg-card-hover) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border-hover) !important;
+}
+
+/* Interactive Action Buttons */
+.post-action-btn {
+  background: var(--color-bg-input) !important;
+  color: var(--color-text-primary) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 12px !important;
+  padding: 8px 18px !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+.post-action-btn:hover {
+  background: var(--color-bg-card-hover) !important;
+  border-color: var(--color-border-hover) !important;
+  transform: translateY(-2px) !important;
+}
+
+.post-action-btn i {
+  transition: transform 0.2s ease !important;
+}
+
+.post-action-btn:hover i {
+  transform: scale(1.15) !important;
+}
+
+/* Premium Read More Button */
+.post-readmore-btn {
+  background-color: var(--color-accent) !important;
+  color: #000000 !important;
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 8px 20px !important;
+  font-weight: 700 !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="light"] .post-readmore-btn {
+  color: #FFFFFF !important;
+}
+
+/* Donation Hero Buttons */
+.donation-hero-primary-btn {
+  background-color: var(--color-accent) !important;
+  color: #000000 !important;
+  padding: 14px 32px !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  border: none !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex;
+  align-items: center;
+}
+
+[data-theme="light"] .donation-hero-primary-btn {
+  color: #FFFFFF !important;
+}
+
+.donation-hero-primary-btn:hover {
+  filter: brightness(1.1) !important;
+  transform: translateY(-2px) !important;
+  color: #000000 !important;
+}
+
+[data-theme="light"] .donation-hero-primary-btn:hover {
+  color: #FFFFFF !important;
+}
+
+.donation-hero-secondary-btn {
+  background: transparent !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+  padding: 14px 32px !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex;
+  align-items: center;
+}
+
+.donation-hero-secondary-btn:hover {
+  background: var(--color-bg-card-hover) !important;
+  border-color: var(--color-border-hover) !important;
+  color: var(--color-text-primary) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* --- Redesigned Modern Modals --- */
+
+/* Modal Content Card override */
+.modal-content {
+  background: var(--color-bg-card) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 24px !important;
+  box-shadow: var(--shadow-card) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--color-border) !important;
+  padding: 1.5rem 2rem !important;
+}
+
+.modal-title {
+  color: var(--color-text-primary) !important;
+  font-weight: 700 !important;
+}
+
+.modal-body {
+  padding: 2rem !important;
+  color: var(--color-text-primary) !important;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--color-border) !important;
+  padding: 1.5rem 2rem !important;
+  background-color: var(--color-bg-surface) !important;
+}
+
+/* Close button custom style */
+.modal-header .btn-close {
+  filter: var(--theme-close-btn-filter, none);
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+[data-theme="dark"] {
+  --theme-close-btn-filter: invert(1) grayscale(1) brightness(2);
+}
+
+.modal-header .btn-close:hover {
+  opacity: 1;
+}
+
+/* Premium Form Input styling inside modals */
+.modal-body .form-label {
+  color: var(--color-text-secondary) !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.modal-body .form-control,
+.modal-body .form-select {
+  background-color: var(--color-bg-input) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+  border-radius: 12px !important;
+  padding: 0.75rem 1rem !important;
+  font-size: 0.95rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.modal-body .form-control:focus,
+.modal-body .form-select:focus {
+  border-color: var(--color-accent) !important;
+  box-shadow: var(--shadow-glow) !important;
+  background-color: var(--color-bg-input) !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* Checkboxes style */
+.modal-body .form-check-input {
+  background-color: var(--color-bg-input) !important;
+  border-color: var(--color-border) !important;
+}
+
+.modal-body .form-check-input:checked {
+  background-color: var(--color-accent) !important;
+  border-color: var(--color-accent) !important;
+}
+
+.modal-body .form-check-label {
+  color: var(--color-text-secondary) !important;
+  font-weight: 500 !important;
+  font-size: 0.9rem !important;
+}
+
+/* === THEME-AWARE DROPDOWN MENUS === */
+.dropdown-menu {
+  background-color: var(--color-bg-card) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 16px !important;
+  padding: 8px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25) !important;
+}
+
+[data-theme="light"] .dropdown-menu {
+  background-color: var(--color-bg-surface) !important;
+  border-color: var(--color-border) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
+}
+
+.dropdown-item {
+  color: var(--color-text-primary) !important;
+  border-radius: 10px !important;
+  padding: 10px 16px !important;
+  font-size: 0.88rem !important;
+  display: flex !important;
+  align-items: center !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  background: none !important;
+  border: none !important;
+}
+
+.dropdown-item i {
+  font-size: 1.1rem !important;
+  color: var(--color-text-secondary) !important;
+  transition: color 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: var(--color-bg-input) !important;
+  color: var(--color-accent) !important;
+}
+
+.dropdown-item:hover i {
+  color: var(--color-accent) !important;
+}
+
+.dropdown-divider {
+  border-top: 1px solid var(--color-border) !important;
+  margin: 6px 0 !important;
+}
+
+/* Explicit colors override */
+.dropdown-item.text-primary {
+  color: #3b82f6 !important;
+}
+.dropdown-item.text-primary i {
+  color: #3b82f6 !important;
+}
+.dropdown-item.text-primary:hover {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  color: #3b82f6 !important;
+}
+
+.dropdown-item.text-danger {
+  color: #ef4444 !important;
+}
+.dropdown-item.text-danger i {
+  color: #ef4444 !important;
+}
+.dropdown-item.text-danger:hover {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  color: #ef4444 !important;
+}
+
+/* ==========================================================================
+   REDESIGNED MOBILE OFFCANVAS SIDEBAR NAVIGATION
+   ========================================================================== */
+
+/* Glassmorphic custom offcanvas style */
+.offcanvas {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(20px) !important;
+  border-left: 1px solid var(--color-border, #e5e7eb) !important;
+  width: 300px !important;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+[data-theme="dark"] .offcanvas {
+  background: rgba(18, 18, 18, 0.9) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.brand-title {
+  color: var(--color-text-primary, #111827);
+}
+
+/* User Card inside menu */
+.user-profile-menu-card {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .user-profile-menu-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.user-profile-menu-card:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+[data-theme="dark"] .user-profile-menu-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.status-badge-active {
+  background-color: var(--color-accent-dim, rgba(170, 255, 0, 0.1)) !important;
+  color: var(--color-accent, #7acc00) !important;
+  border: 1px solid var(--color-accent-glow, rgba(170, 255, 0, 0.2)) !important;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  display: inline-block;
+}
+
+/* Mobile navigation items */
+.mobile-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  color: var(--color-text-secondary, #4b5563);
+  font-weight: 500;
+  text-align: left;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.mobile-nav-item i {
+  font-size: 1.25rem;
+  color: var(--color-text-secondary, #4b5563);
+  transition: all 0.25s ease;
+}
+
+.mobile-nav-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--color-text-primary, #111827);
+  padding-left: 20px;
+}
+
+[data-theme="dark"] .mobile-nav-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-primary, #ffffff);
+}
+
+.mobile-nav-item:hover i {
+  color: var(--color-accent, #7acc00);
+  transform: scale(1.1);
+}
+
+.mobile-nav-item.active {
+  background: var(--color-accent-dim, rgba(170, 255, 0, 0.1)) !important;
+  color: var(--color-accent, #7acc00) !important;
+  font-weight: 700;
+}
+
+.mobile-nav-item.active i {
+  color: var(--color-accent, #7acc00) !important;
+}
+
+/* Active link indicator */
+.mobile-nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 25%;
+  height: 50%;
+  width: 4px;
+  background-color: var(--color-accent, #7acc00);
+  border-radius: 0 4px 4px 0;
+}
+
+/* Auth button redesign */
+.mobile-nav-auth .btn-theme {
+  background-color: var(--color-accent, #7acc00) !important;
+  color: #000000 !important;
+  border: none;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px var(--color-accent-glow, rgba(170, 255, 0, 0.25));
+}
+
+[data-theme="light"] .mobile-nav-auth .btn-theme {
+  color: #ffffff !important;
+}
+
+.mobile-nav-auth .btn-theme:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px var(--color-accent-glow, rgba(170, 255, 0, 0.35));
+}
+
+.mobile-nav-auth .btn-outline-theme {
+  background-color: transparent !important;
+  color: var(--color-text-primary, #111827) !important;
+  border: 1px solid var(--color-border, #e5e7eb) !important;
+  transition: all 0.25s ease;
+}
+
+.mobile-nav-auth .btn-outline-theme:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+  border-color: var(--color-border-hover, #9ca3af) !important;
+}
+
+[data-theme="dark"] .mobile-nav-auth .btn-outline-theme:hover {
+  background-color: rgba(255, 255, 255, 0.04) !important;
 }

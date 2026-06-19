@@ -158,3 +158,25 @@ export async function hideComment(commentId) {
     const { data } = await api.post(`/admin/comments/${commentId}/hide`);
     return data;
 }
+
+/**
+ * CONTACT MESSAGES MANAGEMENT
+ */
+export async function listContactMessages(params = {}) {
+    const { data } = await api.get('/admin/contact-messages', { params });
+    return data;
+}
+
+export async function getContactMessage(id) {
+    const { data } = await api.get(`/admin/contact-messages/${id}`);
+    return data;
+}
+
+export async function updateContactMessageStatus(id, status) {
+    const { data } = await api.put(`/admin/contact-messages/${id}`, { status });
+    return data;
+}
+
+export async function deleteContactMessage(id) {
+    await api.delete(`/admin/contact-messages/${id}`);
+}

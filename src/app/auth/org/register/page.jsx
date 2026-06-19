@@ -158,16 +158,16 @@ export default function OrgRegisterPage() {
             disabled={submitting}
           >
             {submitting ? (
-              <>
+              <span className="d-flex align-items-center justify-content-center">
                 <span
                   className="spinner-border spinner-border-sm me-2"
                   role="status"
                   aria-hidden="true"
-                ></span>
+                />
                 កំពុងបង្កើត...
-              </>
+              </span>
             ) : (
-              "Get Started"
+              <span>Get Started</span>
             )}
           </button>
         </div>

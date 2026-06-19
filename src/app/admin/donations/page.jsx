@@ -12,6 +12,11 @@ export default function AdminDonationsPage() {
   const [error, setError] = useState(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [causeFilter, setCauseFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("created_at");
+  const [sortOrder, setSortOrder] = useState("desc");
   const limit = 10;
   const offset = (page - 1) * limit;
   const [mounted, setMounted] = useState(false);
@@ -24,7 +29,15 @@ export default function AdminDonationsPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await listDonations({ limit, offset });
+      const res = await listDonations({
+        search: search || null,
+        cause: causeFilter,
+        donation_type: typeFilter,
+        sort_by: sortBy,
+        sort_order: sortOrder,
+        limit,
+        offset,
+      });
       const items = res?.data || res || [];
       setDonations(items);
       setTotal(res?.total ?? items.length ?? 0);
@@ -34,7 +47,7 @@ export default function AdminDonationsPage() {
     } finally {
       setLoading(false);
     }
-  }, [limit, offset]);
+  }, [search, causeFilter, typeFilter, sortBy, sortOrder, limit, offset]);
 
   useEffect(() => {
     if (!authLoading && user?.role?.toLowerCase() === "admin") {
@@ -91,6 +104,68 @@ export default function AdminDonationsPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <div className="search-container">
+            <i className="bi bi-search"></i>
+            <input
+              type="search"
+              placeholder="Search donor..."
+              value={search}
+              onChange={(e) => {
+                setPage(1);
+                setSearch(e.target.value);
+              }}
+              style={{
+                paddingLeft: "36px",
+              }}
+            />
+          </div>
+          
+          <select
+            className="filter-select"
+            value={causeFilter}
+            onChange={(e) => {
+              setPage(1);
+              setCauseFilter(e.target.value);
+            }}
+          >
+            <option value="all">All Causes</option>
+            <option value="general">General Support</option>
+            <option value="education">Education</option>
+            <option value="environment">Environment</option>
+            <option value="community">Community</option>
+          </select>
+
+          <select
+            className="filter-select"
+            value={typeFilter}
+            onChange={(e) => {
+              setPage(1);
+              setTypeFilter(e.target.value);
+            }}
+          >
+            <option value="all">All Types</option>
+            <option value="once">One-time</option>
+            <option value="monthly">Monthly</option>
+          </select>
+
+          <select
+            className="filter-select"
+            value={`${sortBy}_${sortOrder}`}
+            onChange={(e) => {
+              const [by, order] = e.target.value.split("_");
+              setPage(1);
+              setSortBy(by);
+              setSortOrder(order);
+            }}
+          >
+            <option value="created_at_desc">Newest Donation</option>
+            <option value="created_at_asc">Oldest Donation</option>
+            <option value="amount_desc">Amount (Highest)</option>
+            <option value="amount_asc">Amount (Lowest)</option>
+            <option value="donor_name_asc">Donor Name (A-Z)</option>
+            <option value="donor_name_desc">Donor Name (Z-A)</option>
+          </select>
+
           <button
             className="btn-secondary"
             onClick={exportCSV}
@@ -197,6 +272,58 @@ export default function AdminDonationsPage() {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .search-container {
+          position: relative;
+          display: flex;
+          align-items: center;
+          width: 100%;
+          max-width: 200px;
+        }
+        .search-container i {
+          position: absolute;
+          left: 12px;
+          color: var(--color-text-secondary);
+          pointer-events: none;
+          font-size: 14px;
+        }
+        .search-container input {
+          width: 100%;
+          padding: 8px 12px 8px 36px !important;
+          background-color: var(--color-bg-input) !important;
+          border: 1px solid var(--color-border) !important;
+          border-radius: var(--radius-btn) !important;
+          color: var(--color-text-primary) !important;
+          font-size: 0.875rem;
+          transition: all 0.2s ease;
+        }
+        .search-container input:focus {
+          border-color: var(--color-accent) !important;
+          outline: none;
+          box-shadow: 0 0 0 3px var(--color-accent-dim) !important;
+        }
+        
+        .filter-select {
+          background-color: var(--color-bg-input) !important;
+          border: 1px solid var(--color-border) !important;
+          border-radius: var(--radius-btn) !important;
+          color: var(--color-text-primary) !important;
+          padding: 8px 32px 8px 16px !important;
+          font-size: 0.875rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.25s ease;
+          appearance: none;
+          background-image: url("data:image/svg+xml;utf8,<svg fill='%239a9a9a' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>") !important;
+          background-position: right 10px center !important;
+          background-repeat: no-repeat !important;
+        }
+        .filter-select:focus {
+          border-color: var(--color-accent) !important;
+          outline: none;
+        }
+      `}</style>
     </div>
   );
 }

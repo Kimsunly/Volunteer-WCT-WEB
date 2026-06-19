@@ -15,10 +15,14 @@ export default function AdminUsersPage() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("created_at");
+  const [sortOrder, setSortOrder] = useState("desc");
   const [editing, setEditing] = useState(null);
   const [actionLoading, setActionLoading] = useState(null);
   const [error, setError] = useState(null);
   const [mounted, setMounted] = useState(false);
+  const [deactivatingUser, setDeactivatingUser] = useState(null);
+  const [deactivateReason, setDeactivateReason] = useState("");
 
   useEffect(() => {
     setMounted(true);
@@ -63,6 +67,8 @@ export default function AdminUsersPage() {
         search,
         status: statusFilter === "all" ? null : statusFilter,
         role: roleFilter === "all" ? null : roleFilter,
+        sort_by: sortBy,
+        sort_order: sortOrder,
         limit,
         offset,
       });
@@ -75,7 +81,7 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [search, statusFilter, roleFilter, limit, offset]);
+  }, [search, statusFilter, roleFilter, sortBy, sortOrder, limit, offset]);
 
   useEffect(() => {
     if (!authLoading && user?.role?.toLowerCase() === "admin") {
@@ -85,13 +91,19 @@ export default function AdminUsersPage() {
 
   const viewUser = (user) => setEditing(user);
 
-  const handleDeactivate = async (u) => {
+  const handleDeactivate = (u) => {
     if (!u) return;
-    const reason = prompt("Reason for deactivating (at least 10 characters):");
-    if (!reason || reason.length < 10) return;
-    setActionLoading(u.id);
+    setDeactivatingUser(u);
+    setDeactivateReason("");
+  };
+
+  const commitDeactivate = async () => {
+    if (!deactivatingUser || deactivateReason.length < 10) return;
+    setActionLoading(deactivatingUser.id);
     try {
-      await deactivateUser(u.id, reason);
+      await deactivateUser(deactivatingUser.id, deactivateReason);
+      setDeactivatingUser(null);
+      setDeactivateReason("");
       await fetchUsers();
     } catch (err) {
       console.error("Deactivate error:", err);
@@ -175,6 +187,23 @@ export default function AdminUsersPage() {
             <option value="inactive">Inactive</option>
             <option value="suspended">Suspended</option>
             <option value="pending">Pending</option>
+          </select>
+          <select
+            className="filter-select"
+            value={`${sortBy}_${sortOrder}`}
+            onChange={(e) => {
+              const [by, order] = e.target.value.split("_");
+              setOffset(0);
+              setSortBy(by);
+              setSortOrder(order);
+            }}
+          >
+            <option value="created_at_desc">Newest Joined</option>
+            <option value="created_at_asc">Oldest Joined</option>
+            <option value="name_asc">Name (A-Z)</option>
+            <option value="name_desc">Name (Z-A)</option>
+            <option value="email_asc">Email (A-Z)</option>
+            <option value="email_desc">Email (Z-A)</option>
           </select>
         </div>
       </div>
@@ -454,21 +483,11 @@ export default function AdminUsersPage() {
                       Modify Role Access
                     </label>
                     <select
-                      className="form-input"
+                      className="form-select"
                       value={editing.role}
                       onChange={(e) =>
                         setEditing({ ...editing, role: e.target.value })
                       }
-                      style={{
-                        backgroundImage: `url("data:image/svg+xml;utf8,<svg fill='%239a9a9a' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>")`,
-                        backgroundPosition: "right 12px center",
-                        backgroundRepeat: "no-repeat",
-                        paddingRight: "30px",
-                        WebkitAppearance: "none",
-                        MozAppearance: "none",
-                        appearance: "none",
-                        backgroundColor: "var(--color-bg-surface) !important",
-                      }}
                     >
                       <option value="user">User</option>
                       <option value="organizer">Organizer</option>
@@ -505,6 +524,155 @@ export default function AdminUsersPage() {
             </div>
           </>
         )}
+
+        {/* Deactivate Modal */}
+        {deactivatingUser && (
+          <>
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: "rgba(0, 0, 0, 0.6)",
+                backdropFilter: "blur(6px)",
+                zIndex: 1040,
+              }}
+              onClick={() => setDeactivatingUser(null)}
+            ></div>
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1050,
+                padding: "1rem",
+                pointerEvents: "none",
+              }}
+            >
+              <div
+                className="card shadow-lg"
+                style={{
+                  width: "100%",
+                  maxWidth: "480px",
+                  maxHeight: "90vh",
+                  overflowY: "auto",
+                  background: "var(--color-bg-surface)",
+                  border: "1px solid var(--color-border)",
+                  borderRadius: "var(--radius-card)",
+                  boxShadow: "var(--shadow-card)",
+                  animation: "modalIn 0.3s ease-out",
+                  pointerEvents: "auto",
+                }}
+              >
+                <div
+                  className="card-header"
+                  style={{
+                    borderBottom: "1px solid var(--color-border)",
+                    padding: "1.25rem 1.5rem",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <h3 className="card-title" style={{ margin: 0, fontSize: "1.125rem", fontWeight: "600", color: "var(--color-negative)" }}>
+                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                    Deactivate Account
+                  </h3>
+                  <button
+                    className="icon-btn"
+                    onClick={() => setDeactivatingUser(null)}
+                  >
+                    <i className="bi bi-x-lg"></i>
+                  </button>
+                </div>
+                
+                <div className="space-y-4" style={{ padding: "1.5rem" }}>
+                  <p style={{ color: "var(--color-text-primary)", fontSize: "0.95rem" }}>
+                    Are you sure you want to deactivate <strong>{deactivatingUser.name}</strong>&rsquo;s account?
+                  </p>
+                  <p style={{ color: "var(--color-text-secondary)", fontSize: "0.85rem", lineHeight: "1.5" }}>
+                    Deactivating this account will prevent them from logging in, accessing their profile, or performing any actions on the platform.
+                  </p>
+                  
+                  <div className="space-y-2">
+                    <label
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "var(--color-text-secondary)",
+                        fontWeight: "600",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                      }}
+                    >
+                      Reason for deactivating
+                    </label>
+                    <textarea
+                      className="form-input"
+                      style={{ 
+                        minHeight: "100px", 
+                        resize: "vertical", 
+                        backgroundColor: "var(--color-bg-input)",
+                        borderRadius: "10px",
+                        border: "1.5px solid var(--color-border)"
+                      }}
+                      placeholder="Please provide a detailed reason for deactivating this account (minimum 10 characters)..."
+                      value={deactivateReason}
+                      onChange={(e) => setDeactivateReason(e.target.value)}
+                    />
+                    <small style={{ color: deactivateReason.length >= 10 ? "var(--color-text-muted)" : "var(--color-negative)", fontSize: "11px", display: "block" }}>
+                      {deactivateReason.length < 10 
+                        ? `Minimum 10 characters required (${deactivateReason.length}/10)`
+                        : "Ready to deactivate account"
+                      }
+                    </small>
+                  </div>
+                </div>
+
+                <div
+                  className="flex items-center justify-end gap-3"
+                  style={{
+                    borderTop: "1px solid var(--color-border)",
+                    padding: "0 1.5rem 1.5rem",
+                    marginTop: "1.5rem",
+                    paddingTop: "1rem"
+                  }}
+                >
+                  <button
+                    className="btn-secondary"
+                    onClick={() => setDeactivatingUser(null)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="btn-danger"
+                    onClick={commitDeactivate}
+                    disabled={deactivateReason.length < 10 || actionLoading === deactivatingUser.id}
+                  >
+                    {actionLoading === deactivatingUser.id ? (
+                      <>
+                        <i className="bi bi-arrow-repeat animate-spin me-2"></i>
+                        Deactivating...
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-pause-circle me-2"></i>
+                        Deactivate
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
 
         {/* Pagination */}
         <div className="flex items-center justify-between mt-4">

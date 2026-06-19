@@ -17,6 +17,7 @@ export default function AccountSettingsModal({ open, onClose }) {
   );
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState("profile"); // profile | availability | emergency | address
 
   // Form State
   const [formData, setFormData] = useState({
@@ -45,6 +46,7 @@ export default function AccountSettingsModal({ open, onClose }) {
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
+      setActiveTab("profile");
       fetchProfile();
     } else {
       document.body.style.overflow = "unset";
@@ -95,8 +97,6 @@ export default function AccountSettingsModal({ open, onClose }) {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    // Handle select inputs which might not have id matching state key perfectly in previous code,
-    // but we will align them.
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
@@ -176,14 +176,14 @@ export default function AccountSettingsModal({ open, onClose }) {
     <>
       {/* Backdrop */}
       <div
-        className="modal-backdrop fade show"
+        className="modal-backdrop fade show custom-modal-backdrop"
         onClick={close}
         style={{ zIndex: 1050 }}
       ></div>
 
       {/* Modal */}
       <div
-        className="modal fade show"
+        className="modal fade show modern-settings-modal"
         style={{
           display: "block",
           zIndex: 1055,
@@ -194,376 +194,436 @@ export default function AccountSettingsModal({ open, onClose }) {
         tabIndex={-1}
       >
         <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-          <div className="modal-content border-0 shadow-lg rounded-4">
+          <div className="modal-content border-0">
             {/* Modal Header */}
-            <div
-              className="modal-header p-4 text-white"
-              style={{
-                background: "linear-gradient(90deg, #4e54c8, #8f94fb)",
-                borderBottom: "none",
-              }}
-            >
-              <h6 className="modal-title fw-bold mb-0" id="accSetTitle">
+            <div className="modal-header">
+              <h6 className="modal-title" id="accSetTitle">
                 ការកំណត់គណនី /{" "}
                 <span className="fw-normal">Account Settings</span>
               </h6>
               <button
                 type="button"
-                className="btn-close btn-close-white"
+                className="btn-close"
                 aria-label="Close"
                 onClick={close}
               ></button>
             </div>
 
-            {/* Modal Body */}
-            <div className="modal-body p-4">
-              {loading ? (
-                <div className="text-center py-5">
-                  <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
+            {/* Modal Body with Split Pane */}
+            <div className="modal-body">
+              {/* Sidebar Navigation */}
+              <div className="modal-sidebar">
+                <button
+                  type="button"
+                  className={`sidebar-tab-btn ${activeTab === "profile" ? "active" : ""}`}
+                  onClick={() => setActiveTab("profile")}
+                >
+                  <i className="bi bi-person-fill"></i>
+                  <span>ព័ត៌មានផ្ទាល់ខ្លួន</span>
+                </button>
+                <button
+                  type="button"
+                  className={`sidebar-tab-btn ${activeTab === "availability" ? "active" : ""}`}
+                  onClick={() => setActiveTab("availability")}
+                >
+                  <i className="bi bi-calendar-week-fill"></i>
+                  <span>ការចូលរួម & ជំនាញ</span>
+                </button>
+                <button
+                  type="button"
+                  className={`sidebar-tab-btn ${activeTab === "emergency" ? "active" : ""}`}
+                  onClick={() => setActiveTab("emergency")}
+                >
+                  <i className="bi bi-telephone-outbound-fill"></i>
+                  <span>ទំនាក់ទំនងបន្ទាន់</span>
+                </button>
+                <button
+                  type="button"
+                  className={`sidebar-tab-btn ${activeTab === "address" ? "active" : ""}`}
+                  onClick={() => setActiveTab("address")}
+                >
+                  <i className="bi bi-geo-alt-fill"></i>
+                  <span>អាសយដ្ឋាន</span>
+                </button>
+              </div>
+
+              {/* Tab Content Area */}
+              <div className="modal-tab-content">
+                {loading ? (
+                  <div className="text-center py-5">
+                    <div className="spinner-border text-primary" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <>
-                  {/* Avatar Upload */}
-                  <div className="d-flex align-items-center justify-content-center mb-4">
-                    <label className="vh-avatar-uploader mb-0 position-relative cursor-pointer">
-                      <input
-                        type="file"
-                        ref={fileInputRef}
-                        className="d-none"
-                        accept="image/*"
-                        onChange={handleAvatarChange}
-                      />
-                      <span
-                        className="vh-avatar ring rounded-circle overflow-hidden d-block"
-                        role="img"
-                        aria-label="avatar"
-                      >
-                        <Image
-                          src={avatarUrl}
-                          alt="រូបភាព"
-                          className="w-100 h-100 object-fit-cover"
-                          width={120}
-                          height={120}
-                          unoptimized
-                        />
-                      </span>
-                      <span className="small d-block mt-2 text-center text-muted">
-                        ជ្រើសរើសរូបភាព
-                      </span>
-                    </label>
-                  </div>
+                ) : (
+                  <>
+                    {/* Tab 1: Profile Info */}
+                    {activeTab === "profile" && (
+                      <div>
+                        <h5 className="tab-section-title">
+                          <i className="bi bi-person-fill"></i> ព័ត៌មានផ្ទាល់ខ្លួន / Profile Details
+                        </h5>
 
-                  {/* Personal Info Section */}
-                  <div className="mb-4">
-                    <h6 className="fw-bold text-secondary mb-3">
-                      ព័ត៌មានផ្ទាល់ខ្លួន / Personal Info
-                    </h6>
-                    <form onSubmit={(e) => e.preventDefault()}>
-                      <div className="row g-3">
-                        <div className="col-sm-6">
-                          <label
-                            className="form-label fw-medium"
-                            htmlFor="first_name"
+                        {/* Avatar Upload */}
+                        <div className="avatar-upload-section">
+                          <div
+                            className="avatar-container"
+                            onClick={() => fileInputRef.current?.click()}
                           >
-                            នាមខ្លួន / First Name
-                          </label>
-                          <input
-                            id="first_name"
-                            type="text"
-                            className="form-control form-control-lg"
-                            placeholder="ឧ. សុភា"
-                            value={formData.first_name}
-                            onChange={handleChange}
-                          />
-                        </div>
-
-                        <div className="col-sm-6">
-                          <label
-                            className="form-label fw-medium"
-                            htmlFor="last_name"
-                          >
-                            នាមត្រកូល / Last Name
-                          </label>
-                          <input
-                            id="last_name"
-                            type="text"
-                            className="form-control form-control-lg"
-                            placeholder="ឧ. ចាន់"
-                            value={formData.last_name}
-                            onChange={handleChange}
-                          />
-                        </div>
-
-                        <div className="col-sm-6">
-                          <label
-                            className="form-label fw-medium"
-                            htmlFor="email"
-                          >
-                            អ៊ីមែល / Email
-                          </label>
-                          <div className="input-group">
-                            <span className="input-group-text bg-light">
-                              <i className="bi bi-envelope-fill text-secondary"></i>
-                            </span>
                             <input
-                              id="email"
-                              type="email"
-                              className="form-control form-control-lg bg-light"
-                              placeholder="sophea.chan@email.com"
-                              value={formData.email}
-                              disabled // Email usually not editable directly
+                              type="file"
+                              ref={fileInputRef}
+                              className="d-none"
+                              accept="image/*"
+                              onChange={handleAvatarChange}
                             />
-                          </div>
-                        </div>
-
-                        <div className="col-sm-6">
-                          <label
-                            className="form-label fw-medium"
-                            htmlFor="phone"
-                          >
-                            ទូរស័ព្ទ / Phone
-                          </label>
-                          <div className="input-group">
-                            <span className="input-group-text">
-                              <i className="bi bi-telephone-fill"></i>
-                            </span>
-                            <input
-                              id="phone"
-                              type="tel"
-                              className="form-control form-control-lg"
-                              placeholder="+855 23 123 456"
-                              value={formData.phone}
-                              onChange={handleChange}
+                            <Image
+                              src={avatarUrl}
+                              alt="រូបភាព"
+                              className="avatar-preview"
+                              width={90}
+                              height={90}
+                              unoptimized
                             />
-                          </div>
-                        </div>
-
-                        <div className="col-sm-6">
-                          <label
-                            className="form-label fw-medium"
-                            htmlFor="location"
-                          >
-                            ទីតាំង / Location
-                          </label>
-                          <div className="input-group">
-                            <span className="input-group-text">
-                              <i className="bi bi-geo-alt-fill"></i>
-                            </span>
-                            <input
-                              id="location"
-                              type="text"
-                              className="form-control form-control-lg"
-                              placeholder="Phnom Penh"
-                              value={formData.location}
-                              onChange={handleChange}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="col-sm-6">
-                          <label
-                            className="form-label fw-medium"
-                            htmlFor="birth_date"
-                          >
-                            ថ្ងៃខែឆ្នាំកំណើត / Birth Date
-                          </label>
-                          <div className="input-group">
-                            <span className="input-group-text">
-                              <i className="bi bi-calendar-event-fill"></i>
-                            </span>
-                            <input
-                              id="birth_date"
-                              type="date"
-                              className="form-control form-control-lg"
-                              value={formData.birth_date}
-                              onChange={handleChange}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="col-12">
-                          <label
-                            className="form-label fw-medium"
-                            htmlFor="about_me"
-                          >
-                            ពីអំពីខ្ញុំ / About Me
-                          </label>
-                          <div className="position-relative">
-                            <textarea
-                              id="about_me"
-                              className="form-control form-control-lg"
-                              rows={3}
-                              maxLength={aboutMax}
-                              value={formData.about_me}
-                              onChange={handleChange}
-                              placeholder="សូមពិពណ៌នាខ្លីៗអំពីបទពិសោធន៍ និងចំណាប់អារម្មណ៍…"
-                              style={{ paddingBottom: "25px" }}
-                            />
-                            <div
-                              className="position-absolute bottom-0 end-0 p-2"
-                              style={{ pointerEvents: "none" }}
-                            >
-                              <small className="text-muted">
-                                {(formData.about_me || "").length}/{aboutMax}
-                              </small>
+                            <div className="avatar-overlay">
+                              <i className="bi bi-camera-fill"></i>
+                              <span>ប្តូររូបភាព</span>
                             </div>
                           </div>
+                          <div className="avatar-upload-info">
+                            <h6>រូបថតគណនី / Account Photo</h6>
+                            <p>បញ្ចូលរូបថតផ្ទាល់ខ្លួនដើម្បីបង្ហាញលើកម្រងព័ត៌មាន។</p>
+                            <button
+                              type="button"
+                              className="btn-upload-avatar"
+                              onClick={() => fileInputRef.current?.click()}
+                            >
+                              ប្តូររូបភាព / Change Photo
+                            </button>
+                          </div>
                         </div>
 
-                        <div className="col-12">
-                          <label
-                            className="form-label fw-medium"
-                            htmlFor="skills"
-                          >
-                            ជំនាញ / Skills
-                          </label>
-                          <input
-                            id="skills"
-                            type="text"
-                            className="form-control form-control-lg"
-                            placeholder="ឧ. ការទំនាក់ទំនង, ការបណ្តុះបណ្តា, ការរៀបចំព្រឹត្តិការណ៍"
-                            value={formData.skills}
-                            onChange={handleChange}
-                          />
-                        </div>
-                      </div>
-                    </form>
-                  </div>
+                        {/* Profile Info Form */}
+                        <form onSubmit={(e) => e.preventDefault()}>
+                          <div className="row g-3">
+                            <div className="col-sm-6">
+                              <label className="form-label" htmlFor="first_name">
+                                នាមខ្លួន / First Name
+                              </label>
+                              <input
+                                id="first_name"
+                                type="text"
+                                className="form-control"
+                                placeholder="ឧ. សុភា"
+                                value={formData.first_name}
+                                onChange={handleChange}
+                              />
+                            </div>
 
-                  {/* Availability Section */}
-                  <div className="mb-4">
-                    <h6 className="fw-bold text-secondary mb-3">
-                      ការស្រេចចិត្ត/អាចចូលរួម / Availability
-                    </h6>
-                    <div className="row g-3">
-                      <div className="col-sm-6">
-                        <select
-                          className="form-select form-select-lg"
-                          value={formData.availability}
-                          onChange={(e) =>
-                            handleSelectChange("availability", e.target.value)
-                          }
-                        >
-                          <option value="weekend">អាទិត្យ / Weekend</option>
-                          <option value="weekdays">
-                            ថ្ងៃធ្វើការ / Weekdays
-                          </option>
-                          <option value="flexible">បត់បែនពេល / Flexible</option>
-                        </select>
-                      </div>
-                      <div className="col-sm-6">
-                        <select
-                          className="form-select form-select-lg"
-                          value={formData.time_preference}
-                          onChange={(e) =>
-                            handleSelectChange(
-                              "time_preference",
-                              e.target.value,
-                            )
-                          }
-                        >
-                          <option value="morning">ព្រឹក</option>
-                          <option value="afternoon">រសៀល</option>
-                          <option value="evening">ល្ងាច</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
+                            <div className="col-sm-6">
+                              <label className="form-label" htmlFor="last_name">
+                                នាមត្រកូល / Last Name
+                              </label>
+                              <input
+                                id="last_name"
+                                type="text"
+                                className="form-control"
+                                placeholder="ឧ. ចាន់"
+                                value={formData.last_name}
+                                onChange={handleChange}
+                              />
+                            </div>
 
-                  {/* Emergency Contact */}
-                  <div className="mb-4">
-                    <h6 className="fw-bold text-secondary mb-3">
-                      ទំនាក់ទំនងបន្ទាន់ / Emergency Contact
-                    </h6>
-                    <div className="row g-3">
-                      <div className="col-sm-6">
-                        <label className="form-label small fw-medium">
-                          ឈ្មោះ / Name
-                        </label>
-                        <input
-                          id="emergency_contact_name"
-                          type="text"
-                          className="form-control form-control-lg"
-                          placeholder="ឈ្មោះ"
-                          value={formData.emergency_contact_name}
-                          onChange={handleChange}
-                        />
-                      </div>
-                      <div className="col-sm-6">
-                        <label className="form-label small fw-medium">
-                          លេខទូរស័ព្ទ / Phone Number
-                        </label>
-                        <input
-                          id="emergency_contact_phone"
-                          type="tel"
-                          className="form-control form-control-lg"
-                          placeholder="+855 92 123 456"
-                          value={formData.emergency_contact_phone}
-                          onChange={handleChange}
-                        />
-                      </div>
-                    </div>
-                  </div>
+                            <div className="col-12">
+                              <label className="form-label" htmlFor="email">
+                                អ៊ីមែល / Email Address
+                              </label>
+                              <div className="input-group">
+                                <span className="input-group-text">
+                                  <i className="bi bi-envelope-fill"></i>
+                                </span>
+                                <input
+                                  id="email"
+                                  type="email"
+                                  className="form-control"
+                                  placeholder="sophea.chan@email.com"
+                                  value={formData.email}
+                                  disabled
+                                />
+                              </div>
+                            </div>
 
-                  {/* Address */}
-                  <div className="mb-3">
-                    <h6 className="fw-bold text-secondary mb-3">
-                      អាសយដ្ឋាន / Address
-                    </h6>
-                    <div className="row g-3">
-                      <div className="col-md-6">
-                        <input
-                          id="address_street"
-                          type="text"
-                          className="form-control form-control-lg"
-                          placeholder="ផ្លូវ, ផ្ទះលេខ"
-                          value={formData.address_street}
-                          onChange={handleChange}
-                        />
+                            <div className="col-sm-6">
+                              <label className="form-label" htmlFor="phone">
+                                លេខទូរស័ព្ទ / Phone
+                              </label>
+                              <div className="input-group">
+                                <span className="input-group-text">
+                                  <i className="bi bi-telephone-fill"></i>
+                                </span>
+                                <input
+                                  id="phone"
+                                  type="tel"
+                                  className="form-control"
+                                  placeholder="+855 23 123 456"
+                                  value={formData.phone}
+                                  onChange={handleChange}
+                                />
+                              </div>
+                            </div>
+
+                            <div className="col-sm-6">
+                              <label className="form-label" htmlFor="location">
+                                ទីតាំង / Location
+                              </label>
+                              <div className="input-group">
+                                <span className="input-group-text">
+                                  <i className="bi bi-geo-alt-fill"></i>
+                                </span>
+                                <input
+                                  id="location"
+                                  type="text"
+                                  className="form-control"
+                                  placeholder="Phnom Penh"
+                                  value={formData.location}
+                                  onChange={handleChange}
+                                />
+                              </div>
+                            </div>
+
+                            <div className="col-12">
+                              <label className="form-label" htmlFor="birth_date">
+                                ថ្ងៃខែឆ្នាំកំណើត / Birth Date
+                              </label>
+                              <div className="input-group">
+                                <span className="input-group-text">
+                                  <i className="bi bi-calendar-event-fill"></i>
+                                </span>
+                                <input
+                                  id="birth_date"
+                                  type="date"
+                                  className="form-control"
+                                  value={formData.birth_date}
+                                  onChange={handleChange}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </form>
                       </div>
-                      <div className="col-md-6">
-                        <input
-                          id="address_city"
-                          type="text"
-                          className="form-control form-control-lg"
-                          placeholder="Phnom Penh"
-                          value={formData.address_city}
-                          onChange={handleChange}
-                        />
+                    )}
+
+                    {/* Tab 2: Availability & Skills */}
+                    {activeTab === "availability" && (
+                      <div>
+                        <h5 className="tab-section-title">
+                          <i className="bi bi-calendar-week-fill"></i> ការចូលរួម & ជំនាញ / Availability & Skills
+                        </h5>
+
+                        <form onSubmit={(e) => e.preventDefault()}>
+                          <div className="row g-3">
+                            <div className="col-12">
+                              <label className="form-label" htmlFor="about_me">
+                                អំពីខ្ញុំ / About Me
+                              </label>
+                              <div className="position-relative">
+                                <textarea
+                                  id="about_me"
+                                  className="form-control"
+                                  rows={4}
+                                  maxLength={aboutMax}
+                                  value={formData.about_me}
+                                  onChange={handleChange}
+                                  placeholder="សូមពិពណ៌នាខ្លីៗអំពីបទពិសោធន៍ និងចំណាប់អារម្មណ៍…"
+                                  style={{ paddingBottom: "25px" }}
+                                />
+                                <div
+                                  className="position-absolute bottom-0 end-0 p-2"
+                                  style={{ pointerEvents: "none" }}
+                                >
+                                  <small className="text-muted">
+                                    {(formData.about_me || "").length}/{aboutMax}
+                                  </small>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="col-12">
+                              <label className="form-label" htmlFor="skills">
+                                ជំនាញ / Skills
+                              </label>
+                              <input
+                                id="skills"
+                                type="text"
+                                className="form-control"
+                                placeholder="ឧ. ការទំនាក់ទំនង, ការបណ្តុះបណ្តា, ការរៀបចំព្រឹត្តិការណ៍"
+                                value={formData.skills}
+                                onChange={handleChange}
+                              />
+                            </div>
+
+                            <div className="col-sm-6">
+                              <label className="form-label">
+                                ថ្ងៃអាចចូលរួម / Availability
+                              </label>
+                              <select
+                                className="form-select"
+                                value={formData.availability}
+                                onChange={(e) =>
+                                  handleSelectChange("availability", e.target.value)
+                                }
+                              >
+                                <option value="weekend">អាទិត្យ / Weekend</option>
+                                <option value="weekdays">ថ្ងៃធ្វើការ / Weekdays</option>
+                                <option value="flexible">បត់បែនពេល / Flexible</option>
+                              </select>
+                            </div>
+
+                            <div className="col-sm-6">
+                              <label className="form-label">
+                                ពេលអាចចូលរួម / Time Preference
+                              </label>
+                              <select
+                                className="form-select"
+                                value={formData.time_preference}
+                                onChange={(e) =>
+                                  handleSelectChange("time_preference", e.target.value)
+                                }
+                              >
+                                <option value="morning">ព្រឹក / Morning</option>
+                                <option value="afternoon">រសៀល / Afternoon</option>
+                                <option value="evening">ល្ងាច / Evening</option>
+                              </select>
+                            </div>
+                          </div>
+                        </form>
                       </div>
-                      <div className="col-md-6">
-                        <input
-                          id="address_district"
-                          type="text"
-                          className="form-control form-control-lg"
-                          placeholder="សង្កាត់/ឃុំ"
-                          value={formData.address_district}
-                          onChange={handleChange}
-                        />
+                    )}
+
+                    {/* Tab 3: Emergency Contact */}
+                    {activeTab === "emergency" && (
+                      <div>
+                        <h5 className="tab-section-title">
+                          <i className="bi bi-telephone-outbound-fill"></i> ទំនាក់ទំនងបន្ទាន់ / Emergency Contact
+                        </h5>
+
+                        <form onSubmit={(e) => e.preventDefault()}>
+                          <div className="row g-3">
+                            <div className="col-12">
+                              <label className="form-label" htmlFor="emergency_contact_name">
+                                ឈ្មោះអ្នកទាក់ទង / Contact Name
+                              </label>
+                              <input
+                                id="emergency_contact_name"
+                                type="text"
+                                className="form-control"
+                                placeholder="ឧ. ចាន់ ធារី"
+                                value={formData.emergency_contact_name}
+                                onChange={handleChange}
+                              />
+                            </div>
+
+                            <div className="col-12">
+                              <label className="form-label" htmlFor="emergency_contact_phone">
+                                លេខទូរស័ព្ទ / Phone Number
+                              </label>
+                              <div className="input-group">
+                                <span className="input-group-text">
+                                  <i className="bi bi-telephone-fill"></i>
+                                </span>
+                                <input
+                                  id="emergency_contact_phone"
+                                  type="tel"
+                                  className="form-control"
+                                  placeholder="+855 92 123 456"
+                                  value={formData.emergency_contact_phone}
+                                  onChange={handleChange}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </form>
                       </div>
-                      <div className="col-md-6">
-                        <input
-                          id="address_province"
-                          type="text"
-                          className="form-control form-control-lg"
-                          placeholder="ខណ្ឌ/ស្រុក"
-                          value={formData.address_province}
-                          onChange={handleChange}
-                        />
+                    )}
+
+                    {/* Tab 4: Address */}
+                    {activeTab === "address" && (
+                      <div>
+                        <h5 className="tab-section-title">
+                          <i className="bi bi-geo-alt-fill"></i> អាសយដ្ឋាន / Address
+                        </h5>
+
+                        <form onSubmit={(e) => e.preventDefault()}>
+                          <div className="row g-3">
+                            <div className="col-12">
+                              <label className="form-label" htmlFor="address_street">
+                                ផ្លូវ និងផ្ទះលេខ / Street & House No.
+                              </label>
+                              <input
+                                id="address_street"
+                                type="text"
+                                className="form-control"
+                                placeholder="ឧ. ផ្លូវ ១២៣, ផ្ទះលេខ ៤៥A"
+                                value={formData.address_street}
+                                onChange={handleChange}
+                              />
+                            </div>
+
+                            <div className="col-sm-6">
+                              <label className="form-label" htmlFor="address_district">
+                                សង្កាត់/ឃុំ / Commune
+                              </label>
+                              <input
+                                id="address_district"
+                                type="text"
+                                className="form-control"
+                                placeholder="សង្កាត់/ឃុំ"
+                                value={formData.address_district}
+                                onChange={handleChange}
+                              />
+                            </div>
+
+                            <div className="col-sm-6">
+                              <label className="form-label" htmlFor="address_province">
+                                ខណ្ឌ/ស្រុក / District
+                              </label>
+                              <input
+                                id="address_province"
+                                type="text"
+                                className="form-control"
+                                placeholder="ខណ្ឌ/ស្រុក"
+                                value={formData.address_province}
+                                onChange={handleChange}
+                              />
+                            </div>
+
+                            <div className="col-12">
+                              <label className="form-label" htmlFor="address_city">
+                                រាជធានី/ខេត្ត / Province/City
+                              </label>
+                              <input
+                                id="address_city"
+                                type="text"
+                                className="form-control"
+                                placeholder="Phnom Penh"
+                                value={formData.address_city}
+                                onChange={handleChange}
+                              />
+                            </div>
+                          </div>
+                        </form>
                       </div>
-                    </div>
-                  </div>
-                </>
-              )}
+                    )}
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="modal-footer border-0 justify-content-end p-4">
+            <div className="modal-footer justify-content-end">
               <button
                 type="button"
-                className="btn btn-light btn-lg rounded-pill"
+                className="btn btn-cancel"
                 onClick={close}
                 disabled={saving}
               >
@@ -571,7 +631,7 @@ export default function AccountSettingsModal({ open, onClose }) {
               </button>
               <button
                 type="button"
-                className="btn btn-primary btn-lg rounded-pill"
+                className="btn btn-save"
                 onClick={handleSubmit}
                 disabled={loading || saving}
               >

@@ -129,7 +129,7 @@ export default function ReportCommentModal({ open, onClose, commentId, onReportS
                 type="submit"
                 className="btn btn-danger px-4 rounded-pill btn-sm fw-bold"
                 disabled={isSubmitting}
-                style={{ background: '#ef473a', borderColor: '#ef473a' }}
+                style={{ background: '#ef473a', borderColor: '#ef473a', color: '#ffffff' }}
               >
                 {isSubmitting ? "កំពុងផ្ញើ..." : "ផ្ញើការរាយការណ៍"}
               </button>

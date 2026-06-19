@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import OpportunityCard from "@/components/cards/OpportunityCard";
 
 const filters = [
@@ -28,9 +29,9 @@ export default function LandingOpportunities({ items = [] }) {
               <p className="text-start mb-0 text-muted">ស្វែងរកឱកាសដែលត្រូវនឹងចំណាប់អារម្មណ៍របស់អ្នក</p>
             </div>
             <div className="section-actions d-flex gap-2">
-              <a href="/opportunity" className="btn btn-outline-primary">
+              <Link href="/opportunities" className="btn btn-outline-primary">
                 <i className="bi bi-grid-3x3-gap me-2" /> មើលទាំងអស់
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -50,7 +51,7 @@ export default function LandingOpportunities({ items = [] }) {
         </div>
 
         <div className="row mt-2 gy-4">
-          {filtered.map((item, idx) => (
+          {filtered.slice(0, 3).map((item, idx) => (
             <OpportunityCard key={item.id || idx} data={item} data-aos="fade-up" data-aos-delay={idx * 100} />
           ))}
         </div>

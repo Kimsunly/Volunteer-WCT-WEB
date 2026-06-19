@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 /**
  * AuthShell
  * - Wraps the page with left image and right form panel.
@@ -37,9 +38,9 @@ export default function AuthShell({
               {switchText && (
                 <p>
                   {switchText}{" "}
-                  <a href={switchLink} className="auth-switch-link">
+                  <Link href={switchLink} className="auth-switch-link">
                     {switchAction}
-                  </a>
+                  </Link>
                 </p>
               )}
               {!switchText && subtitle && <p>{subtitle}</p>}

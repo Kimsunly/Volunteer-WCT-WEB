@@ -39,9 +39,6 @@ export default function FAQAccordion() {
                 alt="FAQ"
                 className="img-fluid"
               />
-              <div className="floating-q q1">?</div>
-              <div className="floating-q q2">?</div>
-              <div className="floating-q q3">?</div>
             </div>
           </div>
 

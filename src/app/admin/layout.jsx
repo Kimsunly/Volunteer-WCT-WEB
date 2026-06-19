@@ -55,6 +55,7 @@ export default function AdminLayout({ children }) {
     if (pathname.includes("/admin/comments")) return "comments";
     if (pathname.includes("/admin/users")) return "users";
     if (pathname.includes("/admin/donations")) return "donations";
+    if (pathname.includes("/admin/contact-messages")) return "contact-messages";
     if (pathname.includes("/admin/settings/profile")) return "settings-profile";
     if (pathname.includes("/admin/settings")) return "settings";
     return "dashboard";

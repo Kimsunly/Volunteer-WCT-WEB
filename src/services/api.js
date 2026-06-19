@@ -32,6 +32,17 @@ api.interceptors.request.use((config) => {
     }
   }
 
+  // Prevent browser caching for GET requests to ensure SPA real-time freshness
+  if (config.method?.toLowerCase() === 'get') {
+    config.params = {
+      ...config.params,
+      _t: Date.now(),
+    };
+    config.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+    config.headers['Pragma'] = 'no-cache';
+    config.headers['Expires'] = '0';
+  }
+
   return config;
 });
 
@@ -72,15 +83,18 @@ api.interceptors.response.use(
       cfg._retry = true;
       const refreshToken = typeof window !== 'undefined' ? window.localStorage.getItem('refreshToken') : null;
 
+      const protectedRoutes = ['/user', '/organizer', '/admin', '/user-profile'];
+      const isProtected = typeof window !== 'undefined' && protectedRoutes.some(route => window.location.pathname.startsWith(route));
+
       if (!refreshToken) {
-        // No refresh token, clear everything and redirect if not on auth page
+        // No refresh token, clear everything and redirect if on protected page
         window.localStorage.removeItem('authToken');
         window.localStorage.removeItem('token');
         window.localStorage.removeItem('refreshToken');
         document.cookie = "authToken=; path=/; max-age=0";
         document.cookie = "refreshToken=; path=/; max-age=0";
 
-        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/auth')) {
+        if (isProtected) {
           window.location.href = '/auth/login';
         }
         throw error;
@@ -109,15 +123,14 @@ api.interceptors.response.use(
           return await axios(cfg);
         }
       } catch (refreshError) {
-        // If refresh fails, clear auth and redirect to login
+        // If refresh fails, clear auth and redirect to login if on protected page
         window.localStorage.removeItem('authToken');
         window.localStorage.removeItem('token');
         window.localStorage.removeItem('refreshToken');
         document.cookie = "authToken=; path=/; max-age=0";
         document.cookie = "refreshToken=; path=/; max-age=0";
 
-        // Prevent redirect loop if already on an auth page
-        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/auth')) {
+        if (isProtected) {
           window.location.href = '/auth/login';
         }
       }

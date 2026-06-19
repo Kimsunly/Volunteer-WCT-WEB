@@ -16,7 +16,7 @@ const hexToRgba = (hex, alpha) => {
 
 export const SettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState({
-    theme: "dark",
+    theme: "system",
     language: "km",
     primaryColor: "#A3E635",
     secondaryColor: "#8f94fb",
@@ -31,9 +31,19 @@ export const SettingsProvider = ({ children }) => {
     }
   }, []);
 
-  // Apply theme to DOM whenever it changes
+  // Apply theme and variables to DOM whenever settings change
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", settings.theme);
+    const applyTheme = () => {
+      let resolvedTheme = settings.theme;
+      if (settings.theme === "system") {
+        const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        resolvedTheme = systemPrefersDark ? "dark" : "light";
+      }
+      document.documentElement.setAttribute("data-theme", resolvedTheme);
+    };
+
+    applyTheme();
+
     if (settings.primaryColor) {
       document.documentElement.style.setProperty("--primary-color", settings.primaryColor);
       document.documentElement.style.setProperty("--btn-primary", settings.primaryColor);
@@ -54,6 +64,14 @@ export const SettingsProvider = ({ children }) => {
     }
     // Save to localStorage
     localStorage.setItem("volunteer-settings", JSON.stringify(settings));
+
+    // Listen for system changes if system theme is selected
+    if (settings.theme === "system") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const handleSystemThemeChange = () => applyTheme();
+      mediaQuery.addEventListener("change", handleSystemThemeChange);
+      return () => mediaQuery.removeEventListener("change", handleSystemThemeChange);
+    }
   }, [settings]);
 
   const updateSetting = (key, value) => {

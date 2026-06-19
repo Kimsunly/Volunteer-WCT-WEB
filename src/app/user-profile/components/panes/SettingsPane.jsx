@@ -16,495 +16,470 @@ export default function SettingsPane() {
   const { settings, updateSetting } = useSettings();
 
   return (
-    <div className="container py-4">
-      <h4 className="fw-bold mb-5" style={{ color: "#111827" }}>
-        Appearance
-      </h4>
+    <div className="container-fluid px-0 py-2">
+      <div className="vh-section-card mb-5">
+        <h4 className="fw-bold mb-4 card-title-theme">Appearance</h4>
+        <p className="text-secondary-theme small mb-0">Customize your workspace appearance settings, theme layout, color palettes, and language preferences.</p>
+      </div>
 
       {/* Interface Theme */}
-      <div className="mb-6 pb-5" style={{ borderBottom: "1px solid #e5e7eb" }}>
-        <div className="mb-3">
-          <h6 className="fw-semibold mb-1" style={{ color: "#111827" }}>
-            Interface theme
-          </h6>
-          <p className="text-muted small">Select or customize your UI theme.</p>
+      <div className="vh-section-card mb-4">
+        <div className="mb-4">
+          <h6 className="fw-bold mb-1 card-title-theme">Interface theme</h6>
+          <p className="text-secondary-theme small">Select or customize your UI theme preference.</p>
         </div>
-        <div className="d-flex gap-4">
+        <div className="row g-4">
           {/* System Preference */}
-          <button
-            type="button"
-            className="p-0 border-0 bg-transparent"
-            onClick={() => updateSetting("theme", "light")}
-          >
-            <div
-              className={`p-2 rounded-4 border-3 transition-all ${settings.theme === "light" ? "border-primary" : "border-transparent"}`}
+          <div className="col-md-4 col-sm-6">
+            <button
+              type="button"
+              className="p-0 border-0 bg-transparent w-100 text-start"
+              onClick={() => updateSetting("theme", "system")}
             >
               <div
-                style={{
-                  width: "180px",
-                  height: "120px",
-                  borderRadius: "12px",
-                  background: `linear-gradient(90deg, #ffffff 50%, #1f2937 50%)`,
-                  border: "1px solid #e5e7eb",
-                  position: "relative",
-                }}
+                className={`theme-card-outer ${settings.theme === "system" ? "active" : ""}`}
               >
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    left: "10px",
-                    width: "12px",
-                    height: "12px",
-                    borderRadius: "50%",
-                    background: "#ef4444",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    left: "30px",
-                    width: "12px",
-                    height: "12px",
-                    borderRadius: "50%",
-                    background: "#f59e0b",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    left: "50px",
-                    width: "12px",
-                    height: "12px",
-                    borderRadius: "50%",
-                    background: "#10b981",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "40px",
-                    left: "15px",
-                    right: "15px",
-                    height: "12px",
-                    borderRadius: "4px",
-                    background: "#e5e7eb",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "60px",
-                    left: "15px",
-                    right: "40px",
-                    height: "12px",
-                    borderRadius: "4px",
-                    background: "#f3f4f6",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "80px",
-                    left: "15px",
-                    right: "60px",
-                    height: "12px",
-                    borderRadius: "4px",
-                    background: "#f3f4f6",
-                  }}
-                ></div>
-                {settings.theme === "light" && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "10px",
-                      right: "10px",
-                      width: "28px",
-                      height: "28px",
-                      borderRadius: "50%",
-                      background: "linear-gradient(135deg, #0969DA, #0CB6D6)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <i
-                      className="bi bi-check-lg text-white"
-                      style={{ fontSize: "16px" }}
-                    ></i>
+                <div className="theme-preview-card system-preview">
+                  <div className="mock-window-dots">
+                    <span className="dot dot-red"></span>
+                    <span className="dot dot-yellow"></span>
+                    <span className="dot dot-green"></span>
                   </div>
-                )}
+                  <div className="mock-layout-lines">
+                    <span className="line-long"></span>
+                    <span className="line-mid"></span>
+                    <span className="line-short"></span>
+                  </div>
+                  {settings.theme === "system" && (
+                    <div className="active-check-badge">
+                      <i className="bi bi-check-lg"></i>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-            <p
-              className="text-center mt-2 small fw-medium"
-              style={{ color: "#111827" }}
-            >
-              System preference
-            </p>
-          </button>
+              <p className="text-center mt-3 small fw-semibold theme-label-text">
+                System preference
+              </p>
+            </button>
+          </div>
 
           {/* Light Mode */}
-          <button
-            type="button"
-            className="p-0 border-0 bg-transparent"
-            onClick={() => updateSetting("theme", "light")}
-          >
-            <div
-              className={`p-2 rounded-4 border-3 transition-all ${settings.theme === "light" ? "border-primary" : "border-transparent"}`}
+          <div className="col-md-4 col-sm-6">
+            <button
+              type="button"
+              className="p-0 border-0 bg-transparent w-100 text-start"
+              onClick={() => updateSetting("theme", "light")}
             >
               <div
-                style={{
-                  width: "180px",
-                  height: "120px",
-                  borderRadius: "12px",
-                  background: "#ffffff",
-                  border: "1px solid #e5e7eb",
-                  position: "relative",
-                }}
+                className={`theme-card-outer ${settings.theme === "light" ? "active" : ""}`}
               >
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    left: "10px",
-                    width: "12px",
-                    height: "12px",
-                    borderRadius: "50%",
-                    background: "#ef4444",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    left: "30px",
-                    width: "12px",
-                    height: "12px",
-                    borderRadius: "50%",
-                    background: "#f59e0b",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    left: "50px",
-                    width: "12px",
-                    height: "12px",
-                    borderRadius: "50%",
-                    background: "#10b981",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "40px",
-                    left: "15px",
-                    right: "15px",
-                    height: "12px",
-                    borderRadius: "4px",
-                    background: "#e5e7eb",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "60px",
-                    left: "15px",
-                    right: "40px",
-                    height: "12px",
-                    borderRadius: "4px",
-                    background: "#f3f4f6",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "80px",
-                    left: "15px",
-                    right: "60px",
-                    height: "12px",
-                    borderRadius: "4px",
-                    background: "#f3f4f6",
-                  }}
-                ></div>
-                {settings.theme === "light" && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "10px",
-                      right: "10px",
-                      width: "28px",
-                      height: "28px",
-                      borderRadius: "50%",
-                      background: "linear-gradient(135deg, #0969DA, #0CB6D6)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <i
-                      className="bi bi-check-lg text-white"
-                      style={{ fontSize: "16px" }}
-                    ></i>
+                <div className="theme-preview-card light-preview">
+                  <div className="mock-window-dots">
+                    <span className="dot dot-red"></span>
+                    <span className="dot dot-yellow"></span>
+                    <span className="dot dot-green"></span>
                   </div>
-                )}
+                  <div className="mock-layout-lines">
+                    <span className="line-long"></span>
+                    <span className="line-mid"></span>
+                    <span className="line-short"></span>
+                  </div>
+                  {settings.theme === "light" && (
+                    <div className="active-check-badge">
+                      <i className="bi bi-check-lg"></i>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-            <p
-              className="text-center mt-2 small fw-medium"
-              style={{ color: "#111827" }}
-            >
-              Light
-            </p>
-          </button>
+              <p className="text-center mt-3 small fw-semibold theme-label-text">
+                Light
+              </p>
+            </button>
+          </div>
 
           {/* Dark Mode */}
-          <button
-            type="button"
-            className="p-0 border-0 bg-transparent"
-            onClick={() => updateSetting("theme", "dark")}
-          >
-            <div
-              className={`p-2 rounded-4 border-3 transition-all ${settings.theme === "dark" ? "border-primary" : "border-transparent"}`}
+          <div className="col-md-4 col-sm-6">
+            <button
+              type="button"
+              className="p-0 border-0 bg-transparent w-100 text-start"
+              onClick={() => updateSetting("theme", "dark")}
             >
               <div
-                style={{
-                  width: "180px",
-                  height: "120px",
-                  borderRadius: "12px",
-                  background: "#1f2937",
-                  border: "1px solid #374151",
-                  position: "relative",
-                }}
+                className={`theme-card-outer ${settings.theme === "dark" ? "active" : ""}`}
               >
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    left: "10px",
-                    width: "12px",
-                    height: "12px",
-                    borderRadius: "50%",
-                    background: "#ef4444",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    left: "30px",
-                    width: "12px",
-                    height: "12px",
-                    borderRadius: "50%",
-                    background: "#f59e0b",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    left: "50px",
-                    width: "12px",
-                    height: "12px",
-                    borderRadius: "50%",
-                    background: "#10b981",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "40px",
-                    left: "15px",
-                    right: "15px",
-                    height: "12px",
-                    borderRadius: "4px",
-                    background: "#4b5563",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "60px",
-                    left: "15px",
-                    right: "40px",
-                    height: "12px",
-                    borderRadius: "4px",
-                    background: "#374151",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "80px",
-                    left: "15px",
-                    right: "60px",
-                    height: "12px",
-                    borderRadius: "4px",
-                    background: "#374151",
-                  }}
-                ></div>
-                {settings.theme === "dark" && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "10px",
-                      right: "10px",
-                      width: "28px",
-                      height: "28px",
-                      borderRadius: "50%",
-                      background: "linear-gradient(135deg, #0969DA, #0CB6D6)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <i
-                      className="bi bi-check-lg text-white"
-                      style={{ fontSize: "16px" }}
-                    ></i>
+                <div className="theme-preview-card dark-preview">
+                  <div className="mock-window-dots">
+                    <span className="dot dot-red"></span>
+                    <span className="dot dot-yellow"></span>
+                    <span className="dot dot-green"></span>
                   </div>
-                )}
+                  <div className="mock-layout-lines">
+                    <span className="line-long"></span>
+                    <span className="line-mid"></span>
+                    <span className="line-short"></span>
+                  </div>
+                  {settings.theme === "dark" && (
+                    <div className="active-check-badge">
+                      <i className="bi bi-check-lg"></i>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-            <p
-              className="text-center mt-2 small fw-medium"
-              style={{ color: "#111827" }}
-            >
-              Dark
-            </p>
-          </button>
+              <p className="text-center mt-3 small fw-semibold theme-label-text">
+                Dark
+              </p>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Brand Color */}
-      <div className="mb-6 pb-5" style={{ borderBottom: "1px solid #e5e7eb" }}>
-        <div className="mb-3">
-          <h6 className="fw-semibold mb-1" style={{ color: "#111827" }}>
-            Brand color
-          </h6>
-          <p className="text-muted small">
-            Select or customize your brand color.
-          </p>
+      <div className="vh-section-card mb-4">
+        <div className="mb-4">
+          <h6 className="fw-bold mb-1 card-title-theme">Brand color</h6>
+          <p className="text-secondary-theme small">Select or customize your brand accent color scheme.</p>
         </div>
-        <div className="d-flex gap-3 align-items-center mb-3">
+        <div className="d-flex gap-3 align-items-center flex-wrap mb-4">
           {colorPresets.map((color, index) => (
             <button
               key={index}
               type="button"
-              className="p-0 border-0 rounded-circle"
+              className={`p-0 border-0 rounded-circle color-preset-circle ${settings.primaryColor === color ? "active" : ""}`}
               style={{
-                width: "32px",
-                height: "32px",
+                width: "38px",
+                height: "38px",
                 background: color,
-                boxShadow:
-                  settings.primaryColor === color
-                    ? "0 0 0 3px rgba(9,105,218,0.2)"
-                    : "none",
-                border:
-                  settings.primaryColor === color
-                    ? "3px solid #0969DA"
-                    : "none",
               }}
               onClick={() => updateSetting("primaryColor", color)}
-            />
+            >
+              {settings.primaryColor === color && (
+                <i className="bi bi-check-lg text-white preset-check-icon"></i>
+              )}
+            </button>
           ))}
         </div>
-        <div className="d-flex gap-3 align-items-center">
-          <label
-            className="form-label small fw-medium mb-0 me-2"
-            style={{ color: "#6b7280" }}
-          >
+        <div className="d-flex gap-3 align-items-center custom-color-picker-wrap">
+          <label className="form-label small fw-semibold mb-0 text-secondary-theme">
             Custom color:
           </label>
-          <span className="small fw-medium" style={{ color: "#111827" }}>
+          <span className="small fw-bold custom-color-val">
             {settings.primaryColor}
           </span>
-          <input
-            type="color"
-            className="form-control-color p-0 border-0"
-            value={settings.primaryColor}
-            onChange={(e) => updateSetting("primaryColor", e.target.value)}
-            style={{
-              width: "36px",
-              height: "36px",
-              borderRadius: "50%",
-              boxShadow: settings.primaryColor
-                ? "0 0 0 3px rgba(9,105,218,0.2)"
-                : "none",
-              border: "3px solid #0969DA",
-            }}
-          />
+          <div className="color-picker-input-container">
+            <input
+              type="color"
+              className="p-0 border-0 color-input"
+              value={settings.primaryColor}
+              onChange={(e) => updateSetting("primaryColor", e.target.value)}
+            />
+            <div className="color-input-overlay" style={{ backgroundColor: settings.primaryColor }}></div>
+          </div>
         </div>
       </div>
 
       {/* Language */}
-      <div className="mb-6 pb-5" style={{ borderBottom: "1px solid #e5e7eb" }}>
-        <div className="mb-3">
-          <h6 className="fw-semibold mb-1" style={{ color: "#111827" }}>
-            Language
-          </h6>
-          <p className="text-muted small">Select your preferred language.</p>
+      <div className="vh-section-card mb-4">
+        <div className="mb-4">
+          <h6 className="fw-bold mb-1 card-title-theme">Language</h6>
+          <p className="text-secondary-theme small">Select your preferred system language.</p>
         </div>
-        <div className="d-flex gap-4">
-          <button
-            type="button"
-            className="p-0 border-0 bg-transparent"
-            onClick={() => updateSetting("language", "km")}
-          >
-            <div
-              className={`p-3 rounded-3 border-2 transition-all d-flex align-items-center gap-3 ${settings.language === "km" ? "border-primary bg-white" : "border-gray-200 bg-gray-50"}`}
-              style={{
-                minWidth: "180px",
-                borderColor: settings.language === "km" ? "#0969DA" : "#d1d5db",
-                boxShadow:
-                  settings.language === "km"
-                    ? "0 0 0 1px rgba(9, 105, 218, 0.2)"
-                    : "none",
-              }}
+        <div className="row g-4">
+          <div className="col-md-4 col-sm-6">
+            <button
+              type="button"
+              className="p-0 border-0 bg-transparent w-100 text-start"
+              onClick={() => updateSetting("language", "km")}
             >
-              <img
-                src="/images/Icon/Cambodia.png"
-                alt="KH"
-                style={{ width: "48px", height: "auto" }}
-              />
-              <span className="fw-semibold" style={{ color: "#111827" }}>
-                ភាសាខ្មែរ
-              </span>
-            </div>
-          </button>
+              <div
+                className={`p-3 rounded-4 border-2 transition-all d-flex align-items-center gap-3 lang-card-outer ${settings.language === "km" ? "active" : ""}`}
+              >
+                <div className="flag-img-wrap">
+                  <img
+                    src="/images/Icon/Cambodia.png"
+                    alt="KH"
+                    style={{ width: "38px", height: "auto", objectFit: "contain" }}
+                  />
+                </div>
+                <div className="min-width-0">
+                  <span className="fw-bold d-block text-primary-theme">ភាសាខ្មែរ</span>
+                  <span className="small text-secondary-theme">Khmer</span>
+                </div>
+                {settings.language === "km" && (
+                  <div className="lang-active-dot"></div>
+                )}
+              </div>
+            </button>
+          </div>
 
-          <button
-            type="button"
-            className="p-0 border-0 bg-transparent"
-            onClick={() => updateSetting("language", "en")}
-          >
-            <div
-              className={`p-3 rounded-3 border-2 transition-all d-flex align-items-center gap-3 ${settings.language === "en" ? "border-primary bg-white" : "border-gray-200 bg-gray-50"}`}
-              style={{
-                minWidth: "180px",
-                borderColor: settings.language === "en" ? "#0969DA" : "#d1d5db",
-                boxShadow:
-                  settings.language === "en"
-                    ? "0 0 0 1px rgba(9, 105, 218, 0.2)"
-                    : "none",
-              }}
+          <div className="col-md-4 col-sm-6">
+            <button
+              type="button"
+              className="p-0 border-0 bg-transparent w-100 text-start"
+              onClick={() => updateSetting("language", "en")}
             >
-              <img
-                src="/images/Icon/england.png"
-                alt="EN"
-                style={{ width: "48px", height: "auto" }}
-              />
-              <span className="fw-semibold" style={{ color: "#111827" }}>
-                English
-              </span>
-            </div>
-          </button>
+              <div
+                className={`p-3 rounded-4 border-2 transition-all d-flex align-items-center gap-3 lang-card-outer ${settings.language === "en" ? "active" : ""}`}
+              >
+                <div className="flag-img-wrap">
+                  <img
+                    src="/images/Icon/england.png"
+                    alt="EN"
+                    style={{ width: "38px", height: "auto", objectFit: "contain" }}
+                  />
+                </div>
+                <div className="min-width-0">
+                  <span className="fw-bold d-block text-primary-theme">English</span>
+                  <span className="small text-secondary-theme">English</span>
+                </div>
+                {settings.language === "en" && (
+                  <div className="lang-active-dot"></div>
+                )}
+              </div>
+            </button>
+          </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .vh-section-card {
+          background-color: var(--color-bg-card) !important;
+          border: 1px solid var(--color-border) !important;
+          border-radius: 20px !important;
+          box-shadow: var(--shadow-card) !important;
+          padding: 28px !important;
+          transition: all 0.3s ease;
+        }
+        .vh-section-card:hover {
+          border-color: var(--color-border-hover) !important;
+        }
+
+        .card-title-theme {
+          color: var(--color-text-primary) !important;
+        }
+        .text-secondary-theme {
+          color: var(--color-text-secondary) !important;
+        }
+        .text-primary-theme {
+          color: var(--color-text-primary) !important;
+        }
+        .text-accent-theme {
+          color: var(--color-accent) !important;
+        }
+
+        /* Theme selection preview card styling */
+        .theme-card-outer {
+          border: 2px solid var(--color-border);
+          border-radius: 18px;
+          padding: 6px;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .theme-card-outer.active {
+          border-color: var(--color-accent) !important;
+          box-shadow: 0 0 12px var(--color-accent-glow) !important;
+        }
+        .theme-card-outer:hover {
+          border-color: var(--color-border-hover);
+          transform: translateY(-2px);
+        }
+        .theme-card-outer.active:hover {
+          border-color: var(--color-accent) !important;
+        }
+
+        .theme-preview-card {
+          height: 120px;
+          border-radius: 12px;
+          border: 1px solid var(--color-border);
+          position: relative;
+          overflow: hidden;
+          transition: all 0.3s ease;
+        }
+        
+        /* Layout line animations in preview cards */
+        .mock-window-dots {
+          position: absolute;
+          top: 12px;
+          left: 12px;
+          display: flex;
+          gap: 6px;
+        }
+        .mock-window-dots .dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+        }
+        .dot-red { background-color: #ef4444; }
+        .dot-yellow { background-color: #f59e0b; }
+        .dot-green { background-color: #10b981; }
+
+        .mock-layout-lines {
+          position: absolute;
+          top: 38px;
+          left: 12px;
+          right: 12px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .mock-layout-lines span {
+          height: 8px;
+          border-radius: 4px;
+        }
+        
+        /* System Theme Preview Styling */
+        .system-preview {
+          background: linear-gradient(90deg, #ffffff 50%, #1f2937 50%);
+        }
+        .system-preview .line-long { background-color: #e5e7eb; }
+        .system-preview .line-mid { background-color: #d1d5db; }
+        .system-preview .line-short { background-color: #d1d5db; }
+
+        /* Light Theme Preview Styling */
+        .light-preview {
+          background-color: #ffffff;
+        }
+        .light-preview .line-long { background-color: #e5e7eb; }
+        .light-preview .line-mid { background-color: #f3f4f6; }
+        .light-preview .line-short { background-color: #f3f4f6; }
+        .light-preview .mock-layout-lines span {
+          box-shadow: inset 0 0 1px rgba(0,0,0,0.05);
+        }
+
+        /* Dark Theme Preview Styling */
+        .dark-preview {
+          background-color: #1f2937;
+        }
+        .dark-preview .line-long { background-color: #4b5563; }
+        .dark-preview .line-mid { background-color: #374151; }
+        .dark-preview .line-short { background-color: #374151; }
+
+        .active-check-badge {
+          position: absolute;
+          bottom: 10px;
+          right: 10px;
+          width: 26px;
+          height: 26px;
+          border-radius: 50%;
+          background: var(--color-accent) !important;
+          color: #000000 !important;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          font-size: 14px;
+          box-shadow: 0 2px 8px var(--color-accent-glow);
+          animation: scale-up 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes scale-up {
+          from { transform: scale(0); }
+          to { transform: scale(1); }
+        }
+
+        .theme-label-text {
+          color: var(--color-text-primary) !important;
+        }
+
+        /* Color presets circle styling */
+        .color-preset-circle {
+          position: relative;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .color-preset-circle.active {
+          box-shadow: 0 0 0 3px var(--color-text-primary), 0 0 12px var(--color-accent-glow) !important;
+          transform: scale(1.1);
+        }
+        .color-preset-circle:hover {
+          transform: scale(1.15);
+        }
+        .preset-check-icon {
+          font-size: 16px;
+          font-weight: 700;
+        }
+
+        /* Custom color picker formatting */
+        .custom-color-picker-wrap {
+          border-top: 1px solid var(--color-border);
+          padding-top: 20px;
+        }
+        
+        .custom-color-val {
+          color: var(--color-text-primary) !important;
+          background-color: var(--color-bg-input);
+          padding: 6px 12px;
+          border-radius: 8px;
+          border: 1px solid var(--color-border);
+        }
+        
+        .color-picker-input-container {
+          position: relative;
+          width: 38px;
+          height: 38px;
+          border-radius: 50%;
+          overflow: hidden;
+          border: 2px solid var(--color-border);
+          cursor: pointer;
+        }
+        .color-input {
+          position: absolute;
+          top: -10px;
+          left: -10px;
+          width: 60px;
+          height: 60px;
+          opacity: 0;
+          cursor: pointer;
+          z-index: 2;
+        }
+        .color-input-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 1;
+        }
+
+        /* Flag / language styling */
+        .lang-card-outer {
+          border-color: var(--color-border) !important;
+          background-color: var(--color-bg-input) !important;
+          cursor: pointer;
+          position: relative;
+          width: 100%;
+          height: 100%;
+        }
+        .lang-card-outer.active {
+          border-color: var(--color-accent) !important;
+          background-color: var(--color-bg-card) !important;
+          box-shadow: 0 0 10px var(--color-accent-glow) !important;
+        }
+        .lang-card-outer:hover {
+          border-color: var(--color-border-hover) !important;
+          transform: translateY(-2px);
+        }
+        .lang-card-outer.active:hover {
+          border-color: var(--color-accent) !important;
+        }
+
+        .flag-img-wrap {
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .lang-active-dot {
+          position: absolute;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background-color: var(--color-accent);
+          right: 16px;
+          top: 50%;
+          transform: translateY(-50%);
+          box-shadow: 0 0 8px var(--color-accent-glow);
+        }
+      `}</style>
     </div>
   );
 }

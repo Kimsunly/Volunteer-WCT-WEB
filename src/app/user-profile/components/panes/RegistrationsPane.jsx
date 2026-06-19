@@ -97,10 +97,16 @@ export default function RegistrationsPane() {
 
   return (
     <div className="tab-pane fade show active" id="tabRegistrations">
-      <div className="alert alert-info d-flex align-items-center mb-3" role="alert">
-        <i className="bi bi-shield-check me-2"></i>
+      {/* Top Banner Notice */}
+      <div className="alert vh-notice-banner d-flex align-items-center mb-4" role="alert">
+        <div className="notice-icon-wrap me-3">
+          <i className="bi bi-shield-check"></i>
+        </div>
         <div>
-          អ្នកអាចបោះបង់ឬពិនិត្យស្ថានភាពការចុះឈ្មោះរបស់លោកអ្នកនៅទីនេះ។
+          <div className="fw-semibold text-primary-theme">ពិនិត្យស្ថានភាពការចុះឈ្មោះ / Manage Registrations</div>
+          <div className="small text-secondary-theme">
+            អ្នកអាចបោះបង់ឬពិនិត្យស្ថានភាពការចុះឈ្មោះរបស់លោកអ្នកនៅទីនេះ។
+          </div>
         </div>
       </div>
 
@@ -109,41 +115,43 @@ export default function RegistrationsPane() {
       <div className="row g-4">
         {/* Upcoming */}
         <div className="col-lg-6">
-          <div className="card border-0 shadow-sm h-100 p-4 rounded-4">
+          <div className="vh-reg-column upcoming-column">
             <div className="d-flex align-items-center justify-content-between mb-4">
               <div>
-                <h5 className="fw-bold mb-0">កំពុងមកដល់ / Upcoming</h5>
-                <small className="text-muted">ការចុះឈ្មោះដែលកំពុងរង់ចាំ ឬបានអនុម័ត</small>
+                <h5 className="fw-bold mb-1 title-theme">កំពុងមកដល់ / Upcoming</h5>
+                <small className="text-secondary-theme">ការចុះឈ្មោះដែលកំពុងរង់ចាំ ឬបានអនុម័ត</small>
               </div>
-              <span className="badge bg-primary rounded-pill p-2 px-3">{upcoming.length}</span>
+              <span className="badge counter-badge bg-primary-theme">{upcoming.length}</span>
             </div>
 
             <div className="d-flex flex-column gap-3">
               {upcoming.length === 0 ? (
-                <div className="text-center py-4 text-muted border border-dashed rounded-4">
+                <div className="text-center py-5 text-muted border border-dashed rounded-4 opacity-75">
                   <i className="bi bi-journal-x fs-2 mb-2 d-block"></i>
                   មិនមានការចុះឈ្មោះដែលកំពុងមកដល់ឡើយ
                 </div>
               ) : (
                 upcoming.map(app => (
-                  <div key={app.id} className="p-3 border rounded-4 hover-shadow transition-all bg-white">
-                    <div className="d-flex justify-content-between align-items-start">
-                      <div className="flex-grow-1">
-                        <div className="fw-bold text-dark mb-1">{app.opportunity_title || `ឱកាស #${app.opportunity_id}`}</div>
-                        <div className="small text-muted mb-2">
-                          <i className="bi bi-calendar-event me-2"></i>{formatDate(app.created_at)}
+                  <div key={app.id} className="vh-reg-card">
+                    <div className="d-flex justify-content-between align-items-start gap-2">
+                      <div className="flex-grow-1 min-width-0">
+                        <div className="fw-bold act-title text-truncate mb-1">{app.opportunity_title || `ឱកាស #${app.opportunity_id}`}</div>
+                        <div className="small text-secondary-theme mb-3">
+                          <i className="bi bi-calendar-event me-2 text-accent-theme"></i>{formatDate(app.created_at)}
                         </div>
-                        <div className={`small fw-medium ${getStatusLabel(app.status).className}`}>
-                          ស្ថានភាព៖ {getStatusLabel(app.status).label}
+                        <div className="mt-2">
+                          <span className={`badge ${getStatusLabel(app.status).className}`}>
+                            {getStatusLabel(app.status).label}
+                          </span>
                         </div>
                       </div>
-                      <div className="btn-group btn-group-sm">
-                        <Link href={`/opportunities/${app.opportunity_id}`} className="btn btn-light border-0 rounded-start-pill" title="មើលលម្អិត">
+                      <div className="btn-group-actions">
+                        <Link href={`/opportunities/${app.opportunity_id}`} className="btn btn-action btn-view" title="មើលលម្អិត">
                           <i className="bi bi-eye"></i>
                         </Link>
                         {["pending", "approved"].includes(app.status) && (
                           <button
-                            className="btn btn-light border-0 text-danger rounded-end-pill"
+                            className="btn btn-action btn-cancel"
                             title="បោះបង់"
                             onClick={() => handleWithdraw(app.id)}
                             disabled={actionLoading === app.id}
@@ -162,35 +170,37 @@ export default function RegistrationsPane() {
 
         {/* Passed / History */}
         <div className="col-lg-6">
-          <div className="card border-0 shadow-sm h-100 p-4 rounded-4 bg-light bg-opacity-50">
+          <div className="vh-reg-column history-column">
             <div className="d-flex align-items-center justify-content-between mb-4">
               <div>
-                <h5 className="fw-bold mb-0">ប្រវត្តិការចុះឈ្មោះ / History</h5>
-                <small className="text-muted">ការចុះឈ្មោះដែលបានបដិសេធ ឬបោះបង់</small>
+                <h5 className="fw-bold mb-1 title-theme">ប្រវត្តិការចុះឈ្មោះ / History</h5>
+                <small className="text-secondary-theme">ការចុះឈ្មោះដែលបានបដិសេធ ឬបោះបង់</small>
               </div>
-              <span className="badge bg-secondary rounded-pill p-2 px-3">{passed.length}</span>
+              <span className="badge counter-badge bg-secondary-theme">{passed.length}</span>
             </div>
 
             <div className="d-flex flex-column gap-3">
               {passed.length === 0 ? (
-                <div className="text-center py-4 text-muted border border-dashed rounded-4">
+                <div className="text-center py-5 text-muted border border-dashed rounded-4 opacity-75">
                   <i className="bi bi-history fs-2 mb-2 d-block"></i>
                   មិនទាន់មានប្រវត្តិការចុះឈ្មោះឡើយ
                 </div>
               ) : (
                 passed.map(app => (
-                  <div key={app.id} className="p-3 border rounded-4 bg-white opacity-75 shadow-sm">
-                    <div className="d-flex justify-content-between align-items-start">
-                      <div>
-                        <div className="fw-bold text-dark mb-1">{app.opportunity_title || `ឱកាស #${app.opportunity_id}`}</div>
-                        <div className="small text-muted mb-1">
+                  <div key={app.id} className="vh-reg-card history-card">
+                    <div className="d-flex justify-content-between align-items-start gap-2">
+                      <div className="flex-grow-1 min-width-0">
+                        <div className="fw-bold act-title text-truncate mb-1">{app.opportunity_title || `ឱកាស #${app.opportunity_id}`}</div>
+                        <div className="small text-secondary-theme mb-3">
                           <i className="bi bi-calendar-event me-2"></i>{formatDate(app.created_at)}
                         </div>
-                        <div className={`small fw-medium ${getStatusLabel(app.status).className}`}>
-                          {getStatusLabel(app.status).label}
+                        <div>
+                          <span className={`badge ${getStatusLabel(app.status).className}`}>
+                            {getStatusLabel(app.status).label}
+                          </span>
                         </div>
                       </div>
-                      <Link href={`/opportunities/${app.opportunity_id}`} className="btn btn-outline-secondary btn-sm rounded-circle">
+                      <Link href={`/opportunities/${app.opportunity_id}`} className="btn btn-action btn-view-history" title="មើលលម្អិត">
                         <i className="bi bi-arrow-right"></i>
                       </Link>
                     </div>
@@ -215,6 +225,175 @@ export default function RegistrationsPane() {
         cancelText="បោះបង់"
         type="danger"
       />
+
+      <style jsx>{`
+        .vh-notice-banner {
+          background: linear-gradient(135deg, var(--color-bg-card) 0%, rgba(255, 255, 255, 0.01) 100%) !important;
+          border: 1px solid var(--color-border) !important;
+          border-left: 4px solid var(--color-accent) !important;
+          border-radius: 16px !important;
+          padding: 20px !important;
+          box-shadow: var(--shadow-card) !important;
+        }
+        
+        .notice-icon-wrap {
+          width: 44px;
+          height: 44px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 20px;
+          background-color: var(--color-accent-dim) !important;
+          color: var(--color-accent) !important;
+          flex-shrink: 0;
+        }
+
+        .vh-reg-column {
+          background-color: var(--color-bg-card) !important;
+          border: 1px solid var(--color-border) !important;
+          border-radius: 20px !important;
+          box-shadow: var(--shadow-card) !important;
+          padding: 28px !important;
+          height: 100%;
+          transition: all 0.3s ease;
+        }
+        .vh-reg-column:hover {
+          border-color: var(--color-border-hover) !important;
+        }
+
+        .title-theme {
+          color: var(--color-text-primary) !important;
+        }
+
+        .text-primary-theme {
+          color: var(--color-text-primary) !important;
+        }
+        .text-secondary-theme {
+          color: var(--color-text-secondary) !important;
+        }
+
+        .counter-badge {
+          font-size: 13.5px;
+          font-weight: 700;
+          padding: 8px 16px;
+          border-radius: 100px;
+        }
+        .bg-primary-theme {
+          background-color: var(--color-accent-dim) !important;
+          color: var(--color-accent) !important;
+          border: 1px solid var(--color-accent-glow) !important;
+        }
+        .bg-secondary-theme {
+          background-color: var(--color-bg-input) !important;
+          color: var(--color-text-secondary) !important;
+          border: 1px solid var(--color-border) !important;
+        }
+
+        .vh-reg-card {
+          background-color: var(--color-bg-input) !important;
+          border: 1px solid var(--color-border) !important;
+          border-radius: 16px !important;
+          padding: 20px;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .vh-reg-card:hover {
+          border-color: var(--color-accent) !important;
+          box-shadow: 0 8px 20px var(--color-accent-glow);
+          transform: translateY(-2px);
+        }
+        .history-card {
+          opacity: 0.85;
+        }
+        .history-card:hover {
+          opacity: 1;
+          border-color: var(--color-border-hover) !important;
+          box-shadow: var(--shadow-card);
+          transform: translateY(-2px);
+        }
+
+        .act-title {
+          color: var(--color-text-primary) !important;
+          font-size: 15.5px;
+        }
+        .text-accent-theme {
+          color: var(--color-accent) !important;
+        }
+
+        .btn-group-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .btn-action {
+          width: 38px;
+          height: 38px;
+          border-radius: 50% !important;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid var(--color-border) !important;
+          background-color: var(--color-bg-card) !important;
+          color: var(--color-text-primary) !important;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          padding: 0;
+        }
+        
+        .btn-view:hover {
+          background-color: var(--color-accent-dim) !important;
+          color: var(--color-accent) !important;
+          border-color: var(--color-accent) !important;
+          transform: scale(1.08);
+        }
+        
+        .btn-cancel:hover {
+          background-color: rgba(220, 53, 69, 0.12) !important;
+          color: #dc3545 !important;
+          border-color: rgba(220, 53, 69, 0.3) !important;
+          transform: scale(1.08);
+        }
+
+        .btn-view-history:hover {
+          background-color: var(--color-bg-card-hover) !important;
+          border-color: var(--color-border-hover) !important;
+          transform: translateX(3px);
+        }
+
+        /* Status Badges */
+        .status-badge-success {
+          background-color: var(--color-accent-dim) !important;
+          color: var(--color-accent) !important;
+          border: 1px solid rgba(170, 255, 0, 0.25) !important;
+          font-size: 11px;
+          font-weight: 600;
+          padding: 6px 14px;
+        }
+        .status-badge-warning {
+          background-color: rgba(255, 193, 7, 0.12) !important;
+          color: #ffc107 !important;
+          border: 1px solid rgba(255, 193, 7, 0.25) !important;
+          font-size: 11px;
+          font-weight: 600;
+          padding: 6px 14px;
+        }
+        .status-badge-danger {
+          background-color: rgba(220, 53, 69, 0.12) !important;
+          color: #dc3545 !important;
+          border: 1px solid rgba(220, 53, 69, 0.25) !important;
+          font-size: 11px;
+          font-weight: 600;
+          padding: 6px 14px;
+        }
+        .status-badge-secondary {
+          background-color: rgba(108, 117, 125, 0.12) !important;
+          color: #6c757d !important;
+          border: 1px solid rgba(108, 117, 125, 0.25) !important;
+          font-size: 11px;
+          font-weight: 600;
+          padding: 6px 14px;
+        }
+      `}</style>
     </div>
   );
 }

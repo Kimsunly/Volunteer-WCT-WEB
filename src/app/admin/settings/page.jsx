@@ -37,7 +37,64 @@ export default function AdminSettingsPage() {
         </div>
         <div>
           <div className="flex flex-wrap gap-6">
-            {/* System/Light Mode */}
+            {/* System Preference */}
+            <button
+              type="button"
+              className="p-0 border-0 bg-transparent"
+              onClick={() => updateSetting("theme", "system")}
+              style={{ cursor: "pointer", textAlign: "left" }}
+            >
+              <div 
+                className="transition-all"
+                style={{
+                  padding: "8px",
+                  borderRadius: "16px",
+                  border: "3px solid",
+                  borderColor: settings.theme === "system" ? "var(--color-accent)" : "transparent",
+                }}
+              >
+                <div
+                  style={{
+                    width: "180px",
+                    height: "120px",
+                    borderRadius: "12px",
+                    background: "linear-gradient(90deg, #ffffff 50%, #1e1e1e 50%)",
+                    border: "1px solid var(--color-border)",
+                    position: "relative",
+                  }}
+                >
+                  <div style={{ position: "absolute", top: "10px", left: "10px", width: "12px", height: "12px", borderRadius: "50%", background: "#ef4444" }}></div>
+                  <div style={{ position: "absolute", top: "10px", left: "30px", width: "12px", height: "12px", borderRadius: "50%", background: "#f59e0b" }}></div>
+                  <div style={{ position: "absolute", top: "10px", left: "50px", width: "12px", height: "12px", borderRadius: "50%", background: "#10b981" }}></div>
+                  <div style={{ position: "absolute", top: "40px", left: "15px", right: "15px", height: "12px", borderRadius: "4px", background: "var(--color-border)" }}></div>
+                  <div style={{ position: "absolute", top: "60px", left: "15px", right: "40px", height: "12px", borderRadius: "4px", background: "var(--color-bg-input)" }}></div>
+                  <div style={{ position: "absolute", top: "80px", left: "15px", right: "60px", height: "12px", borderRadius: "4px", background: "var(--color-bg-input)" }}></div>
+                  {settings.theme === "system" && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: "10px",
+                        right: "10px",
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "50%",
+                        background: "var(--color-accent)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <i className="bi bi-check-lg" style={{ color: "#000000", fontWeight: "bold" }}></i>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <p className="text-center mt-2 small" style={{ color: "var(--color-text-primary)", fontWeight: "500", margin: "8px 0 0 0", textAlign: "center" }}>
+                System preference
+              </p>
+            </button>
+
+            {/* Light Mode */}
             <button
               type="button"
               className="p-0 border-0 bg-transparent"

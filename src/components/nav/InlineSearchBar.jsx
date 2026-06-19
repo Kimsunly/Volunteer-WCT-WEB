@@ -185,7 +185,7 @@ export default function InlineSearchBar() {
           align-items: center;
           background: #f1f3f4;
           border-radius: 24px;
-          padding: 4px 12px;
+          padding: 2px 12px;
           transition: all 0.2s ease;
           border: 1px solid transparent;
         }
@@ -205,7 +205,7 @@ export default function InlineSearchBar() {
           outline: none;
           width: 100%;
           font-size: 14px;
-          padding: 4px 0;
+          padding: 2px 0;
           color: #202124;
         }
         .clear-btn {

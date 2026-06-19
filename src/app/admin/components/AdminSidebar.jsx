@@ -151,13 +151,20 @@ export default function AdminSidebar({ active }) {
             Users
           </Link>
           <Link
-            href="/admin/donations"
-            className={`nav-item ${active === "donations" ? "active" : ""}`}
-          >
-            <i className="bi bi-heart-fill"></i>
-            Donations
-          </Link>
-        </div>
+                    href="/admin/donations"
+                    className={`nav-item ${active === "donations" ? "active" : ""}`}
+                  >
+                    <i className="bi bi-heart-fill"></i>
+                    Donations
+                  </Link>
+                  <Link
+                    href="/admin/contact-messages"
+                    className={`nav-item ${active === "contact-messages" ? "active" : ""}`}
+                  >
+                    <i className="bi bi-envelope-fill"></i>
+                    Contact Messages
+                  </Link>
+                </div>
       </nav>
 
       {/* Footer */}

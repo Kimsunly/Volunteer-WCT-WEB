@@ -72,7 +72,13 @@ function buildApplicantSearchText(app) {
 
 // Helper: returns a category-specific default image path
 function getCategoryDefaultImage(category) {
-  const cat = (category || "").toLowerCase();
+  let catStr = "";
+  if (typeof category === "string") {
+    catStr = category;
+  } else if (category && typeof category === "object") {
+    catStr = category.slug || category.name || category.name_en || "";
+  }
+  const cat = catStr.toLowerCase();
   const map = {
     environment: "/images/opportunities/Categories/environment.png",
     education: "/images/opportunities/Categories/teaching.png",
@@ -226,6 +232,7 @@ export default function OrgDashboardPage() {
             `ឱកាស #${app.opportunity_id}`,
           meta: `ជំនាញ៖ ${skills || "—"}`,
           dateKh: new Date(app.created_at).toLocaleDateString("km-KH"),
+          appliedDateRaw: new Date(app.created_at).getTime(),
           status: app.status,
           // Full fields for modal
           email: app.email_snapshot || app.user?.email,
@@ -601,6 +608,8 @@ export default function OrgDashboardPage() {
     logo:
       buildApiUrl(orgProfile?.logo_url) ||
       buildApiUrl(orgProfile?.card_image_url) ||
+      user?.avatar_url ||
+      user?.avatar ||
       user?.profileImage ||
       "/images/ORG/company-icon.png",
     nameKh: orgProfile?.organization_name || user?.name || "អ្នករៀបចំ",
@@ -645,23 +654,24 @@ export default function OrgDashboardPage() {
     return (
       <main
         className="flex-grow-1 org-dashboard py-5"
-        style={{ background: "#f8f9fa" }}
+        style={{ background: "var(--color-bg-base)", color: "var(--color-text-primary)" }}
       >
         <style>{`
           .premium-card {
-            background: rgba(255, 255, 255, 0.9);
+            background: var(--color-bg-card);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(220, 224, 230, 0.6);
+            border: 1px solid var(--color-border);
             border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+            box-shadow: var(--shadow-card);
             transition: all 0.3s ease;
           }
           .premium-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+            border-color: var(--color-border-hover);
+            box-shadow: var(--shadow-card);
           }
           .gradient-header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
             color: white;
             border-top-left-radius: 15px;
             border-top-right-radius: 15px;
@@ -682,15 +692,19 @@ export default function OrgDashboardPage() {
             padding: 1.5rem;
           }
           .form-control-premium {
+            background: var(--color-bg-input);
+            color: var(--color-text-primary);
             border-radius: 8px;
-            border: 1.5px solid #dee2e6;
+            border: 1.5px solid var(--color-border);
             padding: 0.75rem 1rem;
             transition: border-color 0.2s, box-shadow 0.2s;
           }
           .form-control-premium:focus {
-            border-color: #2a5298;
-            box-shadow: 0 0 0 3.5px rgba(42, 82, 152, 0.15);
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3.5px var(--color-accent-glow);
             outline: none;
+            background: var(--color-bg-input);
+            color: var(--color-text-primary);
           }
           .pulse-badge {
             animation: pulse-animation 2s infinite;
@@ -708,11 +722,11 @@ export default function OrgDashboardPage() {
           }
           .info-label {
             font-weight: 600;
-            color: #495057;
+            color: var(--color-text-secondary);
             font-size: 0.9rem;
           }
           .info-val {
-            color: #212529;
+            color: var(--color-text-primary);
             font-size: 1rem;
           }
         `}</style>
@@ -961,9 +975,9 @@ export default function OrgDashboardPage() {
                     <div
                       className="card border-dashed p-4 text-center mt-5"
                       style={{
-                        border: "2px dashed #dee2e6",
+                        border: "2px dashed var(--color-border)",
                         borderRadius: "12px",
-                        background: "#fafafa",
+                        background: "var(--color-bg-input)",
                       }}
                     >
                       <h6 className="fw-bold mb-2">
@@ -1074,13 +1088,13 @@ export default function OrgDashboardPage() {
           active={activeTab}
           onChange={setActiveTab}
           tabs={[
-            { id: "overview", label: "ទិដ្ឋភាពទូទៅ" },
-            { id: "opportunities", label: "ឱកាស" },
-            { id: "applications", label: "ការដាក់ពាក្យ" },
-            { id: "analytics", label: "វិភាគទិន្នន័យ" },
-            { id: "community", label: "សហគមន៍" },
-            { id: "reported-comments", label: "មតិយោបល់ដែលបានរាយការណ៍" },
-            { id: "settings", label: "ការកំណត់" },
+            { id: "overview", icon: "bi bi-grid-3x3-gap", label: "ទិដ្ឋភាពទូទៅ" },
+            { id: "opportunities", icon: "bi bi-briefcase", label: "ឱកាស" },
+            { id: "applications", icon: "bi bi-file-earmark-person", label: "ការដាក់ពាក្យ" },
+            { id: "analytics", icon: "bi bi-bar-chart-line", label: "វិភាគទិន្នន័យ" },
+            { id: "community", icon: "bi bi-people", label: "សហគមន៍" },
+            { id: "reported-comments", icon: "bi bi-exclamation-triangle", label: "មតិយោបល់ដែលបានរាយការណ៍" },
+            { id: "settings", icon: "bi bi-gear", label: "ការកំណត់" },
           ]}
         />
 

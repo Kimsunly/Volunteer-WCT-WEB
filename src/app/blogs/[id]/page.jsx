@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import SafeDate from "@/components/common/SafeDate";
 
 import { getBlogById } from "@/services/blogs";
 
@@ -100,7 +101,7 @@ export default function BlogDetailPage() {
                 <div className="text-muted d-flex align-items-center gap-3">
                   <span>
                     <i className="bi bi-calendar me-1"></i>
-                    {new Date(blog.created_at).toLocaleDateString()}
+                    <SafeDate dateString={blog.created_at} />
                   </span>
                   <span>
                     <i className="bi bi-person me-1"></i>

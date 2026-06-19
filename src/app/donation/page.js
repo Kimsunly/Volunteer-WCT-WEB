@@ -10,7 +10,6 @@ import {
     SidebarContact,
     Testimonials,
     FAQ,
-    ContactCTA,
     InfoModal,
     BloodDonateModal,
     QRDonateModal,
@@ -93,7 +92,7 @@ export default function DonationPage() {
                         <div
                             className="p-4"
                             style={{
-                                backgroundColor: "white",
+                                backgroundColor: "var(--color-bg-card)",
                                 borderRadius: "20px",
                                 boxShadow: "0 10px 40px rgba(0,0,0,0.05)",
                             }}
@@ -114,7 +113,6 @@ export default function DonationPage() {
             <section className="faq-donation-modern">
                 <div className="container">
                     <FAQ />
-                    <ContactCTA />
                 </div>
             </section>
 

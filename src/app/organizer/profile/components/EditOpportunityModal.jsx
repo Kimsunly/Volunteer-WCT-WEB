@@ -991,6 +991,12 @@ export default function EditOpportunityModal({
           color: var(--color-text-primary);
           transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        .form-select {
+          background-repeat: no-repeat !important;
+          background-position: right 16px center !important;
+          background-size: 16px 12px !important;
+          padding-right: 40px !important;
+        }
         .form-control:focus, .form-select:focus {
           background-color: var(--color-bg-surface);
           border-color: var(--color-accent);

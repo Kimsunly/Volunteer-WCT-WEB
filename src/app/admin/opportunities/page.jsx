@@ -42,6 +42,7 @@ export default function AdminOpportunitiesPage() {
   const [regsLoading, setRegsLoading] = useState(false);
   const [registrationsList, setRegistrationsList] = useState([]);
   const [activeRegsOp, setActiveRegsOp] = useState(null);
+  const [regsSearchQuery, setRegsSearchQuery] = useState("");
 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deletingOpportunityId, setDeletingOpportunityId] = useState(null);
@@ -83,6 +84,7 @@ export default function AdminOpportunitiesPage() {
     setRegsOpen(true);
     setRegsLoading(true);
     setRegistrationsList([]);
+    setRegsSearchQuery("");
     try {
       const res = await getApplicationsForOpportunity(item.id);
       setRegistrationsList(res.data || res || []);
@@ -163,7 +165,7 @@ export default function AdminOpportunitiesPage() {
       locationKh: item.logistic?.location_label || item.location || "",
       capacity: item.capacity || 10,
       status: item.status || "active",
-      registrations: item.applicants_count || 0,
+      registrations: item.applicants_count ?? item.applications_count ?? 0,
       raw: {
         ...item,
         category_id: item.category_id || item.category?.id || item.category || "",
@@ -326,6 +328,24 @@ export default function AdminOpportunitiesPage() {
     if (!d) return "—";
     return new Date(d).toLocaleDateString();
   };
+
+  // Volunteer registrations filtering and statistics calculations
+  const filteredRegs = activeRegsOp ? registrationsList.filter((app) => {
+    const displayName = [app.user?.first_name, app.user?.last_name].filter(Boolean).join(" ").trim() || app.name_snapshot || app.user?.name || "Anonymous";
+    const searchLower = regsSearchQuery.toLowerCase();
+    return (
+      displayName.toLowerCase().includes(searchLower) ||
+      (app.email_snapshot || app.user?.email || "").toLowerCase().includes(searchLower) ||
+      (app.phone_snapshot || app.user?.phone || "").toLowerCase().includes(searchLower) ||
+      (app.skills_text || "").toLowerCase().includes(searchLower) ||
+      (app.message || "").toLowerCase().includes(searchLower)
+    );
+  }) : [];
+
+  const totalCount = activeRegsOp ? registrationsList.length : 0;
+  const pendingCount = activeRegsOp ? registrationsList.filter(app => app.status === "pending").length : 0;
+  const approvedCount = activeRegsOp ? registrationsList.filter(app => app.status === "approved" || app.status === "accepted").length : 0;
+  const rejectedCount = activeRegsOp ? registrationsList.filter(app => app.status === "rejected").length : 0;
 
   if (!mounted) return null;
 
@@ -505,7 +525,7 @@ export default function AdminOpportunitiesPage() {
                             title="Registrations"
                           >
                             <i className="bi bi-people"></i>
-                            <span style={{ fontSize: "0.8125rem", fontWeight: "600" }}>{o.applicants_count || 0}</span>
+                            <span style={{ fontSize: "0.8125rem", fontWeight: "600" }}>{o.applicants_count ?? o.applications_count ?? 0}</span>
                           </button>
                           <button
                             className="btn-danger"
@@ -656,7 +676,7 @@ export default function AdminOpportunitiesPage() {
                   }}
                 >
                   <h5 className="modal-title d-flex align-items-center gap-2 mb-0" style={{ color: "var(--color-text-primary)", fontSize: "1.15rem", fontWeight: "600" }}>
-                    <i className="bi bi-people-fill fs-4" style={{ color: "var(--color-accent)" }}></i> បញ្ជីអ្នកចុះឈ្មោះ (Registrations List)
+                    <i className="bi bi-people-fill fs-4" style={{ color: "var(--color-accent)" }}></i> បញ្ជីអ្នកចុះឈ្មោះស្ម័គ្រចិត្ត / Volunteer Registrations
                   </h5>
                   <button
                     type="button"
@@ -667,109 +687,265 @@ export default function AdminOpportunitiesPage() {
                   </button>
                 </div>
 
-                <div className="modal-body p-4" style={{ overflowY: "auto", flexGrow: 1 }}>
-                  <div className="mb-4">
-                    <h6 style={{ fontWeight: 700, margin: 0, color: "var(--color-text-secondary)" }}>ឱកាសការងារ / Opportunity:</h6>
-                    <p style={{ color: "var(--color-text-primary)", margin: "4px 0 0", fontSize: "1.05rem", fontWeight: "600" }}>{activeRegsOp.titleKh || activeRegsOp.title || ""}</p>
+                <div className="modal-body p-4" style={{ overflowY: "auto", flexGrow: 1, display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                  {/* Search and Title Section */}
+                  <div className="d-flex align-items-center justify-content-between gap-3 flex-wrap" style={{ flexShrink: 0 }}>
+                    <div className="flex-grow-1">
+                      <h6 style={{ fontWeight: 700, margin: 0, color: "var(--color-text-secondary)", fontSize: "0.85rem", textTransform: "uppercase" }}>ឱកាសស្ម័គ្រចិត្ត / Opportunity:</h6>
+                      <p style={{ color: "var(--color-text-primary)", margin: "4px 0 0", fontSize: "1.05rem", fontWeight: "600" }}>{activeRegsOp.titleKh || activeRegsOp.title || ""}</p>
+                    </div>
+                    <div className="search-container" style={{ position: "relative", width: "100%", maxWidth: "300px" }}>
+                      <i className="bi bi-search" style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--color-text-secondary)", pointerEvents: "none" }}></i>
+                      <input
+                        type="search"
+                        placeholder="ស្វែងរកអ្នកស្ម័គ្រចិត្ត... / Search volunteer..."
+                        value={regsSearchQuery}
+                        onChange={(e) => setRegsSearchQuery(e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "8px 12px 8px 36px",
+                          backgroundColor: "var(--color-bg-input)",
+                          border: "1px solid var(--color-border)",
+                          borderRadius: "10px",
+                          color: "var(--color-text-primary)",
+                          fontSize: "0.875rem",
+                          outline: "none"
+                        }}
+                      />
+                    </div>
                   </div>
 
+                  {/* Summary Stats Cards */}
+                  <div className="row g-3" style={{ flexShrink: 0 }}>
+                    <div className="col-6 col-md-3">
+                      <div className="p-3 rounded-3 text-center" style={{ backgroundColor: "var(--color-bg-input)", border: "1px solid var(--color-border)" }}>
+                        <div style={{ fontSize: "10px", color: "var(--color-text-secondary)", fontWeight: "600", textTransform: "uppercase" }}>សរុប / Total</div>
+                        <div style={{ fontSize: "1.25rem", fontWeight: "700", color: "var(--color-text-primary)", marginTop: "4px" }}>{totalCount}</div>
+                      </div>
+                    </div>
+                    <div className="col-6 col-md-3">
+                      <div className="p-3 rounded-3 text-center" style={{ backgroundColor: "rgba(255, 193, 7, 0.08)", border: "1px solid rgba(255, 193, 7, 0.2)" }}>
+                        <div style={{ fontSize: "10px", color: "#ffc107", fontWeight: "600", textTransform: "uppercase" }}>កំពុងរង់ចាំ / Pending</div>
+                        <div style={{ fontSize: "1.25rem", fontWeight: "700", color: "#ffc107", marginTop: "4px" }}>{pendingCount}</div>
+                      </div>
+                    </div>
+                    <div className="col-6 col-md-3">
+                      <div className="p-3 rounded-3 text-center" style={{ backgroundColor: "rgba(25, 135, 84, 0.08)", border: "1px solid rgba(25, 135, 84, 0.2)" }}>
+                        <div style={{ fontSize: "10px", color: "#198754", fontWeight: "600", textTransform: "uppercase" }}>បានអនុម័ត / Approved</div>
+                        <div style={{ fontSize: "1.25rem", fontWeight: "700", color: "#198754", marginTop: "4px" }}>{approvedCount}</div>
+                      </div>
+                    </div>
+                    <div className="col-6 col-md-3">
+                      <div className="p-3 rounded-3 text-center" style={{ backgroundColor: "rgba(220, 53, 69, 0.08)", border: "1px solid rgba(220, 53, 69, 0.2)" }}>
+                        <div style={{ fontSize: "10px", color: "#dc3545", fontWeight: "600", textTransform: "uppercase" }}>បានបដិសេធ / Rejected</div>
+                        <div style={{ fontSize: "1.25rem", fontWeight: "700", color: "#dc3545", marginTop: "4px" }}>{rejectedCount}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Cards Grid */}
                   {regsLoading ? (
-                    <div className="text-center py-5">
+                    <div className="text-center py-5 my-auto">
                       <div className="spinner-border text-success" role="status">
                         <span className="visually-hidden">Loading...</span>
                       </div>
                     </div>
-                  ) : registrationsList.length === 0 ? (
-                    <div className="text-center py-5 text-muted">
+                  ) : filteredRegs.length === 0 ? (
+                    <div className="text-center py-5 my-auto text-muted">
                       <i className="bi bi-inbox fs-1 d-block mb-2 text-muted" style={{ opacity: 0.4 }} />
-                      គ្មានការចុះឈ្មោះឡើយ / No registrations found.
+                      {registrationsList.length === 0 
+                        ? "គ្មានការចុះឈ្មោះឡើយ / No registrations found." 
+                        : "គ្មានលទ្ធផលស្វែងរកឡើយ / No match found."}
                     </div>
                   ) : (
-                    <div className="table-responsive">
-                      <table className="data-table" style={{ width: "100%" }}>
-                        <thead>
-                          <tr>
-                            <th>អ្នកស្ម័គ្រចិត្ត</th>
-                            <th>ព័ត៌មានទាក់ទង</th>
-                            <th>ជំនាញ & សារ</th>
-                            <th>ស្ថានភាព</th>
-                            <th>សកម្មភាព</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {registrationsList.map((app) => {
-                            const displayName = [app.user?.first_name, app.user?.last_name].filter(Boolean).join(" ").trim() || app.name_snapshot || app.user?.name || "Anonymous";
-                            return (
-                              <tr key={app.id}>
-                                <td style={{ verticalAlign: "middle" }}>
-                                  <div>
-                                    <strong style={{ display: "block", color: "var(--color-text-primary)" }}>{displayName}</strong>
-                                    <span className="small text-muted">{app.sex === "male" ? "ប្រុស (Male)" : app.sex === "female" ? "ស្រី (Female)" : app.sex || "—"}</span>
-                                  </div>
-                                </td>
-                                <td style={{ verticalAlign: "middle" }}>
-                                  <div style={{ fontSize: "13px", color: "var(--color-text-secondary)" }}>
-                                    <div><i className="bi bi-envelope me-1"></i>{app.email_snapshot || app.user?.email || "—"}</div>
-                                    <div className="mt-1"><i className="bi bi-telephone me-1"></i>{app.phone_snapshot || app.user?.phone || "—"}</div>
-                                  </div>
-                                </td>
-                                <td style={{ verticalAlign: "middle" }}>
-                                  <div style={{ fontSize: "13px", maxWidth: "230px", color: "var(--color-text-secondary)" }}>
-                                    <div className="text-truncate" title={app.skills_text}><strong className="small" style={{ color: "var(--color-text-primary)" }}>ជំនាញ:</strong> {app.skills_text || "—"}</div>
-                                    <div className="text-truncate mt-1" title={app.message}><strong className="small" style={{ color: "var(--color-text-primary)" }}>សារ:</strong> {app.message || "—"}</div>
-                                    {app.cv_url && (
-                                      <div className="mt-1">
-                                        <a href={app.cv_url} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary py-0 px-2" style={{ fontSize: "11px", borderRadius: "6px" }}>
-                                          <i className="bi bi-file-earmark-pdf me-1"></i>មើល CV
-                                        </a>
-                                      </div>
-                                    )}
-                                  </div>
-                                </td>
-                                <td style={{ verticalAlign: "middle" }}>
-                                  <span className={`status-badge-custom ${app.status === "approved" || app.status === "accepted" ? "active" : app.status === "rejected" ? "rejected" : "pending"}`}>
-                                    {app.status === "approved" || app.status === "accepted" ? "Approved" : app.status === "rejected" ? "Rejected" : "Pending"}
+                    <div className="d-flex flex-column gap-3">
+                      {filteredRegs.map((app) => {
+                        const displayName = [app.user?.first_name, app.user?.last_name].filter(Boolean).join(" ").trim() || app.name_snapshot || app.user?.name || "Anonymous";
+                        const initials = displayName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+                        const genderLabel = app.sex === "male" ? "ប្រុស (Male)" : app.sex === "female" ? "ស្រី (Female)" : app.sex || "—";
+                        const skills = app.skills_text ? app.skills_text.split(",").map(s => s.trim()).filter(Boolean) : [];
+
+                        return (
+                          <div 
+                            key={app.id} 
+                            className="p-3 rounded-3 border d-flex flex-column gap-3 transition-all"
+                            style={{ 
+                              backgroundColor: "var(--color-bg-card)", 
+                              borderColor: "var(--color-border)",
+                              transition: "transform 0.2s ease, box-shadow 0.2s ease"
+                            }}
+                          >
+                            {/* Card Header */}
+                            <div className="d-flex align-items-center justify-content-between gap-3">
+                              <div className="d-flex align-items-center gap-3">
+                                <div 
+                                  className="d-flex align-items-center justify-content-center rounded-circle text-white fw-bold"
+                                  style={{ 
+                                    width: "42px", 
+                                    height: "42px", 
+                                    fontSize: "14px",
+                                    background: "linear-gradient(135deg, var(--color-accent) 0%, #198754 100%)",
+                                    boxShadow: "0 2px 8px rgba(170, 255, 0, 0.2)"
+                                  }}
+                                >
+                                  {initials}
+                                </div>
+                                <div>
+                                  <h6 className="mb-0 fw-bold" style={{ color: "var(--color-text-primary)" }}>{displayName}</h6>
+                                  <span 
+                                    className="small text-muted d-inline-flex align-items-center gap-1 mt-1 px-2 py-0.5 rounded-pill" 
+                                    style={{ 
+                                      backgroundColor: "var(--color-bg-input)", 
+                                      border: "1px solid var(--color-border)",
+                                      fontSize: "10px"
+                                    }}
+                                  >
+                                    <i className={`bi ${app.sex === "male" ? "bi-gender-male" : app.sex === "female" ? "bi-gender-female" : "bi-person"}`}></i>
+                                    {genderLabel}
                                   </span>
-                                </td>
-                                <td style={{ verticalAlign: "middle" }}>
-                                  <div className="d-flex gap-2">
-                                    {app.status === "pending" && (
-                                      <>
-                                        <button
-                                          onClick={() => handleApproveApp(app.id)}
-                                          className="btn btn-success btn-sm py-1 px-2 rounded-3 d-flex align-items-center gap-1"
-                                          style={{ fontSize: "12px", border: "none", backgroundColor: "#198754", color: "#fff" }}
-                                          title="Approve"
-                                        >
-                                          <i className="bi bi-check-lg"></i> អនុម័ត
-                                        </button>
-                                        <button
-                                          onClick={() => handleRejectApp(app.id)}
-                                          className="btn btn-danger btn-sm py-1 px-2 rounded-3 d-flex align-items-center gap-1"
-                                          style={{ fontSize: "12px", border: "none", backgroundColor: "#dc3545", color: "#fff" }}
-                                          title="Reject"
-                                        >
-                                          <i className="bi bi-x-lg"></i> បដិសេធ
-                                        </button>
-                                      </>
-                                    )}
-                                    {(app.status === "approved" || app.status === "accepted" || app.status === "rejected") && (
-                                      <button
-                                        onClick={() => handleResetAppToPending(app.id)}
-                                        className="btn-secondary py-1 px-2 rounded-3 d-flex align-items-center gap-1"
-                                        style={{ fontSize: "12px", height: "30px", border: "1px solid var(--color-border)", borderRadius: "6px" }}
-                                        title="Reset to Pending"
-                                      >
-                                        <i className="bi bi-arrow-counterclockwise"></i> ត្រឡប់ក្រោយ
-                                      </button>
-                                    )}
-                                  </div>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
+                                </div>
+                              </div>
+                              
+                              <div>
+                                <span className={`status-badge-custom ${app.status === "approved" || app.status === "accepted" ? "active" : app.status === "rejected" ? "rejected" : "pending"}`}>
+                                  {app.status === "approved" || app.status === "accepted" ? "Approved" : app.status === "rejected" ? "Rejected" : "Pending"}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="row g-2 align-items-center" style={{ borderTop: "1px solid var(--color-border)", paddingTop: "12px" }}>
+                              {/* Contact section */}
+                              <div className="col-12 col-md-6 d-flex flex-column gap-2" style={{ fontSize: "13px", color: "var(--color-text-secondary)" }}>
+                                <div className="d-flex align-items-center gap-2">
+                                  <i className="bi bi-envelope" style={{ fontSize: "12px", width: "16px" }}></i>
+                                  <span 
+                                    style={{ cursor: "pointer", textDecoration: "underline" }}
+                                    title="Click to copy email"
+                                    onClick={() => {
+                                      const email = app.email_snapshot || app.user?.email || "";
+                                      if (email) {
+                                        navigator.clipboard.writeText(email);
+                                        toast.success("Copied email!");
+                                      }
+                                    }}
+                                  >
+                                    {app.email_snapshot || app.user?.email || "—"}
+                                  </span>
+                                </div>
+                                <div className="d-flex align-items-center gap-2">
+                                  <i className="bi bi-telephone" style={{ fontSize: "12px", width: "16px" }}></i>
+                                  <span 
+                                    style={{ cursor: "pointer", textDecoration: "underline" }}
+                                    title="Click to copy phone"
+                                    onClick={() => {
+                                      const phone = app.phone_snapshot || app.user?.phone || "";
+                                      if (phone) {
+                                        navigator.clipboard.writeText(phone);
+                                        toast.success("Copied phone!");
+                                      }
+                                    }}
+                                  >
+                                    {app.phone_snapshot || app.user?.phone || "—"}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Resume Section */}
+                              <div className="col-12 col-md-6 d-flex align-items-center justify-content-md-end justify-content-start">
+                                {app.cv_url ? (
+                                  <a 
+                                    href={app.cv_url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-2" 
+                                    style={{ 
+                                      fontSize: "12px", 
+                                      borderRadius: "8px",
+                                      padding: "6px 12px",
+                                      borderColor: "var(--color-accent)",
+                                      color: "var(--color-accent)"
+                                    }}
+                                  >
+                                    <i className="bi bi-file-earmark-pdf" style={{ color: "var(--color-negative)", fontSize: "1.1rem" }}></i>
+                                    <span>មើលប្រវត្តិរូបសង្ខេប / View CV</span>
+                                  </a>
+                                ) : (
+                                  <span style={{ fontSize: "12px", color: "var(--color-text-muted)", fontStyle: "italic" }}>
+                                    <i className="bi bi-info-circle me-1"></i>គ្មាន CV ភ្ជាប់មកទេ / No CV attached
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Message / Cover Letter */}
+                            {app.message && (
+                              <div className="p-3 rounded-2" style={{ backgroundColor: "var(--color-bg-input)", borderLeft: "3.5px solid var(--color-accent)" }}>
+                                <div style={{ fontSize: "10px", fontWeight: "700", textTransform: "uppercase", color: "var(--color-text-secondary)", marginBottom: "4px" }}>
+                                  <i className="bi bi-chat-right-quote me-1"></i>សារ / Message
+                                </div>
+                                <p style={{ fontSize: "13px", color: "var(--color-text-primary)", margin: 0, fontStyle: "italic", lineHeight: "1.5" }}>
+                                  &ldquo;{app.message}&rdquo;
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Skills Tag Pills */}
+                            {skills.length > 0 && (
+                              <div className="d-flex flex-wrap gap-2 align-items-center">
+                                <span style={{ fontSize: "11px", fontWeight: "600", color: "var(--color-text-secondary)" }}>ជំនាញ / Skills:</span>
+                                {skills.map((skill, index) => (
+                                  <span 
+                                    key={index}
+                                    className="px-2 py-0.5 rounded-pill"
+                                    style={{ 
+                                      fontSize: "11px", 
+                                      fontWeight: "500", 
+                                      backgroundColor: "var(--color-accent-dim)", 
+                                      color: "var(--color-accent)",
+                                      border: "1px solid rgba(170, 255, 0, 0.15)"
+                                    }}
+                                  >
+                                    {skill}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Action Buttons inside Card */}
+                            <div className="d-flex justify-content-end gap-2" style={{ borderTop: "1px solid var(--color-border)", paddingTop: "12px" }}>
+                              {app.status === "pending" ? (
+                                <>
+                                  <button
+                                    onClick={() => handleRejectApp(app.id)}
+                                    className="btn btn-sm py-1.5 px-3 rounded-3 d-flex align-items-center gap-1.5"
+                                    style={{ fontSize: "12px", border: "1px solid var(--color-negative)", backgroundColor: "transparent", color: "var(--color-negative)", transition: "all 0.2s ease" }}
+                                    title="Reject"
+                                  >
+                                    <i className="bi bi-x-circle"></i> បដិសេធ / Reject
+                                  </button>
+                                  <button
+                                    onClick={() => handleApproveApp(app.id)}
+                                    className="btn btn-sm py-1.5 px-3 rounded-3 d-flex align-items-center gap-1.5"
+                                    style={{ fontSize: "12px", border: "none", backgroundColor: "var(--color-positive)", color: "#fff", transition: "all 0.2s ease" }}
+                                    title="Approve"
+                                  >
+                                    <i className="bi bi-check-circle-fill"></i> អនុម័ត / Approve
+                                  </button>
+                                </>
+                              ) : (
+                                <button
+                                  onClick={() => handleResetAppToPending(app.id)}
+                                  className="btn-secondary py-1.5 px-3 rounded-3 d-flex align-items-center gap-1.5"
+                                  style={{ fontSize: "12px", height: "32px", border: "1px solid var(--color-border)", borderRadius: "6px" }}
+                                  title="Reset to Pending"
+                                >
+                                  <i className="bi bi-arrow-counterclockwise"></i> ត្រឡប់ក្រោយ / Reset to Pending
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

@@ -38,7 +38,7 @@ export default function FeaturedPost({ post }) {
         </div>
 
         <div
-          className="card featured-card-modern border-0 shadow-lg overflow-hidden"
+          className="card featured-card-modern border-0 shadow-lg overflow-hidden p-0"
           data-aos="fade-up"
           data-aos-delay="100"
         >

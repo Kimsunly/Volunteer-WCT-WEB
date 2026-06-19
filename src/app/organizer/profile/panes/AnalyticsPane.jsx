@@ -1,4 +1,3 @@
-// src/app/org/dashboard/components/panes/AnalyticsPane.jsx
 "use client";
 
 import React, { useEffect, useRef } from "react";
@@ -14,20 +13,20 @@ export default function AnalyticsPane() {
   useEffect(() => {
     const rs = getComputedStyle(document.documentElement);
     const COLOR = {
-      text: rs.getPropertyValue("--bs-body-color").trim() || "#212529",
-      border: rs.getPropertyValue("--bs-border-color").trim() || "#dee2e6",
-      primary: rs.getPropertyValue("--bs-primary").trim() || "#0d6efd",
-      success: rs.getPropertyValue("--bs-success").trim() || "#198754",
-      warning: rs.getPropertyValue("--bs-warning").trim() || "#ffc107",
-      danger: rs.getPropertyValue("--bs-danger").trim() || "#dc3545",
-      info: rs.getPropertyValue("--bs-info").trim() || "#0dcaf0",
+      text: rs.getPropertyValue("--color-text-primary").trim() || "#ffffff",
+      border: rs.getPropertyValue("--color-border").trim() || "#2a2a2a",
+      primary: rs.getPropertyValue("--color-accent").trim() || "#AAFF00",
+      success: rs.getPropertyValue("--color-accent").trim() || "#AAFF00",
+      warning: "#ffc107",
+      danger: "#dc3545",
+      info: "#0d6efd",
     };
 
     Chart.defaults.color = COLOR.text;
     Chart.defaults.borderColor = COLOR.border;
     Chart.defaults.plugins.legend.labels.usePointStyle = true;
     Chart.defaults.font.family =
-      'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial';
+      'var(--font-kantumruy), system-ui, -apple-system, sans-serif';
 
     const months = [
       "Aug",
@@ -75,13 +74,16 @@ export default function AnalyticsPane() {
             data: volunteers,
             tension: 0.35,
             fill: true,
-            backgroundColor: withAlpha(COLOR.primary, 0.15),
-            borderColor: COLOR.primary,
-            pointRadius: 3,
+            backgroundColor: withAlpha(COLOR.info, 0.12),
+            borderColor: COLOR.info,
+            pointRadius: 4,
+            pointBackgroundColor: COLOR.info,
           },
         ],
       },
       options: {
+        responsive: true,
+        maintainAspectRatio: false,
         scales: {
           x: { grid: { display: false } },
           y: { beginAtZero: true, ticks: { stepSize: 50 } },
@@ -103,7 +105,12 @@ export default function AnalyticsPane() {
           },
         ],
       },
-      options: { cutout: "65%", plugins: { legend: { position: "bottom" } } },
+      options: { 
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: "65%", 
+        plugins: { legend: { position: "bottom" } } 
+      },
     });
 
     // Bar chart
@@ -124,17 +131,19 @@ export default function AnalyticsPane() {
             data: [120, 86, 64, 58, 54, 50],
             borderRadius: 8,
             backgroundColor: [
-              COLOR.primary,
               COLOR.info,
-              "#6f42c1",
-              "#ffd166",
-              "#ef476f",
-              "#118ab2",
+              "#0dcaf0",
+              "#7c3aed",
+              COLOR.warning,
+              COLOR.danger,
+              COLOR.success,
             ],
           },
         ],
       },
       options: {
+        responsive: true,
+        maintainAspectRatio: false,
         scales: {
           x: { grid: { display: false } },
           y: { beginAtZero: true, ticks: { stepSize: 20 } },
@@ -151,19 +160,19 @@ export default function AnalyticsPane() {
 
   return (
     <div className="tab-pane fade show active" id="analytics">
-      <div className="card shadow-sm border-0 p-3 vh-analytics">
-        {/* Header & filters (static, you can wire later) */}
+      <div className="vh-section-card p-4">
+        {/* Header & filters */}
         <div
-          className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3"
+          className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4"
           data-aos="fade-up"
         >
           <div>
-            <h5 className="mb-0">ការវិភាគទិន្នន័យ</h5>
+            <h5 className="mb-0 fw-bold title-theme">ការវិភាគទិន្នន័យ</h5>
           </div>
           <div className="d-flex align-items-center gap-2">
             <select
-              className="form-select form-select-sm"
-              style={{ minWidth: 150 }}
+              className="form-select form-control-premium"
+              style={{ minWidth: 120 }}
               defaultValue="90"
             >
               <option value="30">30 ថ្ងៃ</option>
@@ -171,8 +180,8 @@ export default function AnalyticsPane() {
               <option value="365">១ ឆ្នាំ</option>
             </select>
             <select
-              className="form-select form-select-sm"
-              style={{ minWidth: 170 }}
+              className="form-select form-control-premium"
+              style={{ minWidth: 160 }}
               defaultValue="all"
             >
               <option value="all">Segment: ទាំងអស់</option>
@@ -183,49 +192,47 @@ export default function AnalyticsPane() {
         </div>
 
         {/* Metric cards */}
-        <div className="row g-3 mb-2" data-aos="fade-up" data-aos-delay="100">
+        <div className="row g-3 mb-4" data-aos="fade-up" data-aos-delay="50">
           <div className="col-sm-6 col-xl-3">
-            <div className="card h-100 border-0 bg-body-tertiary">
+            <div className="card h-100 border-0 metric-sub-card">
               <div className="card-body">
-                <div className="fw-semibold text-body">Total Volunteers</div>
-                <div className="fs-3 fw-bold">1,256</div>
-                <div className="text-success small">
-                  <i className="fa-solid fa-arrow-trend-up me-1"></i>+8.2%
+                <div className="metric-title">Total Volunteers</div>
+                <div className="metric-value">1,256</div>
+                <div className="metric-trend text-success">
+                  <i className="bi bi-arrow-up-right me-1"></i>+8.2%
                 </div>
               </div>
             </div>
           </div>
           <div className="col-sm-6 col-xl-3">
-            <div className="card h-100 border-0 bg-body-tertiary">
+            <div className="card h-100 border-0 metric-sub-card">
               <div className="card-body">
-                <div className="fw-semibold text-body">Applications</div>
-                <div className="fs-3 fw-bold">432</div>
-                <div className="text-success small">
-                  <i className="fa-solid fa-arrow-trend-up me-1"></i>+4.1%
+                <div className="metric-title">Applications</div>
+                <div className="metric-value">432</div>
+                <div className="metric-trend text-success">
+                  <i className="bi bi-arrow-up-right me-1"></i>+4.1%
                 </div>
               </div>
             </div>
           </div>
           <div className="col-sm-6 col-xl-3">
-            <div className="card h-100 border-0 bg-body-tertiary">
+            <div className="card h-100 border-0 metric-sub-card">
               <div className="card-body">
-                <div className="fw-semibold text-body">Approval Rate</div>
-                <div className="fs-3 fw-bold">72%</div>
-                <div className="text-danger small">
-                  <i className="fa-solid fa-arrow-trend-down me-1"></i>−1.3%
+                <div className="metric-title">Approval Rate</div>
+                <div className="metric-value">72%</div>
+                <div className="metric-trend text-danger">
+                  <i className="bi bi-arrow-down-right me-1"></i>−1.3%
                 </div>
               </div>
             </div>
           </div>
           <div className="col-sm-6 col-xl-3">
-            <div className="card h-100 border-0 bg-body-tertiary">
+            <div className="card h-100 border-0 metric-sub-card">
               <div className="card-body">
-                <div className="fw-semibold text-body">
-                  Active Opportunities
-                </div>
-                <div className="fs-3 fw-bold">18</div>
-                <div className="text-success small">
-                  <i className="fa-solid fa-plus me-1"></i>+2 new
+                <div className="metric-title">Active Opportunities</div>
+                <div className="metric-value">18</div>
+                <div className="metric-trend text-success">
+                  <i className="bi bi-plus me-1"></i>+2 new
                 </div>
               </div>
             </div>
@@ -233,44 +240,124 @@ export default function AnalyticsPane() {
         </div>
 
         {/* Charts */}
-        <div className="row g-3" data-aos="fade-up" data-aos-delay="200">
+        <div className="row g-3" data-aos="fade-up" data-aos-delay="100">
           <div className="col-lg-8">
-            <div className="card border-0 bg-body-tertiary">
+            <div className="card border-0 chart-canvas-card">
               <div className="card-body">
-                <div className="d-flex justify-content-between align-items-baseline mb-2">
-                  <h6 className="mb-0">Volunteers by Month</h6>
-                  <small>ជាមួយចន្លោះពេលខាងលើ</small>
+                <div className="d-flex justify-content-between align-items-baseline mb-3">
+                  <h6 className="mb-0 fw-semibold text-primary-theme">Volunteers by Month</h6>
+                  <small className="text-secondary-theme">ជាមួយចន្លោះពេលខាងលើ</small>
                 </div>
-                <canvas ref={lineRef} height="120"></canvas>
+                <div style={{ position: "relative", height: "260px" }}>
+                  <canvas ref={lineRef}></canvas>
+                </div>
               </div>
             </div>
           </div>
 
           <div className="col-lg-4">
-            <div className="card border-0 bg-body-tertiary">
+            <div className="card border-0 chart-canvas-card">
               <div className="card-body">
-                <div className="d-flex justify-content-between align-items-baseline mb-2">
-                  <h6 className="mb-0">Application Status</h6>
-                  <small>Pending / Approved / Rejected</small>
+                <div className="d-flex justify-content-between align-items-baseline mb-3">
+                  <h6 className="mb-0 fw-semibold text-primary-theme">Application Status</h6>
+                  <small className="text-secondary-theme">Pending / Approved / Rejected</small>
                 </div>
-                <canvas ref={donutRef} height="120"></canvas>
+                <div style={{ position: "relative", height: "260px" }}>
+                  <canvas ref={donutRef}></canvas>
+                </div>
               </div>
             </div>
           </div>
 
           <div className="col-12">
-            <div className="card border-0 bg-body-tertiary">
+            <div className="card border-0 chart-canvas-card">
               <div className="card-body">
-                <div className="d-flex justify-content-between align-items-baseline mb-2">
-                  <h6 className="mb-0">Applications by Opportunity</h6>
-                  <small>Top 6</small>
+                <div className="d-flex justify-content-between align-items-baseline mb-3">
+                  <h6 className="mb-0 fw-semibold text-primary-theme">Applications by Opportunity</h6>
+                  <small className="text-secondary-theme">Top 6</small>
                 </div>
-                <canvas ref={barRef} height="210"></canvas>
+                <div style={{ position: "relative", height: "260px" }}>
+                  <canvas ref={barRef}></canvas>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .vh-section-card {
+          background-color: var(--color-bg-card) !important;
+          border: 1px solid var(--color-border) !important;
+          border-radius: 20px !important;
+          box-shadow: var(--shadow-card) !important;
+        }
+
+        .title-theme {
+          color: var(--color-text-primary) !important;
+        }
+        .text-primary-theme {
+          color: var(--color-text-primary) !important;
+        }
+        .text-secondary-theme {
+          color: var(--color-text-secondary) !important;
+          font-size: 11px;
+        }
+
+        .form-control-premium {
+          background: var(--color-bg-input);
+          color: var(--color-text-primary);
+          border-radius: 8px;
+          border: 1px solid var(--color-border);
+          font-size: 13.5px;
+          height: 38px;
+          padding: 4px 10px;
+        }
+        .form-control-premium:focus {
+          border-color: var(--color-accent);
+          box-shadow: 0 0 0 3px var(--color-accent-glow);
+          background: var(--color-bg-input);
+          color: var(--color-text-primary);
+        }
+
+        /* Metric cards */
+        .metric-sub-card {
+          background: var(--color-bg-input) !important;
+          border: 1px solid var(--color-border) !important;
+          border-radius: 16px !important;
+          transition: all 0.25s ease;
+        }
+        .metric-sub-card:hover {
+          transform: translateY(-2px);
+          border-color: var(--color-border-hover) !important;
+        }
+        .metric-title {
+          font-weight: 600;
+          color: var(--color-text-secondary);
+          font-size: 13px;
+        }
+        .metric-value {
+          font-size: 26px;
+          font-weight: 700;
+          color: var(--color-text-primary);
+          margin-top: 4px;
+        }
+        .metric-trend {
+          font-size: 12px;
+          font-weight: 600;
+          margin-top: 4px;
+        }
+        .metric-trend.text-success {
+          color: var(--color-accent) !important;
+        }
+
+        /* Chart card */
+        .chart-canvas-card {
+          background: var(--color-bg-input) !important;
+          border: 1px solid var(--color-border) !important;
+          border-radius: 16px !important;
+        }
+      `}</style>
     </div>
   );
 }

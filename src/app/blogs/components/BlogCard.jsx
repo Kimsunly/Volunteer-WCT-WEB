@@ -1,13 +1,15 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import SafeDate from "@/components/common/SafeDate";
 
 export default function BlogCard({ post }) {
   const { id, category, image, created_at, title, content } = post;
 
   // Create excerpt from content
   const excerpt = content ? content.substring(0, 100) + "..." : "";
-  const dateStr = created_at ? new Date(created_at).toLocaleDateString() : "";
 
   // Resolve image URL to handle backend storage paths
   const resolveImageUrl = (img) => {
@@ -39,7 +41,7 @@ export default function BlogCard({ post }) {
   const imageSrc = isValidUrl(resolvedImage) ? resolvedImage : "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop";
 
   return (
-    <div className="card blog-card-modern h-100 border-0 shadow-lg overflow-hidden">
+    <div className="card blog-card-modern h-100 border-0 shadow-lg overflow-hidden p-0">
       <div className="blog-card-img-wrapper position-relative">
         <span className="badge-modern-category position-absolute top-0 start-0 m-3 z-3">
           {category?.label || category}
@@ -58,7 +60,7 @@ export default function BlogCard({ post }) {
         <div className="blog-meta-modern d-flex align-items-center gap-3 mb-3 text-muted small">
           <span className="d-flex align-items-center gap-1">
             <i className="bi bi-calendar3"></i>
-            {dateStr}
+            <SafeDate dateString={created_at} />
           </span>
           <span className="d-flex align-items-center gap-1">
             <i className="bi bi-clock"></i>

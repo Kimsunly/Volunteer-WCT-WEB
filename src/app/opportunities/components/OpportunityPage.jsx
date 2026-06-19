@@ -2,12 +2,19 @@
 import { useState, useEffect, useCallback } from "react";
 import OpportunityCard from "@/components/cards/OpportunityCard";
 import AOSInit from "@/components/common/AOSInit";
+import SafeDate from "@/components/common/SafeDate";
 
 import { listOpportunities } from "@/services/opportunities";
 import { listCategories } from "@/services/categories";
 import Skeleton from "@/components/common/Skeleton";
 
-const ALL_TAB = { id: "all", name: "ទាំងអស់", slug: "all", icon: "bi bi-grid", color: "#6c757d" };
+const ALL_TAB = {
+  id: "all",
+  name: "ទាំងអស់",
+  slug: "all",
+  icon: "bi bi-grid",
+  color: "#6c757d",
+};
 
 const LOCATIONS = [
   { slug: "all", label: "គ្រប់កន្លែងទាំងអស់" },
@@ -93,24 +100,36 @@ export default function OpportunityPage() {
 
       // Ensure data is in the expected shape for cards
       const items = data.data || data.items || [];
-      const transformedItems = items.map(item => {
-        const catName = item.category?.name || item.category_label || (typeof item.category === 'string' ? item.category : '');
-        const locName = item.location_label || item.logistic?.location_label || (typeof item.location === 'string' ? item.location : '');
+      const transformedItems = items.map((item) => {
+        const catName =
+          item.category?.name ||
+          item.category_label ||
+          (typeof item.category === "string" ? item.category : "");
+        const locName =
+          item.location_label ||
+          item.logistic?.location_label ||
+          (typeof item.location === "string" ? item.location : "");
         return {
           ...item,
           id: String(item.id),
-          is_private: item.is_private || item.visibility === 'private',
+          is_private: item.is_private || item.visibility === "private",
           category: {
-            slug: catName ? catName.toLowerCase().replace(/\s+/g, '-') : 'all',
-            label: catName || 'ផ្សេងៗ'
+            slug: catName ? catName.toLowerCase().replace(/\s+/g, "-") : "all",
+            label: catName || "ផ្សេងៗ",
           },
           location: {
-            slug: locName ? locName.toLowerCase().replace(/\s+/g, '-') : 'all',
-            label: locName || 'TBD'
+            slug: locName ? locName.toLowerCase().replace(/\s+/g, "-") : "all",
+            label: locName || "TBD",
           },
-          images: item.details?.images_json || (item.images ? (typeof item.images === 'string' ? item.images.split(',') : item.images) : []),
-          date: item.logistic?.start_date ? new Date(item.logistic.start_date).toLocaleDateString('km-KH', { day: '2-digit', month: 'long', year: 'numeric' }) : 'TBD',
-          time: item.logistic?.time_range || 'TBD',
+          images:
+            item.details?.images_json ||
+            (item.images
+              ? typeof item.images === "string"
+                ? item.images.split(",")
+                : item.images
+              : []),
+          start_date: item.logistic?.start_date,
+          time: item.logistic?.time_range || "TBD",
           transport: item.logistic?.transport,
           housing: item.logistic?.housing,
           meals: item.logistic?.meals || item.logistic?.meal,
@@ -133,148 +152,248 @@ export default function OpportunityPage() {
     fetchOpportunities();
   }, [selectedCategory, selectedLocation, searchTerm, fetchOpportunities]);
 
-  const getFilteredOpportunities = useCallback((items) => {
-    return items.filter((item) => {
-      // 1. Duration (រយះពេល)
-      if (advFilter.duration && advFilter.duration !== "all") {
-        const start = item.logistic?.start_date ? new Date(item.logistic.start_date) : null;
-        const end = item.logistic?.end_date ? new Date(item.logistic.end_date) : null;
-        if (start && end) {
-          const diffDays = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
-          if (advFilter.duration === "short" && diffDays > 3) return false;
-          if (advFilter.duration === "medium" && (diffDays < 4 || diffDays > 30)) return false;
-          if (advFilter.duration === "long" && diffDays <= 30) return false;
-        } else {
-          return false;
+  const getFilteredOpportunities = useCallback(
+    (items) => {
+      return items.filter((item) => {
+        // 1. Duration (រយះពេល)
+        if (advFilter.duration && advFilter.duration !== "all") {
+          const start = item.logistic?.start_date
+            ? new Date(item.logistic.start_date)
+            : null;
+          const end = item.logistic?.end_date
+            ? new Date(item.logistic.end_date)
+            : null;
+          if (start && end) {
+            const diffDays =
+              Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
+            if (advFilter.duration === "short" && diffDays > 3) return false;
+            if (
+              advFilter.duration === "medium" &&
+              (diffDays < 4 || diffDays > 30)
+            )
+              return false;
+            if (advFilter.duration === "long" && diffDays <= 30) return false;
+          } else {
+            return false;
+          }
         }
-      }
 
-      // 2. Commitment Types (ប្រភេទការប្តេជ្ញាចិត្ត)
-      if (advFilter.commitments && advFilter.commitments.length > 0) {
-        const timeRangeStr = (item.logistic?.time_range || "").toLowerCase();
-        const descStr = (item.description || "").toLowerCase();
-        const titleStr = (item.title || "").toLowerCase();
-        
-        const matchesType = advFilter.commitments.some((type) => {
-          if (type === "part-time") {
-            return (
-              timeRangeStr.includes("part-time") ||
-              timeRangeStr.includes("ក្រៅម៉ោង") ||
-              timeRangeStr.includes("7:30") ||
-              timeRangeStr.includes("11:30") ||
-              timeRangeStr.includes("1:00") ||
-              timeRangeStr.includes("5:00") ||
-              descStr.includes("ក្រៅម៉ោង") ||
-              titleStr.includes("ក្រៅម៉ោង")
-            );
-          }
-          if (type === "full-time") {
-            return (
-              timeRangeStr.includes("full-time") ||
-              timeRangeStr.includes("ពេញម៉ោង") ||
-              timeRangeStr.includes("8:00") ||
-              timeRangeStr.includes("5:00") ||
-              descStr.includes("ពេញម៉ោង") ||
-              titleStr.includes("ពេញម៉ោង")
-            );
-          }
-          if (type === "weekend") {
-            return (
-              timeRangeStr.includes("weekend") ||
-              timeRangeStr.includes("ចុងសប្តាហ៍") ||
-              timeRangeStr.includes("សៅរ៍") ||
-              timeRangeStr.includes("អាទិត្យ") ||
-              descStr.includes("ចុងសប្តាហ៍") ||
-              descStr.includes("សៅរ៍") ||
-              descStr.includes("អាទិត្យ")
-            );
-          }
-          return false;
-        });
-        if (!matchesType) return false;
-      }
+        // 2. Commitment Types (ប្រភេទការប្តេជ្ញាចិត្ត)
+        if (advFilter.commitments && advFilter.commitments.length > 0) {
+          const timeRangeStr = (item.logistic?.time_range || "").toLowerCase();
+          const descStr = (item.description || "").toLowerCase();
+          const titleStr = (item.title || "").toLowerCase();
 
-      // 3. Required Skills (តម្រូវការជំនាញ)
-      if (advFilter.skills && advFilter.skills.length > 0) {
-        const skillsList = Array.isArray(item.details?.skills_json)
-          ? item.details.skills_json
-          : typeof item.details?.skills_json === "string"
-            ? (() => { try { return JSON.parse(item.details.skills_json); } catch { return []; } })()
-            : [];
-        const skillsText = skillsList.map(s => s.toLowerCase()).join(" ");
-        const descText = (item.description || "").toLowerCase();
-        const titleText = (item.title || "").toLowerCase();
+          const matchesType = advFilter.commitments.some((type) => {
+            if (type === "part-time") {
+              return (
+                timeRangeStr.includes("part-time") ||
+                timeRangeStr.includes("ក្រៅម៉ោង") ||
+                timeRangeStr.includes("7:30") ||
+                timeRangeStr.includes("11:30") ||
+                timeRangeStr.includes("1:00") ||
+                timeRangeStr.includes("5:00") ||
+                descStr.includes("ក្រៅម៉ោង") ||
+                titleStr.includes("ក្រៅម៉ោង")
+              );
+            }
+            if (type === "full-time") {
+              return (
+                timeRangeStr.includes("full-time") ||
+                timeRangeStr.includes("ពេញម៉ោង") ||
+                timeRangeStr.includes("8:00") ||
+                timeRangeStr.includes("5:00") ||
+                descStr.includes("ពេញម៉ោង") ||
+                titleStr.includes("ពេញម៉ោង")
+              );
+            }
+            if (type === "weekend") {
+              return (
+                timeRangeStr.includes("weekend") ||
+                timeRangeStr.includes("ចុងសប្តាហ៍") ||
+                timeRangeStr.includes("សៅរ៍") ||
+                timeRangeStr.includes("អាទិត្យ") ||
+                descStr.includes("ចុងសប្តាហ៍") ||
+                descStr.includes("សៅរ៍") ||
+                descStr.includes("អាទិត្យ")
+              );
+            }
+            return false;
+          });
+          if (!matchesType) return false;
+        }
 
-        const matchesSkill = advFilter.skills.some((skill) => {
-          if (skill === "teaching") {
-            return skillsText.includes("បង្រៀន") || skillsText.includes("teach") || skillsText.includes("educat") || descText.includes("បង្រៀន") || titleText.includes("បង្រៀន");
-          }
-          if (skill === "agriculture") {
-            return skillsText.includes("កសិកម្ម") || skillsText.includes("agricultur") || skillsText.includes("ដាំ") || descText.includes("កសិកម្ម") || descText.includes("ដាំ") || titleText.includes("កសិកម្ម");
-          }
-          if (skill === "it") {
-            return skillsText.includes("it") || skillsText.includes("technology") || skillsText.includes("កុំព្យូទ័រ") || skillsText.includes("computer") || descText.includes("កុំព្យូទ័រ") || titleText.includes("កុំព្យូទ័រ");
-          }
-          if (skill === "medical") {
-            return skillsText.includes("ពេទ្យ") || skillsText.includes("medical") || skillsText.includes("health") || descText.includes("ពេទ្យ") || descText.includes("សុខភាព") || titleText.includes("ពេទ្យ");
-          }
-          if (skill === "translation") {
-            return skillsText.includes("បកប្រែ") || skillsText.includes("translat") || skillsText.includes("languag") || descText.includes("បកប្រែ") || titleText.includes("បកប្រែ");
-          }
-          if (skill === "event") {
-            return skillsText.includes("ព្រឹត្តិការណ៍") || skillsText.includes("event") || skillsText.includes("រៀបចំ") || descText.includes("ព្រឹត្តិការណ៍") || titleText.includes("ព្រឹត្តិការណ៍");
-          }
-          return false;
-        });
-        if (!matchesSkill) return false;
-      }
+        // 3. Required Skills (តម្រូវការជំនាញ)
+        if (advFilter.skills && advFilter.skills.length > 0) {
+          const skillsList = Array.isArray(item.details?.skills_json)
+            ? item.details.skills_json
+            : typeof item.details?.skills_json === "string"
+              ? (() => {
+                  try {
+                    return JSON.parse(item.details.skills_json);
+                  } catch {
+                    return [];
+                  }
+                })()
+              : [];
+          const skillsText = skillsList.map((s) => s.toLowerCase()).join(" ");
+          const descText = (item.description || "").toLowerCase();
+          const titleText = (item.title || "").toLowerCase();
 
-      // 4. Organizer (ក្រុមការងារស្ម័គ្រចិត្ត)
-      if (advFilter.organizer && advFilter.organizer !== "all") {
-        const orgName = item.organization_name || item.creator?.name || item.createdByAdmin?.name || "";
-        if (orgName.toLowerCase() !== advFilter.organizer.toLowerCase()) return false;
-      }
+          const matchesSkill = advFilter.skills.some((skill) => {
+            if (skill === "teaching") {
+              return (
+                skillsText.includes("បង្រៀន") ||
+                skillsText.includes("teach") ||
+                skillsText.includes("educat") ||
+                descText.includes("បង្រៀន") ||
+                titleText.includes("បង្រៀន")
+              );
+            }
+            if (skill === "agriculture") {
+              return (
+                skillsText.includes("កសិកម្ម") ||
+                skillsText.includes("agricultur") ||
+                skillsText.includes("ដាំ") ||
+                descText.includes("កសិកម្ម") ||
+                descText.includes("ដាំ") ||
+                titleText.includes("កសិកម្ម")
+              );
+            }
+            if (skill === "it") {
+              return (
+                skillsText.includes("it") ||
+                skillsText.includes("technology") ||
+                skillsText.includes("កុំព្យូទ័រ") ||
+                skillsText.includes("computer") ||
+                descText.includes("កុំព្យូទ័រ") ||
+                titleText.includes("កុំព្យូទ័រ")
+              );
+            }
+            if (skill === "medical") {
+              return (
+                skillsText.includes("ពេទ្យ") ||
+                skillsText.includes("medical") ||
+                skillsText.includes("health") ||
+                descText.includes("ពេទ្យ") ||
+                descText.includes("សុខភាព") ||
+                titleText.includes("ពេទ្យ")
+              );
+            }
+            if (skill === "translation") {
+              return (
+                skillsText.includes("បកប្រែ") ||
+                skillsText.includes("translat") ||
+                skillsText.includes("languag") ||
+                descText.includes("បកប្រែ") ||
+                titleText.includes("បកប្រែ")
+              );
+            }
+            if (skill === "event") {
+              return (
+                skillsText.includes("ព្រឹត្តិការណ៍") ||
+                skillsText.includes("event") ||
+                skillsText.includes("រៀបចំ") ||
+                descText.includes("ព្រឹត្តិការណ៍") ||
+                titleText.includes("ព្រឹត្តិការណ៍")
+              );
+            }
+            return false;
+          });
+          if (!matchesSkill) return false;
+        }
 
-      // 5. Deadline (ថ្ងៃផុតកំណត់)
-      if (advFilter.deadline) {
-        const start = item.logistic?.start_date ? new Date(item.logistic.start_date) : null;
-        const selected = new Date(advFilter.deadline);
-        if (start && start > selected) return false;
-      }
+        // 4. Organizer (ក្រុមការងារស្ម័គ្រចិត្ត)
+        if (advFilter.organizer && advFilter.organizer !== "all") {
+          const orgName =
+            item.organization_name ||
+            item.creator?.name ||
+            item.createdByAdmin?.name ||
+            "";
+          if (orgName.toLowerCase() !== advFilter.organizer.toLowerCase())
+            return false;
+        }
 
-      // 6. Benefits (អត្ថប្រយោជន៍)
-      if (advFilter.benefits && advFilter.benefits.length > 0) {
-        const hasBenefits = advFilter.benefits.every((benefit) => {
-          if (benefit === "housing") {
-            const val = (item.logistic?.housing || "").toLowerCase();
-            return val && val !== "none" && val !== "no" && val !== "—" && !val.includes("មិនមាន");
-          }
-          if (benefit === "meals") {
-            const val = (item.logistic?.meals || item.logistic?.meal || "").toLowerCase();
-            return val && val !== "none" && val !== "no" && val !== "—" && !val.includes("មិនមាន");
-          }
-          if (benefit === "transport") {
-            const val = (item.logistic?.transport || "").toLowerCase();
-            return val && val !== "none" && val !== "no" && val !== "—" && !val.includes("មិនមាន");
-          }
-          if (benefit === "certificate") {
-            const desc = (item.description || "").toLowerCase();
-            const detailsText = JSON.stringify(item.details || "").toLowerCase();
-            return desc.includes("វិញ្ញាបនបត្រ") || desc.includes("certificate") || detailsText.includes("វិញ្ញាបនបត្រ") || detailsText.includes("certificate");
-          }
-          if (benefit === "insurance") {
-            const desc = (item.description || "").toLowerCase();
-            const detailsText = JSON.stringify(item.details || "").toLowerCase();
-            return desc.includes("ធានារ៉ាប់រង") || desc.includes("insurance") || detailsText.includes("ធានារ៉ាប់រង") || detailsText.includes("insurance");
-          }
-          return false;
-        });
-        if (!hasBenefits) return false;
-      }
+        // 5. Deadline (ថ្ងៃផុតកំណត់)
+        if (advFilter.deadline) {
+          const start = item.logistic?.start_date
+            ? new Date(item.logistic.start_date)
+            : null;
+          const selected = new Date(advFilter.deadline);
+          if (start && start > selected) return false;
+        }
 
-      return true;
-    });
-  }, [advFilter]);
+        // 6. Benefits (អត្ថប្រយោជន៍)
+        if (advFilter.benefits && advFilter.benefits.length > 0) {
+          const hasBenefits = advFilter.benefits.every((benefit) => {
+            if (benefit === "housing") {
+              const val = (item.logistic?.housing || "").toLowerCase();
+              return (
+                val &&
+                val !== "none" &&
+                val !== "no" &&
+                val !== "—" &&
+                !val.includes("មិនមាន")
+              );
+            }
+            if (benefit === "meals") {
+              const val = (
+                item.logistic?.meals ||
+                item.logistic?.meal ||
+                ""
+              ).toLowerCase();
+              return (
+                val &&
+                val !== "none" &&
+                val !== "no" &&
+                val !== "—" &&
+                !val.includes("មិនមាន")
+              );
+            }
+            if (benefit === "transport") {
+              const val = (item.logistic?.transport || "").toLowerCase();
+              return (
+                val &&
+                val !== "none" &&
+                val !== "no" &&
+                val !== "—" &&
+                !val.includes("មិនមាន")
+              );
+            }
+            if (benefit === "certificate") {
+              const desc = (item.description || "").toLowerCase();
+              const detailsText = JSON.stringify(
+                item.details || "",
+              ).toLowerCase();
+              return (
+                desc.includes("វិញ្ញាបនបត្រ") ||
+                desc.includes("certificate") ||
+                detailsText.includes("វិញ្ញាបនបត្រ") ||
+                detailsText.includes("certificate")
+              );
+            }
+            if (benefit === "insurance") {
+              const desc = (item.description || "").toLowerCase();
+              const detailsText = JSON.stringify(
+                item.details || "",
+              ).toLowerCase();
+              return (
+                desc.includes("ធានារ៉ាប់រង") ||
+                desc.includes("insurance") ||
+                detailsText.includes("ធានារ៉ាប់រង") ||
+                detailsText.includes("insurance")
+              );
+            }
+            return false;
+          });
+          if (!hasBenefits) return false;
+        }
+
+        return true;
+      });
+    },
+    [advFilter],
+  );
 
   useEffect(() => {
     const filtered = getFilteredOpportunities(allOpportunities);
@@ -286,7 +405,10 @@ export default function OpportunityPage() {
     if (allOpportunities && allOpportunities.length > 0) {
       const orgSet = new Set();
       allOpportunities.forEach((item) => {
-        const name = item.organization_name || item.creator?.name || item.createdByAdmin?.name;
+        const name =
+          item.organization_name ||
+          item.creator?.name ||
+          item.createdByAdmin?.name;
         if (name) orgSet.add(name);
       });
       setOrganizers(Array.from(orgSet));
@@ -322,8 +444,8 @@ export default function OpportunityPage() {
   };
 
   const handleFavorite = (id, isFav) => {
-    setAllOpportunities(prev =>
-      prev.map(o => o.id === id ? { ...o, isFavorite: isFav } : o)
+    setAllOpportunities((prev) =>
+      prev.map((o) => (o.id === id ? { ...o, isFavorite: isFav } : o)),
     );
   };
 
@@ -334,16 +456,16 @@ export default function OpportunityPage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const paginatedOpportunities = filteredOpportunities.slice((page - 1) * pageSize, page * pageSize);
+  const paginatedOpportunities = filteredOpportunities.slice(
+    (page - 1) * pageSize,
+    page * pageSize,
+  );
 
   return (
     <>
       <AOSInit />
       <main className="flex-grow-1">
-        <section
-          className="opportunity py-4 pt-5"
-          style={{ marginTop: "120px" }}
-        >
+        <section className="opportunity py-3" style={{ marginTop: "90px" }}>
           <div className="container">
             {/* Search + Select filters */}
             <div
@@ -363,7 +485,15 @@ export default function OpportunityPage() {
                         setPage(1);
                       }}
                     />
-                    <button className="search-btn" onClick={() => { setPage(1); fetchOpportunities(); }}>ស្វែងរក</button>
+                    <button
+                      className="search-btn"
+                      onClick={() => {
+                        setPage(1);
+                        fetchOpportunities();
+                      }}
+                    >
+                      ស្វែងរក
+                    </button>
                   </div>
                 </div>
                 <div className="col-12 col-lg-5">
@@ -475,7 +605,12 @@ export default function OpportunityPage() {
                   <div className="col-12 text-center text-danger p-5">
                     <i className="bi bi-exclamation-triangle fs-1"></i>
                     <p className="mt-3 fs-5">{error}</p>
-                    <button className="btn btn-outline-primary mt-2" onClick={fetchOpportunities}>ព្យាយាមម្តងទៀត</button>
+                    <button
+                      className="btn btn-outline-primary mt-2"
+                      onClick={fetchOpportunities}
+                    >
+                      ព្យាយាមម្តងទៀត
+                    </button>
                   </div>
                 ) : paginatedOpportunities.length > 0 ? (
                   paginatedOpportunities.map((opportunity) => (
@@ -502,12 +637,29 @@ export default function OpportunityPage() {
               <div className="d-flex justify-content-center mt-5">
                 <nav aria-label="Page navigation">
                   <ul className="pagination">
-                    <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
-                      <button className="page-link" onClick={() => setPage(p => Math.max(1, p - 1))}>ថយក្រោយ</button>
+                    <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
+                      <button
+                        className="page-link"
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      >
+                        ថយក្រោយ
+                      </button>
                     </li>
-                    <li className="page-item disabled"><span className="page-link">{page} / {Math.ceil(filteredOpportunities.length / pageSize)}</span></li>
-                    <li className={`page-item ${page >= Math.ceil(filteredOpportunities.length / pageSize) ? 'disabled' : ''}`}>
-                      <button className="page-link" onClick={() => setPage(p => p + 1)}>បន្ទាប់</button>
+                    <li className="page-item disabled">
+                      <span className="page-link">
+                        {page} /{" "}
+                        {Math.ceil(filteredOpportunities.length / pageSize)}
+                      </span>
+                    </li>
+                    <li
+                      className={`page-item ${page >= Math.ceil(filteredOpportunities.length / pageSize) ? "disabled" : ""}`}
+                    >
+                      <button
+                        className="page-link"
+                        onClick={() => setPage((p) => p + 1)}
+                      >
+                        បន្ទាប់
+                      </button>
                     </li>
                   </ul>
                 </nav>
@@ -536,22 +688,45 @@ export default function OpportunityPage() {
 
         {/* Advanced Filter Modal */}
         {showAdvFilter && (
-          <div className="adv-filter-modal-backdrop" onClick={() => setShowAdvFilter(false)}>
-            <div className="adv-filter-modal-content" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="adv-filter-modal-backdrop"
+            onClick={() => setShowAdvFilter(false)}
+          >
+            <div
+              className="adv-filter-modal-content"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="adv-filter-modal-header">
-                <h5 className="modal-title fw-bold">Filters</h5>
-                <button type="button" className="btn-close-filter" onClick={() => setShowAdvFilter(false)}>
+                <div className="d-flex align-items-center gap-2">
+                  <div className="filter-header-icon">
+                    <i className="bi bi-sliders2-vertical"></i>
+                  </div>
+                  <h5 className="modal-title fw-bold mb-0">តម្រងស្វែងរក</h5>
+                </div>
+                <button
+                  type="button"
+                  className="btn-close-filter"
+                  onClick={() => setShowAdvFilter(false)}
+                >
                   <i className="bi bi-x-lg"></i>
                 </button>
               </div>
-              <div className="adv-filter-modal-body">
+              <div className="adv-filter-modal-body d-flex flex-column gap-3">
                 {/* 1. Duration */}
-                <div className="mb-4">
-                  <label className="form-label fw-bold mb-2">រយះពេល</label>
+                <div className="filter-group">
+                  <label className="form-label fw-bold mb-2">
+                    <i className="bi bi-hourglass-split me-2 text-primary"></i>
+                    រយៈពេល
+                  </label>
                   <select
-                    className="form-select w-100"
+                    className="form-select-custom w-100"
                     value={tempFilter.duration}
-                    onChange={(e) => setTempFilter(prev => ({ ...prev, duration: e.target.value }))}
+                    onChange={(e) =>
+                      setTempFilter((prev) => ({
+                        ...prev,
+                        duration: e.target.value,
+                      }))
+                    }
                   >
                     <option value="all">គ្រប់ពេល</option>
                     <option value="short">រយៈពេលខ្លី (1-3 ថ្ងៃ)</option>
@@ -561,196 +736,237 @@ export default function OpportunityPage() {
                 </div>
 
                 {/* 2. Commitment Types */}
-                <div className="mb-4">
-                  <label className="form-label fw-bold mb-2">ប្រភេទការប្តេជ្ញាចិត្ត</label>
-                  <div className="d-flex flex-row gap-4 flex-wrap">
-                    <label className="checkbox-container">
-                      <input
-                        type="checkbox"
-                        checked={tempFilter.commitments.includes("part-time")}
-                        onChange={(e) => handleCheckboxChange("commitments", "part-time", e.target.checked)}
-                      />
-                      <span className="ms-2">ក្រៅម៉ោង</span>
-                    </label>
-                    <label className="checkbox-container">
-                      <input
-                        type="checkbox"
-                        checked={tempFilter.commitments.includes("full-time")}
-                        onChange={(e) => handleCheckboxChange("commitments", "full-time", e.target.checked)}
-                      />
-                      <span className="ms-2">ពេញម៉ោង</span>
-                    </label>
-                    <label className="checkbox-container">
-                      <input
-                        type="checkbox"
-                        checked={tempFilter.commitments.includes("weekend")}
-                        onChange={(e) => handleCheckboxChange("commitments", "weekend", e.target.checked)}
-                      />
-                      <span className="ms-2">ចុងសប្តាហ៍</span>
-                    </label>
+                <div className="filter-group">
+                  <label className="form-label fw-bold mb-2">
+                    <i className="bi bi-calendar2-check me-2 text-primary"></i>
+                    ប្រភេទការងារស្ម័គ្រចិត្ត
+                  </label>
+                  <div className="d-flex flex-wrap gap-2">
+                    {[
+                      {
+                        value: "part-time",
+                        label: "ក្រៅម៉ោង",
+                        icon: "bi-clock",
+                      },
+                      {
+                        value: "full-time",
+                        label: "ពេញម៉ោង",
+                        icon: "bi-briefcase",
+                      },
+                      {
+                        value: "weekend",
+                        label: "ចុងសប្តាហ៍",
+                        icon: "bi-calendar-week",
+                      },
+                    ].map((item) => {
+                      const isSelected = tempFilter.commitments.includes(
+                        item.value,
+                      );
+                      return (
+                        <button
+                          key={item.value}
+                          type="button"
+                          className={`filter-chip ${isSelected ? "active" : ""}`}
+                          onClick={() =>
+                            handleCheckboxChange(
+                              "commitments",
+                              item.value,
+                              !isSelected,
+                            )
+                          }
+                        >
+                          <i className={`bi ${item.icon} me-2`}></i>
+                          {item.label}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
                 {/* 3. Skills */}
-                <div className="mb-4">
-                  <label className="form-label fw-bold mb-2">តម្រូវការជំនាញ</label>
-                  <div className="row g-2">
-                    <div className="col-6">
-                      <label className="checkbox-container">
-                        <input
-                          type="checkbox"
-                          checked={tempFilter.skills.includes("teaching")}
-                          onChange={(e) => handleCheckboxChange("skills", "teaching", e.target.checked)}
-                        />
-                        <span className="ms-2">ការបង្រៀន</span>
-                      </label>
-                    </div>
-                    <div className="col-6">
-                      <label className="checkbox-container">
-                        <input
-                          type="checkbox"
-                          checked={tempFilter.skills.includes("agriculture")}
-                          onChange={(e) => handleCheckboxChange("skills", "agriculture", e.target.checked)}
-                        />
-                        <span className="ms-2">កសិកម្ម</span>
-                      </label>
-                    </div>
-                    <div className="col-6">
-                      <label className="checkbox-container">
-                        <input
-                          type="checkbox"
-                          checked={tempFilter.skills.includes("it")}
-                          onChange={(e) => handleCheckboxChange("skills", "it", e.target.checked)}
-                        />
-                        <span className="ms-2">IT & បច្ចេកវិទ្យា</span>
-                      </label>
-                    </div>
-                    <div className="col-6">
-                      <label className="checkbox-container">
-                        <input
-                          type="checkbox"
-                          checked={tempFilter.skills.includes("medical")}
-                          onChange={(e) => handleCheckboxChange("skills", "medical", e.target.checked)}
-                        />
-                        <span className="ms-2">វេជ្ជសាស្ត្រ / ថែទាំសុខភាព</span>
-                      </label>
-                    </div>
-                    <div className="col-6">
-                      <label className="checkbox-container">
-                        <input
-                          type="checkbox"
-                          checked={tempFilter.skills.includes("translation")}
-                          onChange={(e) => handleCheckboxChange("skills", "translation", e.target.checked)}
-                        />
-                        <span className="ms-2">បកប្រែភាសា</span>
-                      </label>
-                    </div>
-                    <div className="col-6">
-                      <label className="checkbox-container">
-                        <input
-                          type="checkbox"
-                          checked={tempFilter.skills.includes("event")}
-                          onChange={(e) => handleCheckboxChange("skills", "event", e.target.checked)}
-                        />
-                        <span className="ms-2">រៀបចំព្រឹត្តិការណ៍</span>
-                      </label>
-                    </div>
+                <div className="filter-group">
+                  <label className="form-label fw-bold mb-2">
+                    <i className="bi bi-tools me-2 text-primary"></i>
+                    តម្រូវការជំនាញ
+                  </label>
+                  <div className="d-flex flex-wrap gap-2">
+                    {[
+                      {
+                        value: "teaching",
+                        label: "ការបង្រៀន",
+                        icon: "bi-book",
+                      },
+                      {
+                        value: "agriculture",
+                        label: "កសិកម្ម",
+                        icon: "bi-flower1",
+                      },
+                      {
+                        value: "it",
+                        label: "IT & បច្ចេកវិទ្យា",
+                        icon: "bi-laptop",
+                      },
+                      {
+                        value: "medical",
+                        label: "វេជ្ជសាស្ត្រ / ថែទាំសុខភាព",
+                        icon: "bi-heart-pulse",
+                      },
+                      {
+                        value: "translation",
+                        label: "បកប្រែភាសា",
+                        icon: "bi-translate",
+                      },
+                      {
+                        value: "event",
+                        label: "រៀបចំព្រឹត្តិការណ៍",
+                        icon: "bi-calendar-event",
+                      },
+                    ].map((item) => {
+                      const isSelected = tempFilter.skills.includes(item.value);
+                      return (
+                        <button
+                          key={item.value}
+                          type="button"
+                          className={`filter-chip ${isSelected ? "active" : ""}`}
+                          onClick={() =>
+                            handleCheckboxChange(
+                              "skills",
+                              item.value,
+                              !isSelected,
+                            )
+                          }
+                        >
+                          <i className={`bi ${item.icon} me-2`}></i>
+                          {item.label}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
                 {/* 4. Organizer */}
-                <div className="mb-4">
-                  <label className="form-label fw-bold mb-2">ក្រុមការងារស្ម័គ្រចិត្ត</label>
+                <div className="filter-group">
+                  <label className="form-label fw-bold mb-2">
+                    <i className="bi bi-people me-2 text-primary"></i>
+                    ក្រុមការងារស្ម័គ្រចិត្ត
+                  </label>
                   <select
-                    className="form-select w-100"
+                    className="form-select-custom w-100"
                     value={tempFilter.organizer}
-                    onChange={(e) => setTempFilter(prev => ({ ...prev, organizer: e.target.value }))}
+                    onChange={(e) =>
+                      setTempFilter((prev) => ({
+                        ...prev,
+                        organizer: e.target.value,
+                      }))
+                    }
                   >
                     <option value="all">ទាំងអស់</option>
                     {organizers.map((org) => (
-                      <option key={org} value={org}>{org}</option>
+                      <option key={org} value={org}>
+                        {org}
+                      </option>
                     ))}
                   </select>
                 </div>
 
                 {/* 5. Deadline */}
-                <div className="mb-4">
-                  <label className="form-label fw-bold mb-2">ថ្ងៃផុតកំណត់</label>
+                <div className="filter-group">
+                  <label className="form-label fw-bold mb-2">
+                    <i className="bi bi-calendar-event me-2 text-primary"></i>
+                    ថ្ងៃផុតកំណត់
+                  </label>
                   <input
                     type="date"
-                    className="form-control w-100"
+                    className="form-control-custom w-100"
                     value={tempFilter.deadline || ""}
-                    onChange={(e) => setTempFilter(prev => ({ ...prev, deadline: e.target.value }))}
+                    onChange={(e) =>
+                      setTempFilter((prev) => ({
+                        ...prev,
+                        deadline: e.target.value,
+                      }))
+                    }
                   />
                 </div>
 
                 {/* 6. Benefits */}
-                <div className="mb-4">
-                  <label className="form-label fw-bold mb-2">អត្ថប្រយោជន៍</label>
-                  <div className="row g-2">
-                    <div className="col-6">
-                      <label className="checkbox-container">
-                        <input
-                          type="checkbox"
-                          checked={tempFilter.benefits.includes("housing")}
-                          onChange={(e) => handleCheckboxChange("benefits", "housing", e.target.checked)}
-                        />
-                        <span className="ms-2">កន្លែងស្នាក់នៅ</span>
-                      </label>
-                    </div>
-                    <div className="col-6">
-                      <label className="checkbox-container">
-                        <input
-                          type="checkbox"
-                          checked={tempFilter.benefits.includes("meals")}
-                          onChange={(e) => handleCheckboxChange("benefits", "meals", e.target.checked)}
-                        />
-                        <span className="ms-2">អាហារបរិភោគ</span>
-                      </label>
-                    </div>
-                    <div className="col-6">
-                      <label className="checkbox-container">
-                        <input
-                          type="checkbox"
-                          checked={tempFilter.benefits.includes("transport")}
-                          onChange={(e) => handleCheckboxChange("benefits", "transport", e.target.checked)}
-                        />
-                        <span className="ms-2">មធ្យោបាយធ្វើដំណើរ</span>
-                      </label>
-                    </div>
-                    <div className="col-6">
-                      <label className="checkbox-container">
-                        <input
-                          type="checkbox"
-                          checked={tempFilter.benefits.includes("certificate")}
-                          onChange={(e) => handleCheckboxChange("benefits", "certificate", e.target.checked)}
-                        />
-                        <span className="ms-2">វិញ្ញាបនបត្រ</span>
-                      </label>
-                    </div>
-                    <div className="col-6">
-                      <label className="checkbox-container">
-                        <input
-                          type="checkbox"
-                          checked={tempFilter.benefits.includes("insurance")}
-                          onChange={(e) => handleCheckboxChange("benefits", "insurance", e.target.checked)}
-                        />
-                        <span className="ms-2">ធានារ៉ាប់រង</span>
-                      </label>
-                    </div>
+                <div className="filter-group">
+                  <label className="form-label fw-bold mb-2">
+                    <i className="bi bi-gift me-2 text-primary"></i>អត្ថប្រយោជន៍
+                  </label>
+                  <div className="d-flex flex-wrap gap-2">
+                    {[
+                      {
+                        value: "housing",
+                        label: "កន្លែងស្នាក់នៅ",
+                        icon: "bi-house",
+                      },
+                      {
+                        value: "meals",
+                        label: "អាហារបរិភោគ",
+                        icon: "bi-egg-fried",
+                      },
+                      {
+                        value: "transport",
+                        label: "មធ្យោបាយធ្វើដំណើរ",
+                        icon: "bi-truck",
+                      },
+                      {
+                        value: "certificate",
+                        label: "វិញ្ញាបនបត្រ",
+                        icon: "bi-award",
+                      },
+                      {
+                        value: "insurance",
+                        label: "ធានារ៉ាប់រង",
+                        icon: "bi-shield-check",
+                      },
+                    ].map((item) => {
+                      const isSelected = tempFilter.benefits.includes(
+                        item.value,
+                      );
+                      return (
+                        <button
+                          key={item.value}
+                          type="button"
+                          className={`filter-chip ${isSelected ? "active" : ""}`}
+                          onClick={() =>
+                            handleCheckboxChange(
+                              "benefits",
+                              item.value,
+                              !isSelected,
+                            )
+                          }
+                        >
+                          <i className={`bi ${item.icon} me-2`}></i>
+                          {item.label}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
 
               <div className="adv-filter-modal-footer">
-                <button type="button" className="btn-reset" onClick={resetAdvFilters}>
+                <button
+                  type="button"
+                  className="btn-reset"
+                  onClick={resetAdvFilters}
+                >
                   កំណត់ឡើងវិញ
                 </button>
                 <div className="d-flex gap-2">
-                  <button type="button" className="btn-close-btn" onClick={() => setShowAdvFilter(false)}>
+                  <button
+                    type="button"
+                    className="btn-close-btn"
+                    onClick={() => setShowAdvFilter(false)}
+                  >
                     បិទ
                   </button>
-                  <button type="button" className="btn-apply" onClick={applyAdvFilters}>
+                  <button
+                    type="button"
+                    className="btn-apply"
+                    onClick={applyAdvFilters}
+                  >
                     អនុវត្តតម្រង
                   </button>
                 </div>
@@ -763,19 +979,19 @@ export default function OpportunityPage() {
       <style jsx>{`
         .btn-filter-toggle {
           border-radius: 6px;
-          border: 1px solid var(--text-title);
-          padding: 10px;
+          border: none;
+          padding: 10px 16px;
           height: 46px;
           font-size: 16px;
           outline: none;
-          background-color: #3b82f6;
-          color: #ffffff;
+          background: var(--btn-primary);
+          color: var(--text-white-fixed);
           font-weight: 600;
           cursor: pointer;
-          transition: background-color 0.15s ease;
+          transition: opacity 0.15s ease;
         }
         .btn-filter-toggle:hover {
-          background-color: #2563eb;
+          opacity: 0.9;
         }
         .adv-filter-modal-backdrop {
           position: fixed;
@@ -791,32 +1007,54 @@ export default function OpportunityPage() {
           justify-content: center;
         }
         .adv-filter-modal-content {
-          background: #ffffff;
-          border-radius: 16px;
-          width: min(460px, 94vw);
+          background: var(--color-bg-card);
+          border: 1px solid var(--color-border);
+          color: var(--color-text-primary);
+          border-radius: 20px;
+          width: min(520px, 94vw);
           max-height: 85vh;
           display: flex;
           flex-direction: column;
-          box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+          box-shadow:
+            var(--shadow-card),
+            0 20px 40px rgba(0, 0, 0, 0.3);
           overflow: hidden;
           animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
         @keyframes scaleUp {
-          from { transform: scale(0.95); opacity: 0; }
-          to { transform: scale(1); opacity: 1; }
+          from {
+            transform: scale(0.95);
+            opacity: 0;
+          }
+          to {
+            transform: scale(1);
+            opacity: 1;
+          }
         }
         .adv-filter-modal-header {
-          padding: 16px 20px;
-          border-bottom: 1px solid #e5e7eb;
+          padding: 18px 24px;
+          border-bottom: 1px solid var(--color-border);
           display: flex;
           align-items: center;
           justify-content: space-between;
+          background: var(--color-bg-surface);
+        }
+        .filter-header-icon {
+          width: 34px;
+          height: 34px;
+          border-radius: 10px;
+          background: var(--color-accent-dim);
+          color: var(--primary-color);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 18px;
         }
         .btn-close-filter {
           background: none;
           border: none;
           font-size: 1.25rem;
-          color: #9ca3af;
+          color: var(--color-text-secondary);
           cursor: pointer;
           transition: color 0.15s ease;
           padding: 0;
@@ -824,91 +1062,147 @@ export default function OpportunityPage() {
           align-items: center;
         }
         .btn-close-filter:hover {
-          color: #111827;
+          color: var(--color-text-primary);
         }
         .adv-filter-modal-body {
-          padding: 20px;
+          padding: 24px;
           overflow-y: auto;
           flex: 1;
         }
-        .form-label {
-          color: #374151;
+        .filter-group {
+          background: var(--color-bg-surface);
+          border: 1px solid var(--color-border);
+          border-radius: 14px;
+          padding: 16px;
+        }
+        .filter-group .form-label {
+          color: var(--color-text-primary);
           font-size: 14px;
-        }
-        .form-select, .form-control {
-          border: 1.5px solid #e5e7eb;
-          border-radius: 8px;
-          font-size: 14px;
-          padding: 10px 12px;
-          color: #1f2937;
-          background-color: #f9fafb;
-          transition: border-color 0.15s ease;
-        }
-        .form-select:focus, .form-control:focus {
-          border-color: #3b82f6;
-          box-shadow: none;
-          outline: none;
-        }
-        .checkbox-container {
+          font-weight: 600;
           display: flex;
           align-items: center;
-          cursor: pointer;
-          font-size: 14px;
-          color: #4b5563;
+          margin-bottom: 12px !important;
         }
-        .checkbox-container input[type="checkbox"] {
-          width: 18px;
-          height: 18px;
-          accent-color: #3b82f6;
+        .form-select-custom {
+          width: 100%;
+          border: 1.5px solid var(--color-border);
+          border-radius: 10px;
+          font-size: 14px;
+          padding: 10px 14px;
+          color: var(--color-text-primary);
+          background-color: var(--color-bg-input);
+          appearance: none;
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23888' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+          background-repeat: no-repeat;
+          background-position: right 14px center;
+          background-size: 16px 12px;
           cursor: pointer;
+          transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
+        }
+        .form-select-custom:focus {
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 3px var(--color-accent-dim);
+          outline: none;
+        }
+        .form-control-custom {
+          width: 100%;
+          border: 1.5px solid var(--color-border);
+          border-radius: 10px;
+          font-size: 14px;
+          padding: 10px 14px;
+          color: var(--color-text-primary);
+          background-color: var(--color-bg-input);
+          transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
+        }
+        .form-control-custom:focus {
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 3px var(--color-accent-dim);
+          outline: none;
+        }
+        .filter-chip {
+          background: var(--color-bg-input);
+          border: 1px solid var(--color-border);
+          color: var(--color-text-secondary);
+          padding: 8px 14px;
+          border-radius: 100px;
+          font-size: 13px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .filter-chip:hover {
+          background: var(--color-bg-card-hover);
+          border-color: var(--color-border-hover);
+          color: var(--color-text-primary);
+          transform: translateY(-1px);
+        }
+        .filter-chip.active {
+          background: var(--color-accent-dim);
+          border-color: var(--primary-color);
+          color: var(--primary-color);
+          font-weight: 600;
+          box-shadow: 0 0 10px var(--color-accent-glow);
         }
         .adv-filter-modal-footer {
-          padding: 16px 20px;
-          border-top: 1px solid #e5e7eb;
+          padding: 18px 24px;
+          border-top: 1px solid var(--color-border);
           display: flex;
           align-items: center;
           justify-content: space-between;
-          background: #f9fafb;
+          background: var(--color-bg-surface);
         }
         .btn-reset {
           background: none;
           border: none;
-          color: #2563eb;
+          color: var(--primary-color);
           font-weight: 600;
           font-size: 14px;
           cursor: pointer;
           padding: 0;
+          transition: opacity 0.15s ease;
         }
         .btn-reset:hover {
+          opacity: 0.8;
           text-decoration: underline;
         }
         .btn-close-btn {
-          border: 1px solid #e5e7eb;
-          background: #ffffff;
-          color: #4b5563;
-          padding: 8px 16px;
-          border-radius: 8px;
+          border: 1px solid var(--color-border);
+          background: var(--color-bg-card);
+          color: var(--color-text-secondary);
+          padding: 8px 18px;
+          border-radius: 10px;
           font-size: 14px;
           font-weight: 500;
           cursor: pointer;
+          transition:
+            background 0.15s,
+            color 0.15s;
         }
         .btn-close-btn:hover {
-          background: #f3f4f6;
+          background: var(--color-bg-card-hover);
+          color: var(--color-text-primary);
         }
         .btn-apply {
           border: none;
-          background: #3b82f6;
-          color: #ffffff;
-          padding: 8px 18px;
-          border-radius: 8px;
+          background: var(--primary-color);
+          color: #000000;
+          padding: 8px 20px;
+          border-radius: 10px;
           font-size: 14px;
           font-weight: 600;
           cursor: pointer;
-          box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
-          transition: background 0.15s ease;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+          transition: opacity 0.15s ease;
         }
         .btn-apply:hover {
-          background: #2563eb;
+          opacity: 0.9;
         }
       `}</style>
     </>

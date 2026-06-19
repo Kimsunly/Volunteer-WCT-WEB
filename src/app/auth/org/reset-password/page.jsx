@@ -70,7 +70,7 @@ function OrgResetForm({ step, setStep, tempOtp, setTempOtp }) {
 
         <div className="col-12 mt-4">
           <button type="submit" className="auth-modern-btn">
-            Verify OTP
+            <span>Verify OTP</span>
           </button>
         </div>
 
@@ -115,16 +115,16 @@ function OrgResetForm({ step, setStep, tempOtp, setTempOtp }) {
           disabled={submitting}
         >
           {submitting ? (
-            <>
+            <span className="d-flex align-items-center justify-content-center">
               <span
                 className="spinner-border spinner-border-sm me-2"
                 role="status"
                 aria-hidden="true"
-              ></span>
+              />
               កំពុងកំណត់ឡើងវិញ...
-            </>
+            </span>
           ) : (
-            "Reset Password"
+            <span>Reset Password</span>
           )}
         </button>
       </div>

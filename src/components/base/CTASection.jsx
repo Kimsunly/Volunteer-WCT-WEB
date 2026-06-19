@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 // Generic reusable CTA section component
 // Can be customized with props for different pages
 export default function CTASection({
@@ -21,9 +23,9 @@ export default function CTASection({
           <h2>{title}</h2>
           <p className="lead">{description}</p>
           <div className="d-flex gap-3 justify-content-center">
-            <a href={primaryBtnHref} className="btn btn-primary btn-lg">
+            <Link href={primaryBtnHref} className="btn btn-primary btn-lg">
               {primaryBtnText}
-            </a>
+            </Link>
             {secondaryBtnText && (
               <button className="btn btn-outline-primary btn-lg">
                 {secondaryBtnText}

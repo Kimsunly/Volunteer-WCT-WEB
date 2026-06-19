@@ -4,9 +4,13 @@ import Link from "next/link";
 import PropTypes from "prop-types";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { toggleFavoriteOpportunity, verifyOpportunityAccessKey } from "@/services/opportunities";
+import {
+  toggleFavoriteOpportunity,
+  verifyOpportunityAccessKey,
+} from "@/services/opportunities";
 import { showToast } from "@/components/common/CustomToaster";
 import { useRouter } from "next/navigation";
+import SafeDate from "@/components/common/SafeDate";
 
 /**
  * OpportunityCard - Flexible component that handles both data shapes
@@ -37,7 +41,9 @@ export default function OpportunityCard({
 }) {
   const { user } = useAuth();
   const router = useRouter();
-  const [isFav, setIsFav] = useState(data?.is_favorite ?? data?.isFavorite ?? false);
+  const [isFav, setIsFav] = useState(
+    data?.is_favorite ?? data?.isFavorite ?? false,
+  );
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [accessKeyModalOpen, setAccessKeyModalOpen] = useState(false);
   const [accessKey, setAccessKey] = useState("");
@@ -72,6 +78,7 @@ export default function OpportunityCard({
 
   // Date, Time, Capacity
   const date = data?.date;
+  const start_date = data?.start_date;
   const time = data?.time;
   const capacityLabel =
     data?.capacityLabel ||
@@ -117,7 +124,10 @@ export default function OpportunityCard({
       e.stopPropagation();
     }
     if (!user) {
-      showToast.error("សូមចូលគណនីជាមុនសិន ដើម្បីរក្សាទុកឱកាសនេះ។", "တម្រូវឱ្យចូលគណនី");
+      showToast.error(
+        "សូមចូលគណនីជាមុនសិន ដើម្បីរក្សាទុកឱកាសនេះ។",
+        "တម្រូវឱ្យចូលគណនី",
+      );
       return;
     }
     const newFav = !isFav;
@@ -164,7 +174,7 @@ export default function OpportunityCard({
     try {
       await verifyOpportunityAccessKey(id, accessKey);
       // Key is valid! Store access key in sessionStorage and navigate to detail page
-      sessionStorage.setItem('private_access_key', accessKey);
+      sessionStorage.setItem("private_access_key", accessKey);
       showToast.success("កូដសម្ងាត់ត្រឹមត្រូវ!");
       setAccessKeyModalOpen(false);
       setAccessKey("");
@@ -197,11 +207,11 @@ export default function OpportunityCard({
 
   return (
     <div
-      className={`col-12 col-md-6 col-xl-4 mb-4 ${className}`}
+      className={`col-12 col-md-6 col-xl-4 mb-4 opportunity-card ${className}`}
       data-category={categorySlug || ""}
       data-aos="fade-up"
     >
-      <div className="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+      <div className="card h-100 border-0 shadow-sm rounded-4 overflow-hidden p-0">
         {/* Image Section */}
         <div
           className="position-relative overflow-hidden group"
@@ -267,7 +277,13 @@ export default function OpportunityCard({
           {/* Category badge - Top Left */}
           {categoryLabel && (
             <div className="position-absolute top-0 start-0 m-3 d-flex gap-2">
-              <span className="badge rounded-pill bg-primary px-3 py-2 shadow-sm fw-normal">
+              <span
+                className="badge rounded-pill px-3 py-2 shadow-sm fw-normal"
+                style={{
+                  backgroundColor: "var(--btn-primary)",
+                  color: "var(--text-white-fixed)",
+                }}
+              >
                 {categoryLabel}
               </span>
               {data.is_private && (
@@ -282,17 +298,25 @@ export default function OpportunityCard({
           <div className="position-absolute top-0 end-0 m-3">
             <button
               type="button"
-              className="btn btn-white rounded-circle shadow-sm d-flex align-items-center justify-content-center p-0"
+              className="rounded-circle shadow-sm d-flex align-items-center justify-content-center"
               style={{
                 width: "38px",
                 height: "38px",
-                backgroundColor: "white",
+                backgroundColor: "var(--color-bg-card)",
+                border: "1px solid var(--color-border)",
+                padding: "0",
+                cursor: "pointer",
+                outline: "none",
               }}
               onClick={handleToggleFav}
             >
               <i
-                className={`bi ${isFav ? "bi-heart-fill text-danger text-shadow" : "bi-heart text-dark"}`}
-                style={{ fontSize: "1.1rem" }}
+                className={`bi ${isFav ? "bi-heart-fill" : "bi-heart"}`}
+                style={{
+                  fontSize: "1.1rem",
+                  color: isFav ? "#ef4444" : "var(--color-text-secondary)",
+                  lineHeight: "1",
+                }}
               />
             </button>
           </div>
@@ -309,10 +333,21 @@ export default function OpportunityCard({
                 <span>{locationLabel}</span>
               </div>
             )}
-            {date && (
+            {(date || start_date) && (
               <div className="d-flex align-items-center mb-2 gap-2 text-secondary small">
                 <i className="bi bi-calendar-check-fill text-primary fs-6" />
-                <span>{date}</span>
+                <span>
+                  {date || (
+                    <SafeDate
+                      dateString={start_date}
+                      options={{
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      }}
+                    />
+                  )}
+                </span>
               </div>
             )}
             {time && (
@@ -365,7 +400,11 @@ export default function OpportunityCard({
                 <button
                   onClick={handleDetailClick}
                   className="btn btn-primary w-100 rounded-3 py-2 d-flex align-items-center justify-content-center gap-2"
-                  style={{ backgroundColor: "#007bff", borderColor: "#007bff" }}
+                  style={{
+                    backgroundColor: "var(--btn-primary)",
+                    borderColor: "var(--btn-primary)",
+                    color: "var(--text-white-fixed)",
+                  }}
                 >
                   <i className="bi bi-info-circle fs-5" />
                   <span>ព័ត៌មានលម្អិត</span>
@@ -374,7 +413,11 @@ export default function OpportunityCard({
                 <Link
                   href={detailHref}
                   className="btn btn-primary w-100 rounded-3 py-2 d-flex align-items-center justify-content-center gap-2"
-                  style={{ backgroundColor: "#007bff", borderColor: "#007bff" }}
+                  style={{
+                    backgroundColor: "var(--btn-primary)",
+                    borderColor: "var(--btn-primary)",
+                    color: "var(--text-white-fixed)",
+                  }}
                 >
                   <i className="bi bi-info-circle fs-5" />
                   <span>ព័ត៌មានលម្អិត</span>
@@ -395,27 +438,45 @@ export default function OpportunityCard({
 
       {/* Private Opportunity Access Key Modal */}
       {accessKeyModalOpen && (
-        <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
-          <div className="modal-backdrop fade show" style={{ zIndex: 1050 }} onClick={() => setAccessKeyModalOpen(false)}></div>
-          <div className="modal-dialog modal-dialog-centered" style={{ zIndex: 1060 }}>
+        <div
+          className="modal fade show"
+          style={{ display: "block" }}
+          tabIndex="-1"
+        >
+          <div
+            className="modal-backdrop fade show"
+            style={{ zIndex: 1050 }}
+            onClick={() => setAccessKeyModalOpen(false)}
+          ></div>
+          <div
+            className="modal-dialog modal-dialog-centered"
+            style={{ zIndex: 1060 }}
+          >
             <div className="modal-content border-0 shadow-lg rounded-4">
               <div className="modal-header p-4 border-0">
                 <h5 className="modal-title fw-bold">
                   <i className="bi bi-lock-fill me-2 text-warning"></i>
                   កូដសម្ងាត់សម្រាប់កម្មវិធីឯកជន
                 </h5>
-                <button type="button" className="btn-close" onClick={() => setAccessKeyModalOpen(false)}></button>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setAccessKeyModalOpen(false)}
+                ></button>
               </div>
               <div className="modal-body p-4">
                 <div className="alert alert-warning border-0 bg-warning bg-opacity-10">
                   <i className="bi bi-info-circle me-2"></i>
-                  កម្មវិធីនេះជាកម្មវិធីឯកជន។ សូមបញ្ចូលកូដសម្ងាត់ដែលបានពីអ្នករៀបចំកម្មវិធីដើម្បីបន្ត។
+                  កម្មវិធីនេះជាកម្មវិធីឯកជន។
+                  សូមបញ្ចូលកូដសម្ងាត់ដែលបានពីអ្នករៀបចំកម្មវិធីដើម្បីបន្ត។
                 </div>
                 <div className="mb-3">
-                  <label className="form-label fw-bold">កូដសម្ងាត់ <span className="text-danger">*</span></label>
+                  <label className="form-label fw-bold">
+                    កូដសម្ងាត់ <span className="text-danger">*</span>
+                  </label>
                   <input
                     type="text"
-                    className={`form-control form-control-lg ${accessKeyError ? 'is-invalid' : ''}`}
+                    className={`form-control form-control-lg ${accessKeyError ? "is-invalid" : ""}`}
                     value={accessKey}
                     onChange={(e) => {
                       setAccessKey(e.target.value);
@@ -429,7 +490,11 @@ export default function OpportunityCard({
                 </div>
               </div>
               <div className="modal-footer p-4 border-0">
-                <button type="button" className="btn btn-light rounded-pill px-4" onClick={() => setAccessKeyModalOpen(false)}>
+                <button
+                  type="button"
+                  className="btn btn-light rounded-pill px-4"
+                  onClick={() => setAccessKeyModalOpen(false)}
+                >
                   បោះបង់
                 </button>
                 <button
@@ -440,7 +505,11 @@ export default function OpportunityCard({
                 >
                   {verifyingKey ? (
                     <>
-                      <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
+                      <span
+                        className="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                      />
                       កំពុងផ្ទៀងផ្ទាត់...
                     </>
                   ) : (

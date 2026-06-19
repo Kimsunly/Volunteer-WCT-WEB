@@ -55,6 +55,7 @@ export default function UserProfilePage() {
             tierLabel: authUser.role === "organizer" ? "Organizer" : (authUser.volunteer_level ?? authUser.tierLabel ?? "Volunteer"),
             notifCount: Array.isArray(authUser.notifications) ? authUser.notifications.length : 0,
             providers: authUser.providers ?? [],
+            status: authUser.status,
         }
         : {
             name: "ដារា លី",
@@ -62,11 +63,12 @@ export default function UserProfilePage() {
             tierLabel: "Gold Volunteer",
             notifCount: 2,
             providers: [],
+            status: null,
         };
 
     return (
-        <main className="flex-grow-1" style={{ marginTop: 170 }}>
-            <div className="container py-4">
+        <main className="flex-grow-1" style={{ marginTop: 130 }}>
+            <div className="container pt-4 pb-5">
                 {/* Role guard (banner + content disabling) */}
                 <RoleGuard enabled={!loading && !roleAllowed} />
 

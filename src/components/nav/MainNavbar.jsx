@@ -20,7 +20,7 @@ export default function MainNavbar() {
   const getDashboardUrl = () => {
     switch (user?.role) {
       case "user":
-        return "/user";
+        return "/user-profile";
       case "organizer":
         return "/organizer";
       case "admin":
@@ -35,6 +35,28 @@ export default function MainNavbar() {
     return pathname === path;
   };
 
+  const handleMobileNav = (url) => {
+    if (typeof window !== "undefined") {
+      // Find the native close button and trigger click to trigger Bootstrap close animations
+      const closeBtn = document.getElementById("offcanvasCloseBtn");
+      if (closeBtn) {
+        closeBtn.click();
+      }
+      
+      // Safety clean up for overlay backdrops and overflow styles
+      setTimeout(() => {
+        const backdrops = document.querySelectorAll(".offcanvas-backdrop, .modal-backdrop");
+        backdrops.forEach((el) => el.remove());
+        document.body.style.overflow = "";
+        document.body.style.paddingRight = "";
+        document.body.classList.remove("offcanvas-open", "modal-open");
+      }, 150);
+    }
+    if (url) {
+      router.push(url);
+    }
+  };
+
   return (
     <>
       <header className="fixed-top shadow-sm">
@@ -47,12 +69,12 @@ export default function MainNavbar() {
             borderColor: "var(--border) !important",
           }}
         >
-          <div className="container py-1">
+          <div className="container py-0">
             {/* Mobile Logo */}
             <Link
               className="navbar-brand d-lg-none d-flex align-items-center"
               href="/"
-              style={{ color: "var(--text-black)" }}
+              style={{ color: "var(--primary-color)" }}
             >
               <Image
                 src="/logos/logo.png"
@@ -130,7 +152,7 @@ export default function MainNavbar() {
 
               {/* Authentication Buttons - Desktop Only */}
               {!loading && !user && (
-                <ul className="nav-authentication d-none d-lg-flex m-0 list-unstyled align-items-center">
+                <ul className="nav-authentication d-none d-lg-flex m-0 list-unstyled align-items-center gap-2">
                   <li>
                     <Link href="/auth/login" className="login">
                       ចូលគណនី
@@ -177,164 +199,171 @@ export default function MainNavbar() {
           id="offcanvasNavbar"
           aria-labelledby="offcanvasNavbarLabel"
         >
-          <div className="offcanvas-header">
-            <h5 className="offcanvas-title" id="offcanvasNavbarLabel">
-              ម៉េនុយ
-            </h5>
+          <div className="offcanvas-header border-bottom px-4 py-3">
+            <div className="d-flex align-items-center gap-2">
+              <Image
+                src="/logos/logo.png"
+                alt="Logo"
+                width={32}
+                height={32}
+                style={{ borderRadius: "6px" }}
+              />
+              <span className="fw-bold fs-5 brand-title">ស្ម័គ្រចិត្ត</span>
+            </div>
             <button
               type="button"
               className="btn-close"
               data-bs-dismiss="offcanvas"
               aria-label="Close"
+              id="offcanvasCloseBtn"
             ></button>
           </div>
 
-          <div className="offcanvas-body">
-            <ul className="navbar-nav ms-auto">
-              <li className="nav-item">
-                <Link
-                  className={`nav-link ${isActive("/") ? "active" : ""}`}
-                  href="/"
-                  data-bs-dismiss="offcanvas"
-                >
-                  ទំព័រដើម
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link
-                  className={`nav-link ${isActive("/opportunities") ? "active" : ""}`}
-                  href="/opportunities"
-                  data-bs-dismiss="offcanvas"
-                >
-                  ការងារស្ម័គ្រចិត្ត
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link
-                  className={`nav-link ${isActive("/community") ? "active" : ""}`}
-                  href="/community"
-                  data-bs-dismiss="offcanvas"
-                >
-                  សហគមន៍
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link
-                  className={`nav-link ${isActive("/blogs") ? "active" : ""}`}
-                  href="/blogs"
-                  data-bs-dismiss="offcanvas"
-                >
-                  អត្ថបទ
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link
-                  className={`nav-link ${isActive("/donation") ? "active" : ""}`}
-                  href="/donation"
-                  data-bs-dismiss="offcanvas"
-                >
-                  បរិច្ចាក
-                </Link>
-              </li>
+          <div className="offcanvas-body px-4 py-4">
+            {/* User Profile Card */}
+            {!loading && user && (
+              <div className="user-profile-menu-card p-3 rounded-4 mb-4 d-flex align-items-center gap-3">
+                <div className="position-relative flex-shrink-0">
+                  <Image
+                    src={user.avatar_url || user.profileImage || "/images/ORG/computer-icons-user-profile-circle-abstract.jpg"}
+                    alt="Avatar"
+                    width={50}
+                    height={50}
+                    className="rounded-circle border border-2 border-accent"
+                    style={{ objectFit: "cover" }}
+                    unoptimized
+                  />
+                  <span className="position-absolute bottom-0 end-0 p-1 bg-success border border-white rounded-circle"></span>
+                </div>
+                <div className="min-width-0 flex-grow-1">
+                  <h6 className="mb-0 fw-bold text-primary-theme text-truncate">
+                    {(user.first_name && user.last_name)
+                      ? `${user.first_name} ${user.last_name}`
+                      : (user.name || "អ្នកប្រើប្រាស់")}
+                  </h6>
+                  <span className="small text-secondary-theme text-truncate d-block mb-1">{user.email}</span>
+                  <span className="badge status-badge-active">
+                    {user.role === "admin" ? "Admin" : user.role === "organizer" ? "Organizer" : (user.volunteer_level || "Bronze Volunteer")}
+                  </span>
+                </div>
+              </div>
+            )}
 
-              <hr className="my-3" />
+            {/* Navigation Links */}
+            <div className="mobile-nav-list d-flex flex-column gap-1">
+              <button
+                className={`mobile-nav-item ${isActive("/") ? "active" : ""}`}
+                onClick={() => handleMobileNav("/")}
+              >
+                <i className="bi bi-house-door-fill"></i>
+                <span>ទំព័រដើម</span>
+              </button>
 
-              {/* Mobile Auth Section */}
-              {!loading && user && (
-                <>
-                  <li className="nav-item">
-                    <Link
-                      className="nav-link"
-                      href={getDashboardUrl()}
-                      data-bs-dismiss="offcanvas"
-                    >
-                      <i className="bi bi-person-circle me-2"></i>
-                      គណនីរបស់ខ្ញុំ
-                    </Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link
-                      className="nav-link"
-                      href="/settings"
-                      data-bs-dismiss="offcanvas"
-                    >
-                      <i className="bi bi-gear me-2"></i>
-                      ការកំណត់
-                    </Link>
-                  </li>
-                  {user.role === "user" && (
-                    <li className="nav-item">
-                      <button
-                        className="nav-link text-primary"
-                        onClick={() => {
-                          setShowOrgModal(true);
-                          // Close offcanvas if possible - might need a data-bs-dismiss on a button
-                        }}
-                        data-bs-dismiss="offcanvas"
-                        style={{
-                          border: "none",
-                          background: "none",
-                          width: "100%",
-                          textAlign: "left",
-                        }}
-                      >
-                        <i className="bi bi-briefcase me-2"></i>
-                        ក្លាយជាអ្នករៀបចំ
-                      </button>
-                    </li>
-                  )}
-                  <li className="nav-item">
-                    <button
-                      className="nav-link text-danger"
-                      onClick={async () => {
-                        try {
-                          await fetch("/api/auth/logout", { method: "POST" });
-                        } finally {
-                          localStorage.removeItem("authToken");
-                          localStorage.removeItem("role");
-                          document.cookie = "authToken=; path=/; max-age=0";
-                          document.cookie = "role=; path=/; max-age=0";
-                          setUser(null);
-                          router.push("/");
-                        }
-                      }}
-                      style={{
-                        border: "none",
-                        background: "none",
-                        textAlign: "left",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <i className="bi bi-box-arrow-left me-2"></i>
-                      ចាកចេញ
-                    </button>
-                  </li>
-                </>
-              )}
+              <button
+                className={`mobile-nav-item ${isActive("/opportunities") ? "active" : ""}`}
+                onClick={() => handleMobileNav("/opportunities")}
+              >
+                <i className="bi bi-briefcase-fill"></i>
+                <span>ការងារស្ម័គ្រចិត្ត</span>
+              </button>
 
-              {!loading && !user && (
-                <>
-                  <li className="nav-item">
-                    <Link
-                      className="nav-link"
-                      href="/auth/login"
-                      data-bs-dismiss="offcanvas"
-                    >
-                      ចូលគណនី
-                    </Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link
-                      className="nav-link"
-                      href="/auth/register"
-                      data-bs-dismiss="offcanvas"
-                    >
-                      បង្កើតគណនី
-                    </Link>
-                  </li>
-                </>
-              )}
-            </ul>
+              <button
+                className={`mobile-nav-item ${isActive("/community") ? "active" : ""}`}
+                onClick={() => handleMobileNav("/community")}
+              >
+                <i className="bi bi-people-fill"></i>
+                <span>សហគមន៍</span>
+              </button>
+
+              <button
+                className={`mobile-nav-item ${isActive("/blogs") ? "active" : ""}`}
+                onClick={() => handleMobileNav("/blogs")}
+              >
+                <i className="bi bi-file-text-fill"></i>
+                <span>អត្ថបទ</span>
+              </button>
+
+              <button
+                className={`mobile-nav-item ${isActive("/donation") ? "active" : ""}`}
+                onClick={() => handleMobileNav("/donation")}
+              >
+                <i className="bi bi-heart-fill"></i>
+                <span>បរិច្ចាក</span>
+              </button>
+            </div>
+
+            <hr className="my-4 border-secondary border-opacity-25" />
+
+            {/* Mobile Auth / Profile Section */}
+            {!loading && user && (
+              <div className="mobile-nav-list d-flex flex-column gap-1">
+                <button
+                  className={`mobile-nav-item ${isActive(getDashboardUrl()) ? "active" : ""}`}
+                  onClick={() => handleMobileNav(getDashboardUrl())}
+                >
+                  <i className="bi bi-person-circle"></i>
+                  <span>គណនីរបស់ខ្ញុំ</span>
+                </button>
+
+                <button
+                  className={`mobile-nav-item ${isActive("/settings") ? "active" : ""}`}
+                  onClick={() => handleMobileNav("/settings")}
+                >
+                  <i className="bi bi-gear-fill"></i>
+                  <span>ការកំណត់</span>
+                </button>
+
+                {user.role === "user" && (
+                  <button
+                    className="mobile-nav-item text-primary"
+                    onClick={() => {
+                      const closeBtn = document.getElementById("offcanvasCloseBtn");
+                      if (closeBtn) closeBtn.click();
+                      setShowOrgModal(true);
+                    }}
+                  >
+                    <i className="bi bi-briefcase-fill text-primary"></i>
+                    <span>ក្លាយជាអ្នករៀបចំ</span>
+                  </button>
+                )}
+
+                <button
+                  className="mobile-nav-item text-danger"
+                  onClick={async () => {
+                    try {
+                      await fetch("/api/auth/logout", { method: "POST" });
+                    } finally {
+                      localStorage.removeItem("authToken");
+                      localStorage.removeItem("role");
+                      document.cookie = "authToken=; path=/; max-age=0";
+                      document.cookie = "role=; path=/; max-age=0";
+                      setUser(null);
+                      handleMobileNav("/");
+                    }
+                  }}
+                >
+                  <i className="bi bi-box-arrow-left text-danger"></i>
+                  <span>ចាកចេញ</span>
+                </button>
+              </div>
+            )}
+
+            {!loading && !user && (
+              <div className="mobile-nav-auth d-flex flex-column gap-2 mt-2">
+                <button
+                  className="btn btn-outline-theme w-100 py-2.5 rounded-3 fw-bold"
+                  onClick={() => handleMobileNav("/auth/login")}
+                >
+                  ចូលគណនី
+                </button>
+                <button
+                  className="btn btn-theme w-100 py-2.5 rounded-3 fw-bold"
+                  onClick={() => handleMobileNav("/auth/register")}
+                >
+                  បង្កើតគណនី
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </header>

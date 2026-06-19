@@ -22,10 +22,16 @@ export default function ForgetPasswordPage() {
     try {
       setSubmitting(true);
       await forgotPassword({ email });
-      showToast.success("កូដកំណត់ពាក្យសម្ងាត់ថ្មីត្រូវបានផ្ញើទៅអ៊ីមែលរបស់អ្នកហើយ!", "ជោគជ័យ");
+      showToast.success(
+        "កូដកំណត់ពាក្យសម្ងាត់ថ្មីត្រូវបានផ្ញើទៅអ៊ីមែលរបស់អ្នកហើយ!",
+        "ជោគជ័យ"
+      );
       router.push(`/auth/reset-password?email=${encodeURIComponent(email)}`);
     } catch (err) {
-      console.error(err);
+      console.error("Full error:", err);
+      console.error("Error response data:", err?.response?.data);
+      console.error("Error response status:", err?.response?.status);
+      console.error("Error response headers:", err?.response?.headers);
       const msg = parseApiError(err) || "បរាជ័យក្នុងការផ្ញើកូដកំណត់ឡើងវិញ";
       showToast.error(msg, "កំហុស");
     } finally {
@@ -55,9 +61,7 @@ export default function ForgetPasswordPage() {
             placeholder="Email Address"
             required
           />
-          <div className="invalid-feedback">
-            សូមបញ្ចូលអ៊ីមែលត្រឹមត្រូវ។
-          </div>
+          <div className="invalid-feedback">សូមបញ្ចូលអ៊ីមែលត្រឹមត្រូវ។</div>
         </div>
 
         <div className="col-12">
@@ -67,16 +71,16 @@ export default function ForgetPasswordPage() {
             disabled={submitting}
           >
             {submitting ? (
-              <>
+              <span className="d-flex align-items-center justify-content-center">
                 <span
                   className="spinner-border spinner-border-sm me-2"
                   role="status"
                   aria-hidden="true"
-                ></span>
+                />
                 កំពុងផ្ទៀងផ្ទាត់...
-              </>
+              </span>
             ) : (
-              "Send Reset Link"
+              <span>Send Reset Link</span>
             )}
           </button>
         </div>

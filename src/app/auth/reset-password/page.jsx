@@ -4,7 +4,7 @@ import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AuthShell, PasswordField, StrengthMeter, CodeInput } from "../components";
-import { resetPassword } from "@/lib/services/auth";
+import { resetPassword, verifyPasswordOtp, resendPasswordOtp } from "@/lib/services/auth";
 import { showToast } from "@/components/common/CustomToaster";
 import { parseApiError } from "@/lib/utils/apiError";
 
@@ -14,15 +14,53 @@ function ResetPasswordForm({ step, setStep, tempOtp, setTempOtp }) {
   const email = searchParams.get("email") || "";
   const [submitting, setSubmitting] = useState(false);
 
-  const handleVerifyOtpStep = (e) => {
+  const handleVerifyOtpStep = async (e) => {
     e.preventDefault();
     const otpCode = document.getElementById("otp")?.value;
     if (!otpCode || otpCode.length !== 6) {
       showToast.error("សូមបញ្ចូលកូដ OTP ៦ ខ្ទង់", "កំហុស");
       return;
     }
-    setTempOtp(otpCode);
-    setStep(2);
+
+    try {
+      setSubmitting(true);
+      await verifyPasswordOtp({ email, otp: otpCode });
+      setTempOtp(otpCode);
+      showToast.success("OTP ត្រូវបានផ្ទៀងផ្ទាត់ជោគជ័យ!", "ជោគជ័យ");
+      setStep(2);
+    } catch (err) {
+      console.error("Full error:", err);
+      console.error("Error response data:", err?.response?.data);
+      
+      // If the backend doesn't support the separate OTP verification endpoint (returns 404/405 or fails with CORS Network Error),
+      // allow the user to proceed to the next step, since the final reset-password endpoint will validate the OTP anyway.
+      const isNetworkOr404 = !err?.response || err?.response?.status === 404 || err?.response?.status === 405;
+      if (isNetworkOr404) {
+        console.warn("verifyPasswordOtp endpoint not available or returned 404/405. Falling back to inline validation at reset stage.");
+        setTempOtp(otpCode);
+        setStep(2);
+        return;
+      }
+
+      const msg = parseApiError(err) || "OTP មិនត្រឹមត្រូវ ឬផុតកំណត់";
+      showToast.error(msg, "កំហុស");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      setSubmitting(true);
+      await resendPasswordOtp({ email });
+      showToast.success("OTP ថ្មីត្រូវបានផ្ញើទៅអ៊ីមែលរបស់អ្នក!", "ជោគជ័យ");
+    } catch (err) {
+      console.error(err);
+      const msg = parseApiError(err) || "បរាជ័យក្នុងការផ្ញើ OTP ឡើងវិញ";
+      showToast.error(msg, "កំហុស");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const onSubmit = async (e) => {
@@ -53,7 +91,10 @@ function ResetPasswordForm({ step, setStep, tempOtp, setTempOtp }) {
         password: p,
         password_confirmation: c,
       });
-      showToast.success("កំណត់ពាក្យសម្ងាត់ថ្មីជោគជ័យ! សូមចូលគណនីរបស់អ្នក។", "ជោគជ័យ");
+      showToast.success(
+        "កំណត់ពាក្យសម្ងាត់ថ្មីជោគជ័យ! សូមចូលគណនីរបស់អ្នក។",
+        "ជោគជ័យ"
+      );
       router.push("/auth/login");
     } catch (err) {
       console.error(err);
@@ -75,8 +116,31 @@ function ResetPasswordForm({ step, setStep, tempOtp, setTempOtp }) {
         <CodeInput id="otp" length={6} label="Enter 6-digit OTP" placeholder="Enter 6-digit OTP" />
 
         <div className="col-12 mt-4">
-          <button type="submit" className="auth-modern-btn">
-            Verify OTP
+          <button type="submit" className="auth-modern-btn" disabled={submitting}>
+            {submitting ? (
+              <span className="d-flex align-items-center justify-content-center">
+                <span
+                  className="spinner-border spinner-border-sm me-2"
+                  role="status"
+                  aria-hidden="true"
+                />
+                កំពុងផ្ទៀងផ្ទាត់...
+              </span>
+            ) : (
+              <span>Verify OTP</span>
+            )}
+          </button>
+        </div>
+
+        <div className="col-12">
+          <button
+            type="button"
+            className="btn btn-link w-100"
+            onClick={handleResendOtp}
+            disabled={submitting}
+            style={{ color: "#2d6a4f", fontWeight: 700 }}
+          >
+            បញ្ជូន OTP ឡើងវិញ
           </button>
         </div>
 
@@ -96,11 +160,7 @@ function ResetPasswordForm({ step, setStep, tempOtp, setTempOtp }) {
       noValidate
       onSubmit={onSubmit}
     >
-      <PasswordField
-        id="password"
-        placeholder="New Password"
-        minLength={6}
-      />
+      <PasswordField id="password" placeholder="New Password" minLength={6} />
 
       <div className="col-12">
         <div
@@ -146,16 +206,16 @@ function ResetPasswordForm({ step, setStep, tempOtp, setTempOtp }) {
       <div className="col-12 mt-4">
         <button type="submit" className="auth-modern-btn" disabled={submitting}>
           {submitting ? (
-            <>
+            <span className="d-flex align-items-center justify-content-center">
               <span
                 className="spinner-border spinner-border-sm me-2"
                 role="status"
                 aria-hidden="true"
-              ></span>
+              />
               កំពុងកំណត់ឡើងវិញ...
-            </>
+            </span>
           ) : (
-            "Reset Password"
+            <span>Reset Password</span>
           )}
         </button>
       </div>
