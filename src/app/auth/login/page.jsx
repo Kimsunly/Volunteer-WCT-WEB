@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -16,8 +16,14 @@ import LoadingButton from "@/components/common/LoadingButton";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setUser } = useAuth();
+  const { setUser, user, loading } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace(user.role === "admin" ? "/admin/dashboard" : "/");
+    }
+  }, [user, loading, router]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
