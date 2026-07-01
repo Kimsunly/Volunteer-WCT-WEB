@@ -52,7 +52,13 @@ export default function LandingOpportunities({ items = [] }) {
 
         <div className="row mt-2 gy-4">
           {filtered.slice(0, 3).map((item, idx) => (
-            <OpportunityCard key={item.id || idx} data={item} data-aos="fade-up" data-aos-delay={idx * 100} />
+            <OpportunityCard
+              key={item.id || idx}
+              data={item}
+              data-aos="fade-up"
+              data-aos-delay={idx * 100}
+              priority={idx === 0}
+            />
           ))}
         </div>
       </div>
