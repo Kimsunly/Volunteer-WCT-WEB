@@ -119,7 +119,7 @@ export default function HeroBanner() {
             </div>
             <div className="carousel-item h-100" data-bs-interval="3500">
               <img
-                src="/images/homepage/4.banner.jpg"
+                src="/images/homepage/4.Banner.jpg"
                 className="d-block w-100 h-100 object-fit-cover"
                 alt="Banner 3"
               />
