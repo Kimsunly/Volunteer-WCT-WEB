@@ -92,6 +92,7 @@ export default function LandingOpportunities({ items = [] }) {
               data={item}
               data-aos="fade-up"
               data-aos-delay={idx * 100}
+              priority={idx === 0}
             />
           ))}
         </div>

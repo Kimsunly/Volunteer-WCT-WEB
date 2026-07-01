@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import PropTypes from "prop-types";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -38,6 +39,7 @@ export default function OpportunityCard({
   data,
   className = "",
   onToggleFavorite,
+  priority = false,
 }) {
   const { user } = useAuth();
   const router = useRouter();
@@ -49,6 +51,17 @@ export default function OpportunityCard({
   const [accessKey, setAccessKey] = useState("");
   const [accessKeyError, setAccessKeyError] = useState("");
   const [verifyingKey, setVerifyingKey] = useState(false);
+
+  // Extract images info first to initialize state
+  const images = data?.images || [];
+  const imageUrl = data?.imageUrl || images[0] || "/placeholder.png";
+  const currentImage = images.length > 0 ? images[currentImageIndex] : imageUrl;
+
+  const [imgSrc, setImgSrc] = useState(currentImage);
+
+  useEffect(() => {
+    setImgSrc(currentImage);
+  }, [currentImage]);
 
   useEffect(() => {
     setIsFav(data?.is_favorite ?? data?.isFavorite ?? false);
@@ -70,11 +83,6 @@ export default function OpportunityCard({
   // Location handling
   const locationLabel =
     typeof data?.location === "string" ? data.location : data?.location?.label;
-
-  // Image handling
-  const images = data?.images || [];
-  const imageUrl = data?.imageUrl || images[0] || "/placeholder.png";
-  const currentImage = images.length > 0 ? images[currentImageIndex] : imageUrl;
 
   // Date, Time, Capacity
   const date = data?.date;
@@ -217,13 +225,15 @@ export default function OpportunityCard({
           className="position-relative overflow-hidden group"
           style={{ height: "220px" }}
         >
-          <img
-            src={currentImage}
-            alt={title}
+          <Image
+            src={imgSrc || "/placeholder.png"}
+            alt={title || "Opportunity Image"}
+            fill
+            priority={priority}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="w-100 h-100 object-fit-cover transition-scale"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = "/images/placeholder.png";
+            onError={() => {
+              setImgSrc("/placeholder.png");
             }}
           />
 
@@ -553,4 +563,5 @@ OpportunityCard.propTypes = {
   data: PropTypes.oneOfType([PropTypes.object]).isRequired,
   className: PropTypes.string,
   onToggleFavorite: PropTypes.func,
+  priority: PropTypes.bool,
 };

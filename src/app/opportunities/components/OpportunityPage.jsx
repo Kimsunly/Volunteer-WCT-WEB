@@ -43,7 +43,25 @@ export default function OpportunityPage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedLocation, setSelectedLocation] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [showGoTop, setShowGoTop] = useState(false);
+
+  // Debounce search input changes to prevent API spam on every keystroke
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setSearchTerm(searchInput);
+      setPage(1);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchInput]);
+
+  const triggerSearchImmediately = () => {
+    setSearchTerm(searchInput);
+    setPage(1);
+  };
 
   // Dynamic categories from API
   const [categoryTabs, setCategoryTabs] = useState([ALL_TAB]);
@@ -479,18 +497,19 @@ export default function OpportunityPage() {
                     <input
                       type="text"
                       placeholder="ស្វែងរកការងារស្ម័គ្រចិត្ត..."
-                      value={searchTerm}
+                      value={searchInput}
                       onChange={(e) => {
-                        setSearchTerm(e.target.value);
-                        setPage(1);
+                        setSearchInput(e.target.value);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          triggerSearchImmediately();
+                        }
                       }}
                     />
                     <button
                       className="search-btn"
-                      onClick={() => {
-                        setPage(1);
-                        fetchOpportunities();
-                      }}
+                      onClick={triggerSearchImmediately}
                     >
                       ស្វែងរក
                     </button>
@@ -613,11 +632,12 @@ export default function OpportunityPage() {
                     </button>
                   </div>
                 ) : paginatedOpportunities.length > 0 ? (
-                  paginatedOpportunities.map((opportunity) => (
+                  paginatedOpportunities.map((opportunity, idx) => (
                     <OpportunityCard
                       key={opportunity.id}
                       data={opportunity}
                       onToggleFavorite={handleFavorite}
+                      priority={idx < 3}
                     />
                   ))
                 ) : (
