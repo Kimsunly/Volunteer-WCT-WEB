@@ -21,9 +21,13 @@ export async function listOpportunities({ q = '', category = 'all', location = '
 
 import { getOpportunityById as getMockOpportunityById } from '@/data/mockOpportunities';
 
-export async function getOpportunityById(id) {
+export async function getOpportunityById(id, accessKey = null) {
     try {
-        const { data } = await api.get(`/api/opportunities/${id}`);
+        const headers = {};
+        if (accessKey) {
+            headers['X-Access-Key'] = accessKey;
+        }
+        const { data } = await api.get(`/api/opportunities/${id}`, { headers });
         return data;
     } catch (err) {
         const mockData = getMockOpportunityById(id);

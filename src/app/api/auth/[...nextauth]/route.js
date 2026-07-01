@@ -17,45 +17,9 @@ export const authOptions = {
         GitHubProvider({
             clientId: process.env.GITHUB_CLIENT_ID || "",
             clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
-            allowDangerousEmailAccountLinking: true,
+            allowDangerousEmailAccountLinking: false,
             httpOptions: {
                 timeout: 10000,
-            },
-        }),
-        CredentialsProvider({
-            name: "Credentials",
-            credentials: {
-                email: { label: "Email", type: "email" },
-                password: { label: "Password", type: "password" },
-            },
-            async authorize(credentials) {
-                // TODO: Replace with actual API call
-                // For now, mock authentication
-                if (credentials?.email && credentials?.password) {
-                    // Admin check
-                    if (
-                        credentials.email === "admin@volunteer.org" &&
-                        credentials.password === "admin123"
-                    ) {
-                        return {
-                            id: "admin-id",
-                            name: "Admin",
-                            email: credentials.email,
-                            role: "admin",
-                            image: "/images/profile.png",
-                        };
-                    }
-
-                    // Regular user
-                    return {
-                        id: "mock-user-id",
-                        name: "ស្ម័គ្រចិត្ត",
-                        email: credentials.email,
-                        role: "user",
-                        image: "/images/profile.png",
-                    };
-                }
-                return null;
             },
         }),
     ],
