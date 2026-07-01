@@ -18,8 +18,3 @@ export async function POST() {
     }
     return res;
 }
-
-export async function GET() {
-    // Optional: support GET to simplify testing
-    return POST();
-}

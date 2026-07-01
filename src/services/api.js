@@ -1,5 +1,12 @@
-
 import axios from 'axios';
+
+function getCookie(name) {
+  if (typeof document === 'undefined') return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+}
 
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 if (!process.env.NEXT_PUBLIC_API_BASE_URL && typeof window !== 'undefined') {
@@ -13,10 +20,7 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token =
-    typeof window !== 'undefined'
-      ? (window.localStorage.getItem('authToken') || window.localStorage.getItem('token'))
-      : null;
+  const token = typeof window !== 'undefined' ? getCookie('authToken') : null;
   if (token) config.headers.Authorization = `Bearer ${token}`;
 
   // Prepend /api prefix if missing
@@ -81,18 +85,21 @@ api.interceptors.response.use(
     // Fix 3: Handle 401 Unauthorized (Expired Token)
     if (status === 401 && !cfg._retry) {
       cfg._retry = true;
-      const refreshToken = typeof window !== 'undefined' ? window.localStorage.getItem('refreshToken') : null;
+      const refreshToken = typeof window !== 'undefined' ? getCookie('refreshToken') : null;
 
       const protectedRoutes = ['/user', '/organizer', '/admin', '/user-profile'];
       const isProtected = typeof window !== 'undefined' && protectedRoutes.some(route => window.location.pathname.startsWith(route));
 
       if (!refreshToken) {
         // No refresh token, clear everything and redirect if on protected page
+        document.cookie = "authToken=; path=/; max-age=0; Secure; SameSite=Lax";
+        document.cookie = "refreshToken=; path=/; max-age=0; Secure; SameSite=Lax";
+        document.cookie = "role=; path=/; max-age=0; Secure; SameSite=Lax";
+        
         window.localStorage.removeItem('authToken');
         window.localStorage.removeItem('token');
         window.localStorage.removeItem('refreshToken');
-        document.cookie = "authToken=; path=/; max-age=0";
-        document.cookie = "refreshToken=; path=/; max-age=0";
+        window.localStorage.removeItem('role');
 
         if (isProtected) {
           window.location.href = '/auth/login';
@@ -110,13 +117,10 @@ api.interceptors.response.use(
           const newToken = data.data.token;
           const newRefreshToken = data.data.refresh_token;
 
-          window.localStorage.setItem('authToken', newToken);
-          window.localStorage.setItem('token', newToken);
-          document.cookie = `authToken=${newToken}; path=/; max-age=86400`;
+          document.cookie = `authToken=${newToken}; path=/; max-age=86400; Secure; SameSite=Lax`;
 
           if (newRefreshToken) {
-            window.localStorage.setItem('refreshToken', newRefreshToken);
-            document.cookie = `refreshToken=${newRefreshToken}; path=/; max-age=86400`;
+            document.cookie = `refreshToken=${newRefreshToken}; path=/; max-age=86400; Secure; SameSite=Lax`;
           }
 
           cfg.headers.Authorization = `Bearer ${newToken}`;
@@ -124,11 +128,14 @@ api.interceptors.response.use(
         }
       } catch (refreshError) {
         // If refresh fails, clear auth and redirect to login if on protected page
+        document.cookie = "authToken=; path=/; max-age=0; Secure; SameSite=Lax";
+        document.cookie = "refreshToken=; path=/; max-age=0; Secure; SameSite=Lax";
+        document.cookie = "role=; path=/; max-age=0; Secure; SameSite=Lax";
+        
         window.localStorage.removeItem('authToken');
         window.localStorage.removeItem('token');
         window.localStorage.removeItem('refreshToken');
-        document.cookie = "authToken=; path=/; max-age=0";
-        document.cookie = "refreshToken=; path=/; max-age=0";
+        window.localStorage.removeItem('role');
 
         if (isProtected) {
           window.location.href = '/auth/login';

@@ -92,7 +92,8 @@ export default function OpportunityDetailPage() {
       if (!params || !params.id) return;
       setLoading(true);
       try {
-        const res = await getOpportunityById(params.id);
+        const storedKey = typeof window !== 'undefined' ? sessionStorage.getItem("private_access_key") : null;
+        const res = await getOpportunityById(params.id, storedKey);
         const data = res.data || res;
 
         const transformedOpp = {
@@ -492,6 +493,7 @@ export default function OpportunityDetailPage() {
                     toast.success("កូដសម្ងាត់ត្រឹមត្រូវ!");
                     setIsLocked(false);
                     setLockReason(null);
+                    window.location.reload();
                   } catch (err) {
                     setAccessKeyError(
                       err.response?.data?.message ||

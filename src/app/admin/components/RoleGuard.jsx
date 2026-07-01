@@ -26,7 +26,13 @@ export default function RoleGuard() {
       return;
     }
 
-    const role = localStorage.getItem("role") || "admin";
+    const getCookie = (name) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return null;
+    };
+    const role = getCookie("role") || "user";
     setAllowed(role === "admin");
   }, []);
 
